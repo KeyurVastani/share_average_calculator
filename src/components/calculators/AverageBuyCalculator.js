@@ -176,7 +176,7 @@ const AverageBuyCalculator = () => {
       {/* Action Buttons */}
       <View style={styles.buttonSection}>
         <TouchableOpacity style={styles.calculateButton} onPress={calculateAveragePrice}>
-          <CommonText title="Calculate P&L" textStyle={[16, 'bold', 'white']} />
+          <CommonText title="Calculate Average Price" textStyle={[16, 'bold', 'white']} />
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.resetButton} onPress={resetCalculator}>
