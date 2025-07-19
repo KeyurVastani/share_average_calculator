@@ -1,7 +1,9 @@
 import { StatusBar, StyleSheet, Text, View, TouchableOpacity, ScrollView, Animated, Dimensions, Modal, FlatList } from 'react-native';
 import { useRef, useEffect } from 'react';
 import useCalculatorStore from './store/calculatorStore';
-import CommonText from './component/CommonText';
+
+import AverageBuyCalculator from './components/calculators/AverageBuyCalculator';
+import CommonText from './components/CommonText';
 
 const { width, height } = Dimensions.get('window');
 
@@ -307,7 +309,12 @@ function App() {
       );
     }
 
+    // Render specific calculator based on ID
+    if (selectedCalculator.id === 'average-buy') {
+      return <AverageBuyCalculator />;
+    }
 
+    // Default calculator view for other calculators
     return (
       <Animated.View
         style={[
