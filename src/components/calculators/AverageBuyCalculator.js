@@ -4,8 +4,10 @@ import CommonText from '../../components/CommonText';
 
 const AverageBuyCalculator = () => {
   const [purchases, setPurchases] = useState([
-    { quantity: '', price: '', id: 1 }
+    { quantity: '', price: '', id: 1 },
+    { quantity: '', price: '', id: 2 }
   ]);
+  const [currentPrice, setCurrentPrice] = useState('');
   const [result, setResult] = useState(null);
 
   const addPurchase = () => {
@@ -14,7 +16,7 @@ const AverageBuyCalculator = () => {
   };
 
   const removePurchase = (id) => {
-    if (purchases.length > 1) {
+    if (purchases.length > 2) {
       setPurchases(purchases.filter(purchase => purchase.id !== id));
     }
   };
@@ -35,8 +37,13 @@ const AverageBuyCalculator = () => {
       parseFloat(p.price) > 0
     );
 
-    if (validPurchases.length === 0) {
-      Alert.alert('Error', 'Please enter valid quantity and price for at least one purchase.');
+    if (validPurchases.length < 2) {
+      Alert.alert('Error', 'Please enter valid quantity and price for at least two purchases.');
+      return;
+    }
+
+    if (!currentPrice || isNaN(parseFloat(currentPrice)) || parseFloat(currentPrice) <= 0) {
+      Alert.alert('Error', 'Please enter a valid current market price.');
       return;
     }
 
@@ -51,17 +58,32 @@ const AverageBuyCalculator = () => {
     });
 
     const averagePrice = totalInvestment / totalQuantity;
+    const currentMarketPrice = parseFloat(currentPrice);
+    
+    // Calculate profit/loss
+    const currentValue = totalQuantity * currentMarketPrice;
+    const profitLoss = currentValue - totalInvestment;
+    const profitLossPercentage = (profitLoss / totalInvestment) * 100;
 
     setResult({
       averagePrice: averagePrice.toFixed(2),
       totalInvestment: totalInvestment.toFixed(2),
       totalQuantity: totalQuantity.toFixed(2),
-      numberOfPurchases: validPurchases.length
+      numberOfPurchases: validPurchases.length,
+      currentPrice: currentMarketPrice.toFixed(2),
+      currentValue: currentValue.toFixed(2),
+      profitLoss: profitLoss.toFixed(2),
+      profitLossPercentage: profitLossPercentage.toFixed(2),
+      isProfitable: profitLoss >= 0
     });
   };
 
   const resetCalculator = () => {
-    setPurchases([{ quantity: '', price: '', id: 1 }]);
+    setPurchases([
+      { quantity: '', price: '', id: 1 },
+      { quantity: '', price: '', id: 2 }
+    ]);
+    setCurrentPrice('');
     setResult(null);
   };
 
@@ -97,7 +119,7 @@ const AverageBuyCalculator = () => {
                 title={`Purchase ${index + 1}`} 
                 textStyle={[16, '600', '#333']} 
               />
-              {purchases.length > 1 && (
+              {purchases.length > 2 && (
                 <TouchableOpacity 
                   style={styles.removeButton} 
                   onPress={() => removePurchase(purchase.id)}
@@ -134,10 +156,27 @@ const AverageBuyCalculator = () => {
         ))}
       </View>
 
+      {/* Current Market Price Input */}
+      <View style={styles.inputSection}>
+        <CommonText 
+          title="Current Market Price" 
+          textStyle={[18, 'bold', '#333']} 
+        />
+        <View style={styles.currentPriceContainer}>
+          <TextInput
+            style={styles.currentPriceInput}
+            placeholder="Enter current market price"
+            keyboardType="numeric"
+            value={currentPrice}
+            onChangeText={setCurrentPrice}
+          />
+        </View>
+      </View>
+
       {/* Action Buttons */}
       <View style={styles.buttonSection}>
         <TouchableOpacity style={styles.calculateButton} onPress={calculateAveragePrice}>
-          <CommonText title="Calculate Average Price" textStyle={[16, 'bold', 'white']} />
+          <CommonText title="Calculate P&L" textStyle={[16, 'bold', 'white']} />
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.resetButton} onPress={resetCalculator}>
@@ -163,9 +202,25 @@ const AverageBuyCalculator = () => {
             </View>
             
             <View style={styles.resultRow}>
+              <CommonText title="Current Market Price:" textStyle={[16, '600', '#666']} />
+              <CommonText 
+                title={`₹${result.currentPrice}`} 
+                textStyle={[18, 'bold', '#333']} 
+              />
+            </View>
+            
+            <View style={styles.resultRow}>
               <CommonText title="Total Investment:" textStyle={[16, '600', '#666']} />
               <CommonText 
                 title={`₹${result.totalInvestment}`} 
+                textStyle={[16, 'bold', '#333']} 
+              />
+            </View>
+            
+            <View style={styles.resultRow}>
+              <CommonText title="Current Value:" textStyle={[16, '600', '#666']} />
+              <CommonText 
+                title={`₹${result.currentValue}`} 
                 textStyle={[16, 'bold', '#333']} 
               />
             </View>
@@ -186,6 +241,32 @@ const AverageBuyCalculator = () => {
               />
             </View>
           </View>
+
+          {/* Profit/Loss Section */}
+          <View style={[styles.profitLossCard, { backgroundColor: result.isProfitable ? '#e8f5e8' : '#ffeaea' }]}>
+            <View style={styles.resultRow}>
+              <CommonText title="Profit/Loss:" textStyle={[16, '600', '#666']} />
+              <CommonText 
+                title={`₹${result.profitLoss}`} 
+                textStyle={[18, 'bold', result.isProfitable ? '#4caf50' : '#f44336']} 
+              />
+            </View>
+            
+            <View style={styles.resultRow}>
+              <CommonText title="Percentage:" textStyle={[16, '600', '#666']} />
+              <CommonText 
+                title={`${result.profitLossPercentage}%`} 
+                textStyle={[18, 'bold', result.isProfitable ? '#4caf50' : '#f44336']} 
+              />
+            </View>
+            
+            <View style={styles.statusRow}>
+              <CommonText 
+                title={result.isProfitable ? "📈 PROFITABLE" : "📉 LOSS"} 
+                textStyle={[16, 'bold', result.isProfitable ? '#4caf50' : '#f44336']} 
+              />
+            </View>
+          </View>
         </View>
       )}
 
@@ -202,6 +283,10 @@ const AverageBuyCalculator = () => {
           />
           <CommonText 
             title="Total Investment = Σ(Quantity × Price per Share)" 
+            textStyle={[14, 'normal', '#888']} 
+          />
+          <CommonText 
+            title="P&L % = ((Current Value - Total Investment) ÷ Total Investment) × 100" 
             textStyle={[14, 'normal', '#888']} 
           />
         </View>
@@ -287,6 +372,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginTop: 5,
   },
+  currentPriceContainer: {
+    marginTop: 10,
+  },
+  currentPriceInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: 'white',
+  },
   buttonSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -332,6 +428,18 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
+  },
+  profitLossCard: {
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 15,
+    borderWidth: 2,
+    borderColor: '#e9ecef',
+  },
+  statusRow: {
+    alignItems: 'center',
+    paddingVertical: 8,
+    marginTop: 5,
   },
   formulaSection: {
     backgroundColor: 'white',
