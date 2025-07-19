@@ -7,6 +7,7 @@ function App() {
   const [selectedCalculator, setSelectedCalculator] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   
@@ -16,16 +17,176 @@ function App() {
   ).current;
 
   const calculatorTypes = [
-    { id: 'cagr', name: 'CAGR Calculator', description: 'Compound Annual Growth Rate calculations', icon: '📈' },
-    { id: 'sip', name: 'SIP Calculator', description: 'Systematic Investment Plan calculations', icon: '💰' },
-    { id: 'intraday', name: 'Intraday Profit/Loss Calculator', description: 'Calculate intraday trading P&L', icon: '📊' },
-    { id: 'average-buy', name: 'Average Buy Price Calculator', description: 'Calculate average purchase price', icon: '⚖️' },
-    { id: 'options-pnl', name: 'Options P&L Calculator', description: 'Options profit and loss calculations', icon: '📉' },
-    { id: 'dividend-yield', name: 'Dividend Yield Calculator', description: 'Calculate dividend yield percentage', icon: '🎯' },
-    { id: 'stop-loss', name: 'Stop Loss / Target Calculator', description: 'Calculate stop loss and target levels', icon: '🛑' },
-    { id: 'margin', name: 'Margin Requirement Calculator', description: 'Calculate margin requirements', icon: '💳' },
-    { id: 'tax-brokerage', name: 'Tax / Brokerage Charges Calculator', description: 'Calculate taxes and brokerage fees', icon: '🧾' },
-    { id: 'stock-split', name: 'Stock Split / Bonus Share Calculator', description: 'Calculate stock splits and bonus shares', icon: '🎁' },
+    { 
+      id: 'cagr', 
+      name: 'CAGR Calculator', 
+      description: 'Compound Annual Growth Rate calculations', 
+      icon: '📈',
+      info: {
+        title: 'CAGR Calculator',
+        description: 'The Compound Annual Growth Rate (CAGR) calculator helps you determine the mean annual growth rate of an investment over a specified period of time.',
+        features: [
+          'Calculate annualized returns',
+          'Compare investment performance',
+          'Project future growth',
+          'Analyze historical data'
+        ],
+        formula: 'CAGR = (End Value / Start Value)^(1/n) - 1'
+      }
+    },
+    { 
+      id: 'sip', 
+      name: 'SIP Calculator', 
+      description: 'Systematic Investment Plan calculations', 
+      icon: '💰',
+      info: {
+        title: 'SIP Calculator',
+        description: 'The Systematic Investment Plan (SIP) calculator helps you estimate the future value of regular investments made at fixed intervals.',
+        features: [
+          'Calculate future corpus',
+          'Plan regular investments',
+          'Understand compound growth',
+          'Set financial goals'
+        ],
+        formula: 'Future Value = P × [(1 + r)^n - 1] / r'
+      }
+    },
+    { 
+      id: 'intraday', 
+      name: 'Intraday Profit/Loss Calculator', 
+      description: 'Calculate intraday trading P&L', 
+      icon: '📊',
+      info: {
+        title: 'Intraday P&L Calculator',
+        description: 'Calculate your profit or loss from intraday trading, including all charges and taxes.',
+        features: [
+          'Calculate net P&L',
+          'Include brokerage charges',
+          'Account for taxes',
+          'Track daily performance'
+        ],
+        formula: 'P&L = (Sell Price - Buy Price) × Quantity - Charges'
+      }
+    },
+    { 
+      id: 'average-buy', 
+      name: 'Average Buy Price Calculator', 
+      description: 'Calculate average purchase price', 
+      icon: '⚖️',
+      info: {
+        title: 'Average Buy Price Calculator',
+        description: 'Calculate the weighted average price of your stock purchases to understand your true cost basis.',
+        features: [
+          'Calculate weighted average price',
+          'Track multiple purchases',
+          'Understand cost basis',
+          'Plan future investments'
+        ],
+        formula: 'Average Price = Total Investment / Total Quantity'
+      }
+    },
+    { 
+      id: 'options-pnl', 
+      name: 'Options P&L Calculator', 
+      description: 'Options profit and loss calculations', 
+      icon: '📉',
+      info: {
+        title: 'Options P&L Calculator',
+        description: 'Calculate profit and loss for options trading, including calls and puts.',
+        features: [
+          'Calculate options P&L',
+          'Support for calls and puts',
+          'Include premium costs',
+          'Analyze risk-reward'
+        ],
+        formula: 'P&L = (Current Price - Strike Price) × Lot Size - Premium Paid'
+      }
+    },
+    { 
+      id: 'dividend-yield', 
+      name: 'Dividend Yield Calculator', 
+      description: 'Calculate dividend yield percentage', 
+      icon: '🎯',
+      info: {
+        title: 'Dividend Yield Calculator',
+        description: 'Calculate the dividend yield percentage to evaluate income-generating investments.',
+        features: [
+          'Calculate dividend yield',
+          'Compare income stocks',
+          'Evaluate returns',
+          'Plan income portfolio'
+        ],
+        formula: 'Dividend Yield = (Annual Dividend / Current Price) × 100'
+      }
+    },
+    { 
+      id: 'stop-loss', 
+      name: 'Stop Loss / Target Calculator', 
+      description: 'Calculate stop loss and target levels', 
+      icon: '🛑',
+      info: {
+        title: 'Stop Loss / Target Calculator',
+        description: 'Calculate optimal stop loss and target levels based on your risk tolerance and market analysis.',
+        features: [
+          'Calculate stop loss levels',
+          'Set target prices',
+          'Manage risk',
+          'Plan exit strategies'
+        ],
+        formula: 'Stop Loss = Entry Price - (Entry Price × Risk %)'
+      }
+    },
+    { 
+      id: 'margin', 
+      name: 'Margin Requirement Calculator', 
+      description: 'Calculate margin requirements', 
+      icon: '💳',
+      info: {
+        title: 'Margin Requirement Calculator',
+        description: 'Calculate the margin requirements for trading on leverage and understand your capital needs.',
+        features: [
+          'Calculate margin requirements',
+          'Understand leverage',
+          'Plan capital allocation',
+          'Manage risk exposure'
+        ],
+        formula: 'Margin Required = (Position Value × Margin Rate) / 100'
+      }
+    },
+    { 
+      id: 'tax-brokerage', 
+      name: 'Tax / Brokerage Charges Calculator', 
+      description: 'Calculate taxes and brokerage fees', 
+      icon: '🧾',
+      info: {
+        title: 'Tax / Brokerage Calculator',
+        description: 'Calculate all applicable taxes and brokerage charges for your trades.',
+        features: [
+          'Calculate brokerage charges',
+          'Include taxes (STT, GST)',
+          'Estimate total costs',
+          'Plan trade profitability'
+        ],
+        formula: 'Total Charges = Brokerage + STT + GST + Other Taxes'
+      }
+    },
+    { 
+      id: 'stock-split', 
+      name: 'Stock Split / Bonus Share Calculator', 
+      description: 'Calculate stock splits and bonus shares', 
+      icon: '🎁',
+      info: {
+        title: 'Stock Split / Bonus Calculator',
+        description: 'Calculate the impact of stock splits and bonus share issues on your holdings.',
+        features: [
+          'Calculate post-split holdings',
+          'Adjust average price',
+          'Track bonus shares',
+          'Update portfolio value'
+        ],
+        formula: 'New Quantity = Old Quantity × Split Ratio'
+      }
+    },
   ];
 
   useEffect(() => {
@@ -61,6 +222,10 @@ function App() {
       console.error('Error closing modal:', error);
       setIsModalVisible(false);
     }
+  };
+
+  const toggleInfoModal = () => {
+    setShowInfoModal(!showInfoModal);
   };
 
   const handleCalculatorSelect = (calculatorId) => {
@@ -210,18 +375,34 @@ function App() {
         ]}
       >
         <View style={styles.headerContent}>
-          <Text style={styles.headerText}>Market Calculator</Text>
-          <TouchableOpacity 
-            style={styles.calculatorButton}
-            onPress={openCalculatorModal}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.calculatorButtonIcon}>🧮</Text>
-          </TouchableOpacity>
+          <Text style={styles.headerText}>
+            {selectedCalculator 
+              ? calculatorTypes.find(c => c.id === selectedCalculator)?.name
+              : 'Market Calculator'
+            }
+          </Text>
+          <View style={styles.headerButtons}>
+            {selectedCalculator && (
+              <TouchableOpacity 
+                style={styles.infoButton}
+                onPress={toggleInfoModal}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.infoButtonIcon}>ℹ️</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity 
+              style={styles.calculatorButton}
+              onPress={openCalculatorModal}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.calculatorButtonIcon}>🧮</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <Text style={styles.headerSubtext}>
           {selectedCalculator 
-            ? `Using: ${calculatorTypes.find(c => c.id === selectedCalculator)?.name}`
+            ? calculatorTypes.find(c => c.id === selectedCalculator)?.description
             : 'Select your calculator'
           }
         </Text>
@@ -280,6 +461,66 @@ function App() {
           </View>
         </View>
       </Modal>
+
+      {/* Calculator Info Modal */}
+      <Modal
+        visible={showInfoModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={toggleInfoModal}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity 
+            style={styles.modalBackdrop}
+            onPress={toggleInfoModal}
+            activeOpacity={1}
+          />
+          <View style={styles.modalContent}>
+            {selectedCalculator && (() => {
+              const calculator = calculatorTypes.find(c => c.id === selectedCalculator);
+              return (
+                <>
+                  <View style={styles.modalHeader}>
+                    <View style={styles.modalHeaderContent}>
+                      <Text style={styles.modalHeaderIcon}>{calculator.icon}</Text>
+                      <Text style={styles.modalTitle}>{calculator.info.title}</Text>
+                    </View>
+                    <TouchableOpacity 
+                      style={styles.modalCloseButton}
+                      onPress={toggleInfoModal}
+                    >
+                      <Text style={styles.modalCloseIcon}>✕</Text>
+                    </TouchableOpacity>
+                  </View>
+                  
+                  <ScrollView style={styles.modalScrollView} showsVerticalScrollIndicator={false}>
+                    <View style={styles.modalBody}>
+                      <Text style={styles.modalDescription}>{calculator.info.description}</Text>
+                      
+                      <View style={styles.modalSection}>
+                        <Text style={styles.modalSectionTitle}>Key Features:</Text>
+                        {calculator.info.features.map((feature, index) => (
+                          <View key={index} style={styles.modalFeatureItem}>
+                            <Text style={styles.modalFeatureBullet}>•</Text>
+                            <Text style={styles.modalFeatureText}>{feature}</Text>
+                          </View>
+                        ))}
+                      </View>
+                      
+                      <View style={styles.modalSection}>
+                        <Text style={styles.modalSectionTitle}>Formula:</Text>
+                        <View style={styles.modalFormulaContainer}>
+                          <Text style={styles.modalFormula}>{calculator.info.formula}</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </ScrollView>
+                </>
+              );
+            })()}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -290,7 +531,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   header: {
-    height: 100,
+    height: 120,
     backgroundColor: '#2196F3',
     paddingTop: 40,
   },
@@ -299,7 +540,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
+    paddingVertical: 10,
     flex: 1,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   headerText: {
     color: 'white',
@@ -311,6 +557,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 5,
     paddingHorizontal: 20,
+  },
+  infoButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 25,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  infoButtonIcon: {
+    fontSize: 22,
+    color: 'white',
   },
   calculatorButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -426,6 +687,62 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
+  infoCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  infoCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  infoCardIcon: {
+    fontSize: 28,
+    marginRight: 12,
+  },
+  infoCardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  infoCardDescription: {
+    fontSize: 16,
+    color: '#666',
+    lineHeight: 24,
+    marginBottom: 15,
+  },
+  infoCardFeatures: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  infoCardFeaturesTitle: {
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  infoCardCloseButton: {
+    backgroundColor: '#2196F3',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignSelf: 'flex-start',
+  },
+  infoCardCloseText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -463,6 +780,66 @@ const styles = StyleSheet.create({
   modalCloseIcon: {
     fontSize: 16,
     color: '#666',
+  },
+  modalHeaderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  modalHeaderIcon: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+  modalScrollView: {
+    flex: 1,
+  },
+  modalBody: {
+    padding: 20,
+  },
+  modalDescription: {
+    fontSize: 16,
+    color: '#666',
+    lineHeight: 24,
+    marginBottom: 20,
+  },
+  modalSection: {
+    marginBottom: 20,
+  },
+  modalSectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 12,
+  },
+  modalFeatureItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  modalFeatureBullet: {
+    fontSize: 16,
+    color: '#2196F3',
+    marginRight: 8,
+    marginTop: 2,
+  },
+  modalFeatureText: {
+    fontSize: 16,
+    color: '#666',
+    lineHeight: 22,
+    flex: 1,
+  },
+  modalFormulaContainer: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    padding: 15,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196F3',
+  },
+  modalFormula: {
+    fontSize: 16,
+    color: '#333',
+    fontFamily: 'monospace',
+    fontWeight: 'bold',
   },
   modalCurrentSelection: {
     backgroundColor: '#e3f2fd',
