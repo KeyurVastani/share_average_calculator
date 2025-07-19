@@ -483,7 +483,10 @@ function App() {
                   <View style={styles.modalHeader}>
                     <View style={styles.modalHeaderContent}>
                       <Text style={styles.modalHeaderIcon}>{calculator.icon}</Text>
-                      <Text style={styles.modalTitle}>{calculator.info.title}</Text>
+                      <View style={styles.modalTitleContainer}>
+                        <Text style={styles.modalTitle}>{calculator.name}</Text>
+                        <Text style={styles.modalSubtitle}>{calculator.description}</Text>
+                      </View>
                     </View>
                     <TouchableOpacity 
                       style={styles.modalCloseButton}
@@ -495,7 +498,10 @@ function App() {
                   
                   <ScrollView style={styles.modalScrollView} showsVerticalScrollIndicator={false}>
                     <View style={styles.modalBody}>
-                      <Text style={styles.modalDescription}>{calculator.info.description}</Text>
+                      <View style={styles.modalUseSection}>
+                        <Text style={styles.modalUseTitle}>What is this calculator used for?</Text>
+                        <Text style={styles.modalDescription}>{calculator.info.description}</Text>
+                      </View>
                       
                       <View style={styles.modalSection}>
                         <Text style={styles.modalSectionTitle}>Key Features:</Text>
@@ -786,6 +792,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
+  modalTitleContainer: {
+    flex: 1,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+    lineHeight: 18,
+  },
   modalHeaderIcon: {
     fontSize: 24,
     marginRight: 12,
@@ -795,6 +810,18 @@ const styles = StyleSheet.create({
   },
   modalBody: {
     padding: 20,
+  },
+  modalUseSection: {
+    marginBottom: 25,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  modalUseTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 12,
   },
   modalDescription: {
     fontSize: 16,
