@@ -1,26 +1,36 @@
 import { StatusBar, StyleSheet, Text, View, TouchableOpacity, ScrollView, Animated, Dimensions, Modal, FlatList } from 'react-native';
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
+import useCalculatorStore from './store/calculatorStore';
+import CommonText from './component/CommonText';
 
 const { width, height } = Dimensions.get('window');
 
 function App() {
-  const [selectedCalculator, setSelectedCalculator] = useState(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showInfoModal, setShowInfoModal] = useState(false);
+  // Zustand store
+  const {
+    selectedCalculator,
+    isLoading,
+    isModalVisible,
+    showInfoModal,
+    setSelectedCalculator,
+    openCalculatorModal,
+    closeCalculatorModal,
+    toggleInfoModal,
+  } = useCalculatorStore();
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  
+
   // Create animation values for each calculator card
   const cardScales = useRef(
     Array(10).fill(0).map(() => new Animated.Value(1))
   ).current;
 
   const calculatorTypes = [
-    { 
-      id: 'cagr', 
-      name: 'CAGR Calculator', 
-      description: 'Compound Annual Growth Rate calculations', 
+    {
+      id: 'cagr',
+      name: 'CAGR Calculator',
+      description: 'Compound Annual Growth Rate calculations',
       icon: '📈',
       info: {
         title: 'CAGR Calculator',
@@ -34,10 +44,10 @@ function App() {
         formula: 'CAGR = (End Value / Start Value)^(1/n) - 1'
       }
     },
-    { 
-      id: 'sip', 
-      name: 'SIP Calculator', 
-      description: 'Systematic Investment Plan calculations', 
+    {
+      id: 'sip',
+      name: 'SIP Calculator',
+      description: 'Systematic Investment Plan calculations',
       icon: '💰',
       info: {
         title: 'SIP Calculator',
@@ -51,10 +61,10 @@ function App() {
         formula: 'Future Value = P × [(1 + r)^n - 1] / r'
       }
     },
-    { 
-      id: 'intraday', 
-      name: 'Intraday Profit/Loss Calculator', 
-      description: 'Calculate intraday trading P&L', 
+    {
+      id: 'intraday',
+      name: 'Intraday Profit/Loss Calculator',
+      description: 'Calculate intraday trading P&L',
       icon: '📊',
       info: {
         title: 'Intraday P&L Calculator',
@@ -68,10 +78,10 @@ function App() {
         formula: 'P&L = (Sell Price - Buy Price) × Quantity - Charges'
       }
     },
-    { 
-      id: 'average-buy', 
-      name: 'Average Buy Price Calculator', 
-      description: 'Calculate average purchase price', 
+    {
+      id: 'average-buy',
+      name: 'Average Buy Price Calculator',
+      description: 'Calculate average purchase price',
       icon: '⚖️',
       info: {
         title: 'Average Buy Price Calculator',
@@ -85,10 +95,10 @@ function App() {
         formula: 'Average Price = Total Investment / Total Quantity'
       }
     },
-    { 
-      id: 'options-pnl', 
-      name: 'Options P&L Calculator', 
-      description: 'Options profit and loss calculations', 
+    {
+      id: 'options-pnl',
+      name: 'Options P&L Calculator',
+      description: 'Options profit and loss calculations',
       icon: '📉',
       info: {
         title: 'Options P&L Calculator',
@@ -102,10 +112,10 @@ function App() {
         formula: 'P&L = (Current Price - Strike Price) × Lot Size - Premium Paid'
       }
     },
-    { 
-      id: 'dividend-yield', 
-      name: 'Dividend Yield Calculator', 
-      description: 'Calculate dividend yield percentage', 
+    {
+      id: 'dividend-yield',
+      name: 'Dividend Yield Calculator',
+      description: 'Calculate dividend yield percentage',
       icon: '🎯',
       info: {
         title: 'Dividend Yield Calculator',
@@ -119,10 +129,10 @@ function App() {
         formula: 'Dividend Yield = (Annual Dividend / Current Price) × 100'
       }
     },
-    { 
-      id: 'stop-loss', 
-      name: 'Stop Loss / Target Calculator', 
-      description: 'Calculate stop loss and target levels', 
+    {
+      id: 'stop-loss',
+      name: 'Stop Loss / Target Calculator',
+      description: 'Calculate stop loss and target levels',
       icon: '🛑',
       info: {
         title: 'Stop Loss / Target Calculator',
@@ -136,10 +146,10 @@ function App() {
         formula: 'Stop Loss = Entry Price - (Entry Price × Risk %)'
       }
     },
-    { 
-      id: 'margin', 
-      name: 'Margin Requirement Calculator', 
-      description: 'Calculate margin requirements', 
+    {
+      id: 'margin',
+      name: 'Margin Requirement Calculator',
+      description: 'Calculate margin requirements',
       icon: '💳',
       info: {
         title: 'Margin Requirement Calculator',
@@ -153,10 +163,10 @@ function App() {
         formula: 'Margin Required = (Position Value × Margin Rate) / 100'
       }
     },
-    { 
-      id: 'tax-brokerage', 
-      name: 'Tax / Brokerage Charges Calculator', 
-      description: 'Calculate taxes and brokerage fees', 
+    {
+      id: 'tax-brokerage',
+      name: 'Tax / Brokerage Charges Calculator',
+      description: 'Calculate taxes and brokerage fees',
       icon: '🧾',
       info: {
         title: 'Tax / Brokerage Calculator',
@@ -170,10 +180,10 @@ function App() {
         formula: 'Total Charges = Brokerage + STT + GST + Other Taxes'
       }
     },
-    { 
-      id: 'stock-split', 
-      name: 'Stock Split / Bonus Share Calculator', 
-      description: 'Calculate stock splits and bonus shares', 
+    {
+      id: 'stock-split',
+      name: 'Stock Split / Bonus Share Calculator',
+      description: 'Calculate stock splits and bonus shares',
       icon: '🎁',
       info: {
         title: 'Stock Split / Bonus Calculator',
@@ -190,7 +200,7 @@ function App() {
   ];
 
   useEffect(() => {
-    // Animate in on component mount
+    // Animate in on component mountx
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -206,49 +216,17 @@ function App() {
     ]).start();
   }, []);
 
-  const openCalculatorModal = () => {
+  const handleCalculatorSelect = (item) => {
     try {
-      setIsModalVisible(true);
-    } catch (error) {
-      console.error('Error opening modal:', error);
-      setIsModalVisible(true);
-    }
-  };
-
-  const closeCalculatorModal = () => {
-    try {
-      setIsModalVisible(false);
-    } catch (error) {
-      console.error('Error closing modal:', error);
-      setIsModalVisible(false);
-    }
-  };
-
-  const toggleInfoModal = () => {
-    setShowInfoModal(!showInfoModal);
-  };
-
-  const handleCalculatorSelect = (calculatorId) => {
-    try {
-      setSelectedCalculator(calculatorId);
-      setIsLoading(true);
-      
-      // Simulate loading for better UX
-      setTimeout(() => {
-        setIsLoading(false);
-        closeCalculatorModal();
-      }, 500);
+      setSelectedCalculator(item);
     } catch (error) {
       console.error('Error selecting calculator:', error);
-      setSelectedCalculator(calculatorId);
-      setIsLoading(false);
-      closeCalculatorModal();
     }
   };
 
   const renderCalculatorItem = ({ item, index }) => {
     const cardScale = cardScales[index] || new Animated.Value(1);
-    const isSelected = selectedCalculator === item.id;
+    const isSelected = selectedCalculator?.id === item?.id;
 
     const handlePressIn = () => {
       try {
@@ -288,7 +266,7 @@ function App() {
             styles.modalCalculatorCard,
             isSelected && styles.modalSelectedCard,
           ]}
-          onPress={() => handleCalculatorSelect(item.id)}
+          onPress={() => handleCalculatorSelect(item)}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           activeOpacity={0.8}
@@ -314,7 +292,7 @@ function App() {
   const renderSelectedCalculator = () => {
     if (!selectedCalculator) {
       return (
-        <Animated.View 
+        <Animated.View
           style={[
             styles.welcomeContainer,
             { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }
@@ -329,23 +307,22 @@ function App() {
       );
     }
 
-    const calculator = calculatorTypes.find(c => c.id === selectedCalculator);
-    
+
     return (
-      <Animated.View 
+      <Animated.View
         style={[
           styles.calculatorContainer,
           { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }
         ]}
       >
         <View style={styles.calculatorHeader}>
-          <Text style={styles.calculatorHeaderIcon}>{calculator.icon}</Text>
-          <Text style={styles.calculatorHeaderTitle}>{calculator.name}</Text>
+          <Text style={styles.calculatorHeaderIcon}>{selectedCalculator?.icon}</Text>
+          <Text style={styles.calculatorHeaderTitle}>{selectedCalculator?.name}</Text>
         </View>
-        
+
         <View style={styles.calculatorContent}>
-          <Text style={styles.calculatorDescription}>{calculator.description}</Text>
-          
+          <Text style={styles.calculatorDescription}>{selectedCalculator?.description}</Text>
+
           {isLoading ? (
             <View style={styles.loadingContainer}>
               <Text style={styles.loadingText}>Loading calculator...</Text>
@@ -354,7 +331,7 @@ function App() {
             <View style={styles.calculatorPlaceholder}>
               <Text style={styles.placeholderText}>Calculator Interface</Text>
               <Text style={styles.placeholderSubtext}>
-                The {calculator.name.toLowerCase()} interface will appear here
+                The {selectedCalculator?.name.toLowerCase()} interface will appear here
               </Text>
             </View>
           )}
@@ -366,24 +343,24 @@ function App() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      
+
       {/* Header with Calculator Button */}
-      <Animated.View 
+      <Animated.View
         style={[
           styles.header,
           { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }
         ]}
       >
         <View style={styles.headerContent}>
-          <Text style={styles.headerText}>
-            {selectedCalculator 
-              ? calculatorTypes.find(c => c.id === selectedCalculator)?.name
-              : 'Market Calculator'
-            }
-          </Text>
+          <View style={{ width: "70%" }}>
+            <CommonText
+              title={selectedCalculator?.name ||'Market Calculator'}
+              textStyle={[20, 'bold', 'white']}
+            />
+          </View>
           <View style={styles.headerButtons}>
-            {selectedCalculator && (
-              <TouchableOpacity 
+            {selectedCalculator?.id && (
+              <TouchableOpacity
                 style={styles.infoButton}
                 onPress={toggleInfoModal}
                 activeOpacity={0.8}
@@ -391,8 +368,11 @@ function App() {
                 <Text style={styles.infoButtonIcon}>ℹ️</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity 
-              style={styles.calculatorButton}
+            <TouchableOpacity
+              style={[
+                styles.calculatorButton,
+                selectedCalculator?.id && styles.calculatorButtonWithInfo
+              ]}
               onPress={openCalculatorModal}
               activeOpacity={0.8}
             >
@@ -400,17 +380,17 @@ function App() {
             </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles.headerSubtext}>
-          {selectedCalculator 
+        {/* <Text style={styles.headerSubtext}>
+          {selectedCalculator
             ? calculatorTypes.find(c => c.id === selectedCalculator)?.description
             : 'Select your calculator'
           }
-        </Text>
+        </Text> */}
       </Animated.View>
-      
+
       {/* Main Content */}
-      <ScrollView 
-        style={styles.scrollView} 
+      <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         bounces={true}
@@ -426,30 +406,30 @@ function App() {
         onRequestClose={closeCalculatorModal}
       >
         <View style={styles.modalOverlay}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.modalBackdrop}
             onPress={closeCalculatorModal}
             activeOpacity={1}
           />
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Calculator</Text>
-              <TouchableOpacity 
+              <Text style={styles.modalTitle}>Different Types of Calculator</Text>
+              <TouchableOpacity
                 style={styles.modalCloseButton}
                 onPress={closeCalculatorModal}
               >
                 <Text style={styles.modalCloseIcon}>✕</Text>
               </TouchableOpacity>
             </View>
-            
+
             {selectedCalculator && (
               <View style={styles.modalCurrentSelection}>
                 <Text style={styles.modalCurrentSelectionText}>
-                  Currently using: {calculatorTypes.find(c => c.id === selectedCalculator)?.name}
+                  Currently using: {selectedCalculator?.name}
                 </Text>
               </View>
             )}
-            
+
             <FlatList
               data={calculatorTypes}
               renderItem={renderCalculatorItem}
@@ -470,60 +450,58 @@ function App() {
         onRequestClose={toggleInfoModal}
       >
         <View style={styles.modalOverlay}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.modalBackdrop}
             onPress={toggleInfoModal}
             activeOpacity={1}
           />
           <View style={styles.modalContent}>
-            {selectedCalculator && (() => {
-              const calculator = calculatorTypes.find(c => c.id === selectedCalculator);
-              return (
+            {selectedCalculator?.id && 
+              
                 <>
                   <View style={styles.modalHeader}>
                     <View style={styles.modalHeaderContent}>
-                      <Text style={styles.modalHeaderIcon}>{calculator.icon}</Text>
+                      <Text style={styles.modalHeaderIcon}>{selectedCalculator?.icon}</Text>
                       <View style={styles.modalTitleContainer}>
-                        <Text style={styles.modalTitle}>{calculator.name}</Text>
-                        <Text style={styles.modalSubtitle}>{calculator.description}</Text>
+                        <Text style={styles.modalTitle}>{selectedCalculator?.name}</Text>
+                        <Text style={styles.modalSubtitle}>{selectedCalculator?.description}</Text>
                       </View>
                     </View>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={styles.modalCloseButton}
                       onPress={toggleInfoModal}
                     >
                       <Text style={styles.modalCloseIcon}>✕</Text>
                     </TouchableOpacity>
                   </View>
-                  
+
                   <ScrollView style={styles.modalScrollView} showsVerticalScrollIndicator={false}>
                     <View style={styles.modalBody}>
                       <View style={styles.modalUseSection}>
                         <Text style={styles.modalUseTitle}>What is this calculator used for?</Text>
-                        <Text style={styles.modalDescription}>{calculator.info.description}</Text>
+                        <Text style={styles.modalDescription}>{selectedCalculator?.info?.description}</Text>
                       </View>
-                      
+
                       <View style={styles.modalSection}>
                         <Text style={styles.modalSectionTitle}>Key Features:</Text>
-                        {calculator.info.features.map((feature, index) => (
+                        {selectedCalculator?.info?.features.map((feature, index) => (
                           <View key={index} style={styles.modalFeatureItem}>
                             <Text style={styles.modalFeatureBullet}>•</Text>
                             <Text style={styles.modalFeatureText}>{feature}</Text>
                           </View>
                         ))}
                       </View>
-                      
+
                       <View style={styles.modalSection}>
                         <Text style={styles.modalSectionTitle}>Formula:</Text>
                         <View style={styles.modalFormulaContainer}>
-                          <Text style={styles.modalFormula}>{calculator.info.formula}</Text>
+                          <Text style={styles.modalFormula}>{selectedCalculator?.info?.formula}</Text>
                         </View>
                       </View>
                     </View>
                   </ScrollView>
                 </>
-              );
-            })()}
+              }
           </View>
         </View>
       </Modal>
@@ -548,10 +526,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     flex: 1,
+    minHeight: 60,
   },
   headerButtons: {
     flexDirection: 'row',
     alignItems: 'center',
+    minWidth: 110,
+    justifyContent: 'flex-end',
   },
   headerText: {
     color: 'white',
@@ -580,12 +561,17 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   calculatorButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 25,
     width: 50,
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  calculatorButtonWithInfo: {
+    marginLeft: 10,
   },
   calculatorButtonIcon: {
     fontSize: 24,
