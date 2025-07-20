@@ -1,17 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
 import CommonText from '../CommonText';
 import useCalculatorStore from '../../store/calculatorStore';
 import SaveModal from '../SaveModal';
 
 const AverageBuyCalculator = () => {
-  const { toggleHistoryModal, toggleSaveModal } = useCalculatorStore();
+  const { 
+    toggleHistoryModal, 
+    toggleSaveModal, 
+    savedCalculations, 
+    loadedCalculation, 
+    clearLoadedCalculation 
+  } = useCalculatorStore();
   const [purchases, setPurchases] = useState([
     { quantity: '', price: '', id: Date.now() },
     { quantity: '', price: '', id: Date.now() + 1 }
   ]);
   const [currentPrice, setCurrentPrice] = useState('');
   const [result, setResult] = useState(null);
+
+  // Handle loading saved calculations
+  useEffect(() => {
+    if (loadedCalculation) {
+      // Load the saved calculation data
+      setCurrentPrice(loadedCalculation.currentPrice);
+      setResult(loadedCalculation);
+      
+      // Load the purchase data if available
+      if (loadedCalculation.purchases) {
+        setPurchases(loadedCalculation.purchases);
+      }
+      
+      clearLoadedCalculation(); // Clear the loaded calculation
+    }
+  }, [loadedCalculation, clearLoadedCalculation]);
 
   const addPurchase = () => {
     const newId = Date.now() + Math.random();
@@ -106,7 +128,10 @@ const AverageBuyCalculator = () => {
       {/* History Button */}
       <View style={styles.historyButtonContainer}>
         <TouchableOpacity style={styles.historyButton} onPress={toggleHistoryModal}>
-          <CommonText title="📊 History" textStyle={[16, '600', '#2196F3']} />
+          <CommonText 
+            title={`📊 History (${savedCalculations.length})`} 
+            textStyle={[16, '600', '#2196F3']} 
+          />
         </TouchableOpacity>
       </View>
 
@@ -337,7 +362,7 @@ const AverageBuyCalculator = () => {
       </View>
 
       {/* Save Modal */}
-      <SaveModal calculationData={result} />
+      <SaveModal calculationData={{ ...result, purchases, currentPrice }} />
     </ScrollView>
   );
 };
@@ -354,11 +379,13 @@ const styles = StyleSheet.create({
   },
   historyButton: {
     backgroundColor: '#e3f2fd',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
     borderWidth: 1,
     borderColor: '#2196F3',
+    minWidth: 120,
+    alignItems: 'center',
   },
   header: {
     backgroundColor: 'white',

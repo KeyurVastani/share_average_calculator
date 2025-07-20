@@ -13,6 +13,7 @@ const useCalculatorStore = create(
       showHistoryModal: false,
       showSaveModal: false,
       savedCalculations: [],
+      loadedCalculation: null,
       
       setLoading: (loading) => {
         set({ isLoading: loading });
@@ -97,6 +98,19 @@ const useCalculatorStore = create(
       clearAllHistory: () => {
         set({ savedCalculations: [] });
       },
+
+      // Load calculation back to calculator
+      loadCalculation: (calculationData) => {
+        set({ 
+          loadedCalculation: calculationData,
+          showHistoryModal: false
+        });
+      },
+
+      // Clear loaded calculation
+      clearLoadedCalculation: () => {
+        set({ loadedCalculation: null });
+      },
       
       // Reset state
       resetState: () => {
@@ -107,6 +121,7 @@ const useCalculatorStore = create(
           showInfoModal: false,
           showHistoryModal: false,
           showSaveModal: false,
+          loadedCalculation: null,
         });
       },
     }),

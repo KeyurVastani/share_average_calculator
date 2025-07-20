@@ -4,7 +4,7 @@ import CommonText from './CommonText';
 import useCalculatorStore from '../store/calculatorStore';
 
 const HistoryScreen = () => {
-  const { savedCalculations, deleteCalculation, clearAllHistory, toggleHistoryModal } = useCalculatorStore();
+  const { savedCalculations, deleteCalculation, clearAllHistory, toggleHistoryModal, loadCalculation } = useCalculatorStore();
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
@@ -37,6 +37,12 @@ const HistoryScreen = () => {
         { text: 'Clear All', style: 'destructive', onPress: clearAllHistory }
       ]
     );
+  };
+
+  const handleReapplyCalculation = (calculation) => {
+    // Directly load the calculation data and close history screen
+    loadCalculation(calculation);
+    toggleHistoryModal(); // Close history modal
   };
 
   return (
@@ -168,6 +174,16 @@ const HistoryScreen = () => {
                     textStyle={[14, '500', '#666']} 
                   />
                 </View>
+
+                {/* Action Buttons */}
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity 
+                    style={styles.reapplyButton}
+                    onPress={() => handleReapplyCalculation(calculation)}
+                  >
+                    <CommonText title="🔄 Reapply" textStyle={[14, '600', '#2196F3']} />
+                  </TouchableOpacity>
+                </View>
               </View>
             ))}
           </>
@@ -272,6 +288,22 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#e9ecef',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+  },
+  reapplyButton: {
+    backgroundColor: '#e3f2fd',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#2196F3',
   },
 });
 
