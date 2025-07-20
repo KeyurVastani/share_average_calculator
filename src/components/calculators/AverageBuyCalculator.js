@@ -187,82 +187,113 @@ const AverageBuyCalculator = () => {
       {/* Results */}
       {result && (
         <View style={styles.resultSection}>
-          <CommonText 
-            title="Results" 
-            textStyle={[20, 'bold', '#333']} 
-          />
+          <View style={styles.resultHeader}>
+            <CommonText 
+              title="📊 Calculation Results" 
+              textStyle={[22, 'bold', '#333']} 
+            />
+          </View>
           
-          <View style={styles.resultCard}>
-            <View style={styles.resultRow}>
-              <CommonText title="Average Buy Price:" textStyle={[16, '600', '#666']} />
+          {/* Key Metrics Card */}
+          <View style={styles.keyMetricsCard}>
+            <View style={styles.metricRow}>
+              <View style={styles.metricLabel}>
+                <CommonText title="Average Buy Price" textStyle={[16, '600', '#666']} />
+                <CommonText title="(Weighted Average)" textStyle={[12, 'normal', '#999']} />
+              </View>
               <CommonText 
                 title={`₹${result.averagePrice}`} 
-                textStyle={[18, 'bold', '#2196F3']} 
+                textStyle={[20, 'bold', '#2196F3']} 
               />
             </View>
             
-            <View style={styles.resultRow}>
-              <CommonText title="Current Market Price:" textStyle={[16, '600', '#666']} />
+            <View style={styles.metricRow}>
+              <View style={styles.metricLabel}>
+                <CommonText title="Current Market Price" textStyle={[16, '600', '#666']} />
+                <CommonText title="(Latest Price)" textStyle={[12, 'normal', '#999']} />
+              </View>
               <CommonText 
                 title={`₹${result.currentPrice}`} 
-                textStyle={[18, 'bold', '#333']} 
-              />
-            </View>
-            
-            <View style={styles.resultRow}>
-              <CommonText title="Total Investment:" textStyle={[16, '600', '#666']} />
-              <CommonText 
-                title={`₹${result.totalInvestment}`} 
-                textStyle={[16, 'bold', '#333']} 
-              />
-            </View>
-            
-            <View style={styles.resultRow}>
-              <CommonText title="Current Value:" textStyle={[16, '600', '#666']} />
-              <CommonText 
-                title={`₹${result.currentValue}`} 
-                textStyle={[16, 'bold', '#333']} 
-              />
-            </View>
-            
-            <View style={styles.resultRow}>
-              <CommonText title="Total Quantity:" textStyle={[16, '600', '#666']} />
-              <CommonText 
-                title={result.totalQuantity} 
-                textStyle={[16, 'bold', '#333']} 
-              />
-            </View>
-            
-            <View style={styles.resultRow}>
-              <CommonText title="Number of Purchases:" textStyle={[16, '600', '#666']} />
-              <CommonText 
-                title={result.numberOfPurchases.toString()} 
-                textStyle={[16, 'bold', '#333']} 
+                textStyle={[20, 'bold', '#333']} 
               />
             </View>
           </View>
 
+          {/* Investment Summary Card */}
+          <View style={styles.summaryCard}>
+            <CommonText 
+              title="💰 Investment Summary" 
+              textStyle={[18, 'bold', '#333']} 
+            />
+            
+            <View style={styles.summaryGrid}>
+              <View style={styles.summaryItem}>
+                <CommonText title="Total Investment" textStyle={[14, '500', '#666']} />
+                <CommonText 
+                  title={`₹${result.totalInvestment}`} 
+                  textStyle={[16, 'bold', '#333']} 
+                />
+              </View>
+              
+              <View style={styles.summaryItem}>
+                <CommonText title="Current Value" textStyle={[14, '500', '#666']} />
+                <CommonText 
+                  title={`₹${result.currentValue}`} 
+                  textStyle={[16, 'bold', '#333']} 
+                />
+              </View>
+              
+              <View style={styles.summaryItem}>
+                <CommonText title="Total Shares" textStyle={[14, '500', '#666']} />
+                <CommonText 
+                  title={result.totalQuantity} 
+                  textStyle={[16, 'bold', '#333']} 
+                />
+              </View>
+              
+              <View style={styles.summaryItem}>
+                <CommonText title="No. of Purchases" textStyle={[14, '500', '#666']} />
+                <CommonText 
+                  title={result.numberOfPurchases.toString()} 
+                  textStyle={[16, 'bold', '#333']} 
+                />
+              </View>
+            </View>
+          </View>
+
           {/* Profit/Loss Section */}
-          <View style={[styles.profitLossCard, { backgroundColor: result.isProfitable ? '#e8f5e8' : '#ffeaea' }]}>
-            <View style={styles.resultRow}>
-              <CommonText title="Profit/Loss:" textStyle={[16, '600', '#666']} />
+          <View style={[styles.profitLossCard, { 
+            backgroundColor: result.isProfitable ? '#f0f9ff' : '#fef2f2',
+            borderColor: result.isProfitable ? '#4caf50' : '#f44336'
+          }]}>
+            <View style={styles.profitLossHeader}>
               <CommonText 
-                title={`₹${result.profitLoss}`} 
+                title={result.isProfitable ? "📈 PROFIT ANALYSIS" : "📉 LOSS ANALYSIS"} 
                 textStyle={[18, 'bold', result.isProfitable ? '#4caf50' : '#f44336']} 
               />
             </View>
             
-            <View style={styles.resultRow}>
-              <CommonText title="Percentage:" textStyle={[16, '600', '#666']} />
-              <CommonText 
-                title={`${result.profitLossPercentage}%`} 
-                textStyle={[18, 'bold', result.isProfitable ? '#4caf50' : '#f44336']} 
-              />
+            <View style={styles.profitLossGrid}>
+              <View style={styles.profitLossItem}>
+                <CommonText title="Absolute P&L" textStyle={[14, '500', '#666']} />
+                <CommonText 
+                  title={`₹${result.profitLoss}`} 
+                  textStyle={[18, 'bold', result.isProfitable ? '#4caf50' : '#f44336']} 
+                />
+              </View>
+              
+              <View style={styles.profitLossItem}>
+                <CommonText title="Percentage Return" textStyle={[14, '500', '#666']} />
+                <CommonText 
+                  title={`${result.profitLossPercentage}%`} 
+                  textStyle={[18, 'bold', result.isProfitable ? '#4caf50' : '#f44336']} 
+                />
+              </View>
             </View>
             
-            <View style={styles.statusRow}>
+            <View style={styles.statusBanner}>
               <CommonText 
-                title={result.isProfitable ? "📈 PROFITABLE" : "📉 LOSS"} 
+                title={result.isProfitable ? "🎉 You're in PROFIT!" : "⚠️ You're at a LOSS"} 
                 textStyle={[16, 'bold', result.isProfitable ? '#4caf50' : '#f44336']} 
               />
             </View>
@@ -415,31 +446,83 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  resultCard: {
-    backgroundColor: '#f8f9fa',
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 15,
+  resultHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  resultRow: {
+  keyMetricsCard: {
+    backgroundColor: '#f8f9fa',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  metricRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    marginBottom: 15,
   },
-  profitLossCard: {
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 15,
-    borderWidth: 2,
+  metricLabel: {
+    flex: 1,
+    marginRight: 10,
+  },
+  summaryCard: {
+    backgroundColor: '#f8f9fa',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 1,
     borderColor: '#e9ecef',
   },
-  statusRow: {
+  summaryGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    marginTop: 15,
+  },
+  summaryItem: {
+    width: '48%',
+    marginBottom: 15,
+    padding: 10,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  profitLossCard: {
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 2,
+  },
+  profitLossHeader: {
     alignItems: 'center',
-    paddingVertical: 8,
-    marginTop: 5,
+    marginBottom: 15,
+  },
+  profitLossGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  profitLossItem: {
+    width: '48%',
+    padding: 15,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    alignItems: 'center',
+  },
+  statusBanner: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
   },
   formulaSection: {
     backgroundColor: 'white',
