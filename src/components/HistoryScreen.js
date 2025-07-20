@@ -39,10 +39,8 @@ const HistoryScreen = () => {
     );
   };
 
-  const handleReapplyCalculation = (calculation) => {
-    // Directly load the calculation data and close history screen
-    loadCalculation(calculation);
-    toggleHistoryModal(); // Close history modal
+  const handleReapplyCalculation =  (calculation) => {
+     loadCalculation(calculation);
   };
 
   return (
