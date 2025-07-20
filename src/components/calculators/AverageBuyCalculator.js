@@ -4,14 +4,14 @@ import CommonText from '../../components/CommonText';
 
 const AverageBuyCalculator = () => {
   const [purchases, setPurchases] = useState([
-    { quantity: '', price: '', id: 1 },
-    { quantity: '', price: '', id: 2 }
+    { quantity: '', price: '', id: Date.now() },
+    { quantity: '', price: '', id: Date.now() + 1 }
   ]);
   const [currentPrice, setCurrentPrice] = useState('');
   const [result, setResult] = useState(null);
 
   const addPurchase = () => {
-    const newId = purchases.length + 1;
+    const newId = Date.now() + Math.random();
     setPurchases([...purchases, { quantity: '', price: '', id: newId }]);
   };
 
@@ -80,8 +80,8 @@ const AverageBuyCalculator = () => {
 
   const resetCalculator = () => {
     setPurchases([
-      { quantity: '', price: '', id: 1 },
-      { quantity: '', price: '', id: 2 }
+      { quantity: '', price: '', id: Date.now() },
+      { quantity: '', price: '', id: Date.now() + 1 }
     ]);
     setCurrentPrice('');
     setResult(null);
@@ -113,7 +113,7 @@ const AverageBuyCalculator = () => {
         </View>
 
         {purchases.map((purchase, index) => (
-          <View key={purchase.id} style={styles.purchaseRow}>
+          <View key={`purchase-${purchase.id}`} style={styles.purchaseRow}>
             <View style={styles.purchaseHeader}>
               <CommonText 
                 title={`Purchase ${index + 1}`} 
