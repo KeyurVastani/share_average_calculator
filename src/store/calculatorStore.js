@@ -14,6 +14,7 @@ const useCalculatorStore = create(
       showSaveModal: false,
       savedCalculations: [],
       loadedCalculation: null,
+      editingCalculationId: null, // Track which calculation is being edited
       
       setLoading: (loading) => {
         set({ isLoading: loading });
@@ -76,16 +77,32 @@ const useCalculatorStore = create(
 
       // History functions
       saveCalculation: (calculationData) => {
-        const { savedCalculations } = get();
-        const newCalculation = {
-          id: Date.now().toString(),
-          timestamp: new Date().toISOString(),
-          ...calculationData
-        };
-        set({ 
-          savedCalculations: [newCalculation, ...savedCalculations],
-          showSaveModal: false
-        });
+        const { savedCalculations, editingCalculationId } = get();
+        
+        if (editingCalculationId) {
+          // Update existing calculation
+          const updatedCalculations = savedCalculations.map(calc => 
+            calc.id === editingCalculationId 
+              ? { ...calc, ...calculationData, timestamp: new Date().toISOString() }
+              : calc
+          );
+          set({ 
+            savedCalculations: updatedCalculations,
+            editingCalculationId: null, // Clear editing state
+            showSaveModal: false
+          });
+        } else {
+          // Create new calculation
+          const newCalculation = {
+            id: Date.now().toString(),
+            timestamp: new Date().toISOString(),
+            ...calculationData
+          };
+          set({ 
+            savedCalculations: [newCalculation, ...savedCalculations],
+            showSaveModal: false
+          });
+        }
       },
 
       deleteCalculation: (id) => {
@@ -103,13 +120,22 @@ const useCalculatorStore = create(
       loadCalculation: (calculationData) => {
         set({ 
           loadedCalculation: calculationData,
+          editingCalculationId: calculationData.id, // Track which calculation is being edited
           showHistoryModal: false
         });
       },
 
       // Clear loaded calculation
       clearLoadedCalculation: () => {
-        set({ loadedCalculation: null });
+        set({ 
+          loadedCalculation: null
+          // Don't clear editingCalculationId here - it should persist until save
+        });
+      },
+
+      // Clear editing state (call this when starting a new calculation)
+      clearEditingState: () => {
+        set({ editingCalculationId: null });
       },
       
       // Reset state
@@ -122,6 +148,7 @@ const useCalculatorStore = create(
           showHistoryModal: false,
           showSaveModal: false,
           loadedCalculation: null,
+          editingCalculationId: null,
         });
       },
     }),

@@ -8,9 +8,11 @@ const AverageBuyCalculator = () => {
   const { 
     toggleHistoryModal, 
     toggleSaveModal, 
+    saveCalculation,
     savedCalculations, 
     loadedCalculation, 
-    clearLoadedCalculation 
+    clearLoadedCalculation,
+    editingCalculationId
   } = useCalculatorStore();
   const [purchases, setPurchases] = useState([
     { quantity: '', price: '', id: Date.now() },
@@ -18,6 +20,7 @@ const AverageBuyCalculator = () => {
   ]);
   const [currentPrice, setCurrentPrice] = useState('');
   const [result, setResult] = useState(null);
+  const [currentStockName, setCurrentStockName] = useState(''); // Store current stock name
 
   // Handle loading saved calculations
   useEffect(() => {
@@ -25,6 +28,7 @@ const AverageBuyCalculator = () => {
       // Load the saved calculation data
       setCurrentPrice(loadedCalculation.currentPrice);
       setResult(loadedCalculation);
+      setCurrentStockName(loadedCalculation.stockName || ''); // Store the stock name
       
       // Load the purchase data if available
       if (loadedCalculation.purchases) {
@@ -99,7 +103,8 @@ const AverageBuyCalculator = () => {
       currentValue: currentValue.toFixed(2),
       profitLoss: profitLoss.toFixed(2),
       profitLossPercentage: profitLossPercentage.toFixed(2),
-      isProfitable: profitLoss >= 0
+      isProfitable: profitLoss >= 0,
+      stockName: currentStockName // Preserve the stock name
     });
   };
 
@@ -110,6 +115,26 @@ const AverageBuyCalculator = () => {
     ]);
     setCurrentPrice('');
     setResult(null);
+    setCurrentStockName(''); // Clear the stock name
+  };
+
+  const handleSave = () => {
+    console.log('handleSave called:', { editingCalculationId, currentStockName, hasResult: !!result });
+    
+    if (editingCalculationId && result && currentStockName) {
+      // When editing and we have a stock name, automatically update without showing modal
+      console.log('Auto-updating calculation with stock name:', currentStockName);
+      saveCalculation({
+        ...result,
+        purchases,
+        currentPrice,
+        stockName: currentStockName // Use the stored stock name
+      });
+    } else {
+      // Show modal for new calculations or when no stock name exists
+      console.log('Showing modal - editingCalculationId:', editingCalculationId, 'currentStockName:', currentStockName);
+      toggleSaveModal();
+    }
   };
 
   return (
@@ -227,8 +252,8 @@ const AverageBuyCalculator = () => {
               title="📊 Calculation Results" 
               textStyle={[22, 'bold', '#333']} 
             />
-            <TouchableOpacity style={styles.saveResultButton} onPress={toggleSaveModal}>
-              <CommonText title="💾 Save" textStyle={[14, '600', '#4caf50']} />
+            <TouchableOpacity style={styles.saveResultButton} onPress={handleSave}>
+              <CommonText title={editingCalculationId ? "💾 Update" : "💾 Save"} textStyle={[14, '600', '#4caf50']} />
             </TouchableOpacity>
           </View>
           
@@ -362,7 +387,7 @@ const AverageBuyCalculator = () => {
       </View>
 
       {/* Save Modal */}
-      <SaveModal calculationData={{ ...result, purchases, currentPrice }} />
+      <SaveModal calculationData={{ ...result, purchases, currentPrice }}  reset={resetCalculator}/>
     </ScrollView>
   );
 };

@@ -1,31 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import CommonText from './CommonText';
 import useCalculatorStore from '../store/calculatorStore';
 
-const SaveModal = ({ calculationData }) => {
-  const { showSaveModal, toggleSaveModal, saveCalculation } = useCalculatorStore();
+const SaveModal = ({ calculationData, reset }) => {
+  const { showSaveModal, toggleSaveModal, saveCalculation, editingCalculationId } = useCalculatorStore();
   const [stockName, setStockName] = useState('');
 
   const handleSave = () => {
-    if (!stockName.trim()) {
-      // You could add an alert here to warn about empty stock name
-      return;
+    console.log('calculationData-----------------------------------------', editingCalculationId);
+    if (editingCalculationId) {
+      // When editing, automatically update without asking for stock name
+      saveCalculation({
+        ...calculationData,
+        stockName: calculationData.stockName || stockName.trim() // Use existing stock name
+      });
+    } else {
+      // Only ask for stock name when creating new calculation
+      if (!stockName.trim()) {
+        // You could add an alert here to warn about empty stock name
+        return;
+      }
+      
+      saveCalculation({
+        ...calculationData,
+        stockName: stockName.trim()
+      });
     }
-    
-    saveCalculation({
-      ...calculationData,
-      stockName: stockName.trim()
-    });
     
     // Reset the input
     setStockName('');
+    reset();
   };
 
   const handleCancel = () => {
     setStockName('');
     toggleSaveModal();
   };
+
+  // Set initial stock name when editing
+  useEffect(() => {
+    if (editingCalculationId && calculationData?.stockName) {
+      setStockName(calculationData.stockName);
+    } else {
+      setStockName('');
+    }
+  }, [editingCalculationId, calculationData?.stockName]);
 
   return (
     <Modal
@@ -43,7 +63,7 @@ const SaveModal = ({ calculationData }) => {
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
             <CommonText 
-              title="💾 Save Calculation" 
+              title={editingCalculationId ? "✏️ Update Calculation" : "💾 Save Calculation"} 
               textStyle={[20, 'bold', '#333']} 
             />
             <TouchableOpacity style={styles.closeButton} onPress={handleCancel}>
@@ -53,21 +73,26 @@ const SaveModal = ({ calculationData }) => {
 
           <View style={styles.modalBody}>
             <CommonText 
-              title="Enter a name for this calculation to save it to your history." 
+              title={editingCalculationId 
+                ? "Your changes will be automatically saved to the existing calculation." 
+                : "Enter a name for this calculation to save it to your history."
+              } 
               textStyle={[16, 'normal', '#666']} 
             />
             
-            <View style={styles.inputContainer}>
-              <CommonText title="Stock Name" textStyle={[16, '600', '#333']} />
-              <TextInput
-                style={styles.input}
-                placeholder="e.g., Reliance Industries, TCS, HDFC Bank"
-                value={stockName}
-                onChangeText={setStockName}
-                autoFocus={true}
-                maxLength={50}
-              />
-            </View>
+            {!editingCalculationId && (
+              <View style={styles.inputContainer}>
+                <CommonText title="Stock Name" textStyle={[16, '600', '#333']} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g., Reliance Industries, TCS, HDFC Bank"
+                  value={stockName}
+                  onChangeText={setStockName}
+                  autoFocus={true}
+                  maxLength={50}
+                />
+              </View>
+            )}
 
             {/* Preview of what will be saved */}
             {calculationData && (
@@ -111,7 +136,7 @@ const SaveModal = ({ calculationData }) => {
               onPress={handleSave}
               disabled={!stockName.trim()}
             >
-              <CommonText title="Save" textStyle={[16, 'bold', 'white']} />
+              <CommonText title={editingCalculationId ? "Update" : "Save"} textStyle={[16, 'bold', 'white']} />
             </TouchableOpacity>
           </View>
         </View>
