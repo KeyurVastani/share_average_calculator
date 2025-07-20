@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
-import CommonText from '../../components/CommonText';
+import CommonText from '../CommonText';
+import useCalculatorStore from '../../store/calculatorStore';
+import SaveModal from '../SaveModal';
 
 const AverageBuyCalculator = () => {
+  const { toggleHistoryModal, toggleSaveModal } = useCalculatorStore();
   const [purchases, setPurchases] = useState([
     { quantity: '', price: '', id: Date.now() },
     { quantity: '', price: '', id: Date.now() + 1 }
@@ -100,6 +103,13 @@ const AverageBuyCalculator = () => {
         />
       </View> */}
 
+      {/* History Button */}
+      <View style={styles.historyButtonContainer}>
+        <TouchableOpacity style={styles.historyButton} onPress={toggleHistoryModal}>
+          <CommonText title="📊 History" textStyle={[16, '600', '#2196F3']} />
+        </TouchableOpacity>
+      </View>
+
       {/* Purchase Inputs */}
       <View style={styles.inputSection}>
         <View style={styles.sectionHeader}>
@@ -192,6 +202,9 @@ const AverageBuyCalculator = () => {
               title="📊 Calculation Results" 
               textStyle={[22, 'bold', '#333']} 
             />
+            <TouchableOpacity style={styles.saveResultButton} onPress={toggleSaveModal}>
+              <CommonText title="💾 Save" textStyle={[14, '600', '#4caf50']} />
+            </TouchableOpacity>
           </View>
           
           {/* Key Metrics Card */}
@@ -322,6 +335,9 @@ const AverageBuyCalculator = () => {
           />
         </View>
       </View>
+
+      {/* Save Modal */}
+      <SaveModal calculationData={result} />
     </ScrollView>
   );
 };
@@ -330,6 +346,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  historyButtonContainer: {
+    alignItems: 'flex-end',
+    marginBottom: 10,
+    paddingHorizontal: 20,
+  },
+  historyButton: {
+    backgroundColor: '#e3f2fd',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#2196F3',
   },
   header: {
     backgroundColor: 'white',
@@ -447,8 +476,18 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   resultHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
+  },
+  saveResultButton: {
+    backgroundColor: '#e8f5e8',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#4caf50',
   },
   keyMetricsCard: {
     backgroundColor: '#f8f9fa',

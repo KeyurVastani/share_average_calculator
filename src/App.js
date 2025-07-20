@@ -4,6 +4,7 @@ import useCalculatorStore from './store/calculatorStore';
 
 import AverageBuyCalculator from './components/calculators/AverageBuyCalculator';
 import CommonText from './components/CommonText';
+import HistoryScreen from './components/HistoryScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -14,10 +15,12 @@ function App() {
     isLoading,
     isModalVisible,
     showInfoModal,
+    showHistoryModal,
     setSelectedCalculator,
     openCalculatorModal,
     closeCalculatorModal,
     toggleInfoModal,
+    toggleHistoryModal,
   } = useCalculatorStore();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -511,6 +514,15 @@ function App() {
               }
           </View>
         </View>
+      </Modal>
+
+      {/* History Modal */}
+      <Modal
+        visible={showHistoryModal}
+        animationType="slide"
+        onRequestClose={toggleHistoryModal}
+      >
+        <HistoryScreen />
       </Modal>
     </View>
   );

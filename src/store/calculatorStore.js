@@ -10,7 +10,9 @@ const useCalculatorStore = create(
       isLoading: false,
       isModalVisible: false,
       showInfoModal: false,
-      
+      showHistoryModal: false,
+      showSaveModal: false,
+      savedCalculations: [],
       
       setLoading: (loading) => {
         set({ isLoading: loading });
@@ -22,6 +24,14 @@ const useCalculatorStore = create(
       
       setInfoModalVisible: (visible) => {
         set({ showInfoModal: visible });
+      },
+
+      setHistoryModalVisible: (visible) => {
+        set({ showHistoryModal: visible });
+      },
+
+      setSaveModalVisible: (visible) => {
+        set({ showSaveModal: visible });
       },
       
       // Combined actions for better UX
@@ -52,6 +62,41 @@ const useCalculatorStore = create(
         const { showInfoModal } = get();
         set({ showInfoModal: !showInfoModal });
       },
+
+      toggleHistoryModal: () => {
+        const { showHistoryModal } = get();
+        set({ showHistoryModal: !showHistoryModal });
+      },
+
+      toggleSaveModal: () => {
+        const { showSaveModal } = get();
+        set({ showSaveModal: !showSaveModal });
+      },
+
+      // History functions
+      saveCalculation: (calculationData) => {
+        const { savedCalculations } = get();
+        const newCalculation = {
+          id: Date.now().toString(),
+          timestamp: new Date().toISOString(),
+          ...calculationData
+        };
+        set({ 
+          savedCalculations: [newCalculation, ...savedCalculations],
+          showSaveModal: false
+        });
+      },
+
+      deleteCalculation: (id) => {
+        const { savedCalculations } = get();
+        set({ 
+          savedCalculations: savedCalculations.filter(calc => calc.id !== id)
+        });
+      },
+
+      clearAllHistory: () => {
+        set({ savedCalculations: [] });
+      },
       
       // Reset state
       resetState: () => {
@@ -60,6 +105,8 @@ const useCalculatorStore = create(
           isLoading: false,
           isModalVisible: false,
           showInfoModal: false,
+          showHistoryModal: false,
+          showSaveModal: false,
         });
       },
     }),
@@ -68,6 +115,7 @@ const useCalculatorStore = create(
       storage: createJSONStorage(() => AsyncStorage), // use AsyncStorage for persistence
       partialize: (state) => ({
         selectedCalculator: state.selectedCalculator, // only persist selectedCalculator
+        savedCalculations: state.savedCalculations, // persist saved calculations
       }),
     }
   )
