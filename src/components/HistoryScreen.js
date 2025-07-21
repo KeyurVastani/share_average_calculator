@@ -4,7 +4,18 @@ import CommonText from './CommonText';
 import useCalculatorStore from '../store/calculatorStore';
 
 const HistoryScreen = () => {
-  const { savedCalculations, deleteCalculation, clearAllHistory, toggleHistoryModal, loadCalculation } = useCalculatorStore();
+  const { 
+    savedCalculations, 
+    deleteCalculation, 
+    clearAllHistory, 
+    toggleHistoryModal, 
+    loadCalculation,
+    getCalculationsForType,
+    selectedCalculator
+  } = useCalculatorStore();
+  
+  // Get calculations for the current calculator type
+  const currentCalculations = getCalculationsForType(selectedCalculator?.id);
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
@@ -23,7 +34,7 @@ const HistoryScreen = () => {
       `Are you sure you want to delete the calculation for "${stockName}"?`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteCalculation(id) }
+        { text: 'Delete', style: 'destructive', onPress: () => deleteCalculation(id, selectedCalculator?.id) }
       ]
     );
   };
@@ -34,7 +45,7 @@ const HistoryScreen = () => {
       'Are you sure you want to delete all saved calculations? This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear All', style: 'destructive', onPress: clearAllHistory }
+        { text: 'Clear All', style: 'destructive', onPress: () => clearAllHistory(selectedCalculator?.id) }
       ]
     );
   };
@@ -57,14 +68,14 @@ const HistoryScreen = () => {
           </TouchableOpacity>
         </View>
         <CommonText 
-          title={`${savedCalculations.length} saved calculation${savedCalculations.length !== 1 ? 's' : ''}`} 
+          title={`${currentCalculations.length} saved calculation${currentCalculations.length !== 1 ? 's' : ''}`} 
           textStyle={[16, 'normal', 'rgba(255,255,255,0.8)']} 
         />
       </View>
 
       {/* Content */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {savedCalculations.length === 0 ? (
+        {currentCalculations.length === 0 ? (
           <View style={styles.emptyState}>
             <CommonText 
               title="📝" 
@@ -87,7 +98,7 @@ const HistoryScreen = () => {
             </TouchableOpacity>
 
             {/* Calculations List */}
-            {savedCalculations.map((calculation, index) => (
+            {currentCalculations.map((calculation, index) => (
               <View key={calculation.id} style={styles.calculationCard}>
                 {/* Header */}
                 <View style={styles.calculationHeader}>
@@ -111,13 +122,15 @@ const HistoryScreen = () => {
 
                 {/* Key Metrics */}
                 <View style={styles.metricsGrid}>
-                  <View style={styles.metricItem}>
-                    <CommonText title="Avg Price" textStyle={[12, '500', '#666']} />
-                    <CommonText 
-                      title={`₹${calculation.averagePrice}`} 
-                      textStyle={[16, 'bold', '#2196F3']} 
-                    />
-                  </View>
+                  {calculation.averagePrice && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Avg Price" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculation.averagePrice}`} 
+                        textStyle={[16, 'bold', '#2196F3']} 
+                      />
+                    </View>
+                  )}
                   
                   <View style={styles.metricItem}>
                     <CommonText title="Current Price" textStyle={[12, '500', '#666']} />
@@ -127,50 +140,107 @@ const HistoryScreen = () => {
                     />
                   </View>
                   
-                  <View style={styles.metricItem}>
-                    <CommonText title="Total Investment" textStyle={[12, '500', '#666']} />
-                    <CommonText 
-                      title={`₹${calculation.totalInvestment}`} 
-                      textStyle={[16, 'bold', '#333']} 
-                    />
-                  </View>
+                  {calculation.totalInvestment && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Total Investment" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculation.totalInvestment}`} 
+                        textStyle={[16, 'bold', '#333']} 
+                      />
+                    </View>
+                  )}
                   
-                  <View style={styles.metricItem}>
-                    <CommonText title="Total Shares" textStyle={[12, '500', '#666']} />
-                    <CommonText 
-                      title={calculation.totalQuantity} 
-                      textStyle={[16, 'bold', '#333']} 
-                    />
-                  </View>
+                  {calculation.targetAmount && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Target Amount" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculation.targetAmount}`} 
+                        textStyle={[16, 'bold', '#333']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.totalQuantity && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Total Shares" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={calculation.totalQuantity} 
+                        textStyle={[16, 'bold', '#333']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.sharesNeeded && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Shares Needed" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={calculation.sharesNeeded} 
+                        textStyle={[16, 'bold', '#333']} 
+                      />
+                    </View>
+                  )}
                 </View>
 
-                {/* Profit/Loss Summary */}
-                <View style={[styles.profitLossSummary, { 
-                  backgroundColor: calculation.isProfitable ? '#f0f9ff' : '#fef2f2',
-                  borderColor: calculation.isProfitable ? '#4caf50' : '#f44336'
-                }]}>
-                  <View style={styles.profitLossRow}>
+                {/* Profit/Loss Summary - Only for Average Buy Calculator */}
+                {calculation.profitLoss !== undefined && (
+                  <View style={[styles.profitLossSummary, { 
+                    backgroundColor: calculation.isProfitable ? '#f0f9ff' : '#fef2f2',
+                    borderColor: calculation.isProfitable ? '#4caf50' : '#f44336'
+                  }]}>
+                    <View style={styles.profitLossRow}>
+                      <CommonText 
+                        title={calculation.isProfitable ? "📈 PROFIT" : "📉 LOSS"} 
+                        textStyle={[14, 'bold', calculation.isProfitable ? '#4caf50' : '#f44336']} 
+                      />
+                      <CommonText 
+                        title={`₹${calculation.profitLoss}`} 
+                        textStyle={[16, 'bold', calculation.isProfitable ? '#4caf50' : '#f44336']} 
+                      />
+                    </View>
                     <CommonText 
-                      title={calculation.isProfitable ? "📈 PROFIT" : "📉 LOSS"} 
-                      textStyle={[14, 'bold', calculation.isProfitable ? '#4caf50' : '#f44336']} 
-                    />
-                    <CommonText 
-                      title={`₹${calculation.profitLoss}`} 
-                      textStyle={[16, 'bold', calculation.isProfitable ? '#4caf50' : '#f44336']} 
+                      title={`${calculation.profitLossPercentage}% return`} 
+                      textStyle={[14, '600', calculation.isProfitable ? '#4caf50' : '#f44336']} 
                     />
                   </View>
-                  <CommonText 
-                    title={`${calculation.profitLossPercentage}% return`} 
-                    textStyle={[14, '600', calculation.isProfitable ? '#4caf50' : '#f44336']} 
-                  />
-                </View>
+                )}
+
+                {/* Share Price Match Summary */}
+                {calculation.sharesNeeded !== undefined && (
+                  <View style={[styles.profitLossSummary, { 
+                    backgroundColor: '#f0f9ff',
+                    borderColor: '#2196F3'
+                  }]}>
+                    <View style={styles.profitLossRow}>
+                      <CommonText 
+                        title="📈 SHARES CALCULATION" 
+                        textStyle={[14, 'bold', '#2196F3']} 
+                      />
+                      <CommonText 
+                        title={`${calculation.sharesNeeded} shares`} 
+                        textStyle={[16, 'bold', '#2196F3']} 
+                      />
+                    </View>
+                    <CommonText 
+                      title={`₹${calculation.actualInvestment} invested`} 
+                      textStyle={[14, '600', '#2196F3']} 
+                    />
+                  </View>
+                )}
 
                 {/* Purchase Details */}
                 <View style={styles.purchaseDetails}>
-                  <CommonText 
-                    title={`${calculation.numberOfPurchases} purchase${calculation.numberOfPurchases !== 1 ? 's' : ''} made`} 
-                    textStyle={[14, '500', '#666']} 
-                  />
+                  {calculation.numberOfPurchases && (
+                    <CommonText 
+                      title={`${calculation.numberOfPurchases} purchase${calculation.numberOfPurchases !== 1 ? 's' : ''} made`} 
+                      textStyle={[14, '500', '#666']} 
+                    />
+                  )}
+                  {calculation.remainingAmount && (
+                    <CommonText 
+                      title={`₹${calculation.remainingAmount} remaining`} 
+                      textStyle={[14, '500', '#666']} 
+                    />
+                  )}
                 </View>
 
                 {/* Action Buttons */}

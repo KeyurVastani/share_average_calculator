@@ -4,7 +4,7 @@ import CommonText from './CommonText';
 import useCalculatorStore from '../store/calculatorStore';
 
 const SaveModal = ({ calculationData, reset }) => {
-  const { showSaveModal, toggleSaveModal, saveCalculation, editingCalculationId } = useCalculatorStore();
+  const { showSaveModal, toggleSaveModal, saveCalculation, editingCalculationId, selectedCalculator } = useCalculatorStore();
   const [stockName, setStockName] = useState('');
 
   const handleSave = () => {
@@ -14,7 +14,7 @@ const SaveModal = ({ calculationData, reset }) => {
       saveCalculation({
         ...calculationData,
         stockName: calculationData.stockName || stockName.trim() // Use existing stock name
-      });
+      }, selectedCalculator?.id);
     } else {
       // Only ask for stock name when creating new calculation
       if (!stockName.trim()) {
@@ -25,7 +25,7 @@ const SaveModal = ({ calculationData, reset }) => {
       saveCalculation({
         ...calculationData,
         stockName: stockName.trim()
-      });
+      }, selectedCalculator?.id);
     }
     
     // Reset the input
@@ -101,27 +101,60 @@ const SaveModal = ({ calculationData, reset }) => {
                   title="📊 Calculation Preview" 
                   textStyle={[16, 'bold', '#333']} 
                 />
-                <View style={styles.previewRow}>
-                  <CommonText title="Average Price:" textStyle={[14, '500', '#666']} />
-                  <CommonText 
-                    title={`₹${calculationData.averagePrice}`} 
-                    textStyle={[14, 'bold', '#2196F3']} 
-                  />
-                </View>
-                <View style={styles.previewRow}>
-                  <CommonText title="Total Investment:" textStyle={[14, '500', '#666']} />
-                  <CommonText 
-                    title={`₹${calculationData.totalInvestment}`} 
-                    textStyle={[14, 'bold', '#333']} 
-                  />
-                </View>
-                <View style={styles.previewRow}>
-                  <CommonText title="P&L:" textStyle={[14, '500', '#666']} />
-                  <CommonText 
-                    title={`₹${calculationData.profitLoss} (${calculationData.profitLossPercentage}%)`} 
-                    textStyle={[14, 'bold', calculationData.isProfitable ? '#4caf50' : '#f44336']} 
-                  />
-                </View>
+                
+                {/* Average Buy Calculator Preview */}
+                {calculationData.averagePrice && (
+                  <>
+                    <View style={styles.previewRow}>
+                      <CommonText title="Average Price:" textStyle={[14, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculationData.averagePrice}`} 
+                        textStyle={[14, 'bold', '#2196F3']} 
+                      />
+                    </View>
+                    <View style={styles.previewRow}>
+                      <CommonText title="Total Investment:" textStyle={[14, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculationData.totalInvestment}`} 
+                        textStyle={[14, 'bold', '#333']} 
+                      />
+                    </View>
+                    <View style={styles.previewRow}>
+                      <CommonText title="P&L:" textStyle={[14, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculationData.profitLoss} (${calculationData.profitLossPercentage}%)`} 
+                        textStyle={[14, 'bold', calculationData.isProfitable ? '#4caf50' : '#f44336']} 
+                      />
+                    </View>
+                  </>
+                )}
+                
+                {/* Share Price Match Calculator Preview */}
+                {calculationData.sharesNeeded && (
+                  <>
+                    <View style={styles.previewRow}>
+                      <CommonText title="Current Price:" textStyle={[14, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculationData.currentPrice}`} 
+                        textStyle={[14, 'bold', '#2196F3']} 
+                      />
+                    </View>
+                    <View style={styles.previewRow}>
+                      <CommonText title="Target Amount:" textStyle={[14, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculationData.targetAmount}`} 
+                        textStyle={[14, 'bold', '#333']} 
+                      />
+                    </View>
+                    <View style={styles.previewRow}>
+                      <CommonText title="Shares Needed:" textStyle={[14, '500', '#666']} />
+                      <CommonText 
+                        title={`${calculationData.sharesNeeded} shares`} 
+                        textStyle={[14, 'bold', '#4caf50']} 
+                      />
+                    </View>
+                  </>
+                )}
               </View>
             )}
           </View>

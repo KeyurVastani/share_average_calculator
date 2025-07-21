@@ -9,11 +9,13 @@ const AverageBuyCalculator = () => {
     toggleHistoryModal, 
     toggleSaveModal, 
     saveCalculation,
-    savedCalculations, 
+    getCalculationsForType, 
     loadedCalculation, 
     clearLoadedCalculation,
     editingCalculationId
   } = useCalculatorStore();
+  
+  const savedCalculations = getCalculationsForType('average-buy');
   const [purchases, setPurchases] = useState([
     { quantity: '', price: '', id: Date.now() },
     { quantity: '', price: '', id: Date.now() + 1 }
@@ -129,7 +131,7 @@ const AverageBuyCalculator = () => {
         purchases,
         currentPrice,
         stockName: currentStockName // Use the stored stock name
-      });
+      }, 'average-buy');
     } else {
       // Show modal for new calculations or when no stock name exists
       console.log('Showing modal - editingCalculationId:', editingCalculationId, 'currentStockName:', currentStockName);
@@ -152,6 +154,14 @@ const AverageBuyCalculator = () => {
 
       {/* History Button */}
       <View style={styles.historyButtonContainer}>
+        {currentStockName && (
+          <View style={styles.stockNameContainer}>
+            <CommonText 
+              title={`📈 ${currentStockName}`} 
+              textStyle={[16, '600', '#4caf50']} 
+            />
+          </View>
+        )}
         <TouchableOpacity style={styles.historyButton} onPress={toggleHistoryModal}>
           <CommonText 
             title={`📊 History (${savedCalculations.length})`} 
@@ -261,7 +271,7 @@ const AverageBuyCalculator = () => {
           <View style={styles.keyMetricsCard}>
             <View style={styles.metricRow}>
               <View style={styles.metricLabel}>
-                <CommonText title="Average Buy Price" textStyle={[16, '600', '#666']} />
+                <CommonText title="Average Buying Price" textStyle={[16, '600', '#666']} />
                 <CommonText title="(Weighted Average)" textStyle={[12, 'normal', '#999']} />
               </View>
               <CommonText 
@@ -398,9 +408,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   historyButtonContainer: {
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 10,
     paddingHorizontal: 20,
+  },
+  stockNameContainer: {
+    backgroundColor: '#e8f5e8',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#4caf50',
   },
   historyButton: {
     backgroundColor: '#e3f2fd',

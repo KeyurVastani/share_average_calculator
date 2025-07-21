@@ -3,6 +3,7 @@ import { useRef, useEffect } from 'react';
 import useCalculatorStore from './store/calculatorStore';
 
 import AverageBuyCalculator from './components/calculators/AverageBuyCalculator';
+import SharePriceMatchCalculator from './components/calculators/SharePriceMatchCalculator';
 import CommonText from './components/CommonText';
 import HistoryScreen from './components/HistoryScreen';
 
@@ -85,11 +86,11 @@ function App() {
     },
     {
       id: 'average-buy',
-      name: 'Average Buy Price Calculator',
+      name: 'Average Buying Price Calculator',
       description: 'Calculate average purchase price',
       icon: '⚖️',
       info: {
-        title: 'Average Buy Price Calculator',
+        title: 'Average Buying Price Calculator',
         description: 'Calculate the weighted average price of your stock purchases to understand your true cost basis.',
         features: [
           'Calculate weighted average price',
@@ -98,6 +99,23 @@ function App() {
           'Plan future investments'
         ],
         formula: 'Average Price = Total Investment / Total Quantity'
+      }
+    },
+    {
+      id: 'share-price-match',
+      name: 'Share Price Match Calculator',
+      description: 'Calculate shares for target amount',
+      icon: '🎯',
+      info: {
+        title: 'Share Price Match Calculator',
+        description: 'Calculate how many shares you can buy with your target investment amount at the current share price.',
+        features: [
+          'Calculate number of shares',
+          'Determine remaining amount',
+          'Plan investment allocation',
+          'Optimize share purchases'
+        ],
+        formula: 'Number of Shares = Target Amount ÷ Current Share Price'
       }
     },
     {
@@ -315,6 +333,10 @@ function App() {
     // Render specific calculator based on ID
     if (selectedCalculator.id === 'average-buy') {
       return <AverageBuyCalculator />;
+    }
+
+    if (selectedCalculator.id === 'share-price-match') {
+      return <SharePriceMatchCalculator />;
     }
 
     // Default calculator view for other calculators

@@ -12,7 +12,19 @@ const useCalculatorStore = create(
       showInfoModal: false,
       showHistoryModal: false,
       showSaveModal: false,
-      savedCalculations: [],
+      savedCalculations: {
+        'average-buy': [],
+        'share-price-match': [],
+        'cagr': [],
+        'sip': [],
+        'intraday': [],
+        'options-pnl': [],
+        'dividend-yield': [],
+        'stop-loss': [],
+        'margin': [],
+        'tax-brokerage': [],
+        'stock-split': []
+      },
       loadedCalculation: null,
       editingCalculationId: null, // Track which calculation is being edited
       
@@ -76,18 +88,23 @@ const useCalculatorStore = create(
       },
 
       // History functions
-      saveCalculation: (calculationData) => {
-        const { savedCalculations, editingCalculationId } = get();
+      saveCalculation: (calculationData, calculatorType) => {
+        const { savedCalculations, editingCalculationId, selectedCalculator } = get();
+        const currentCalculatorType = calculatorType || selectedCalculator?.id || 'average-buy';
+        const currentCalculations = savedCalculations[currentCalculatorType] || [];
         
         if (editingCalculationId) {
           // Update existing calculation
-          const updatedCalculations = savedCalculations.map(calc => 
+          const updatedCalculations = currentCalculations.map(calc => 
             calc.id === editingCalculationId 
               ? { ...calc, ...calculationData, timestamp: new Date().toISOString() }
               : calc
           );
           set({ 
-            savedCalculations: updatedCalculations,
+            savedCalculations: {
+              ...savedCalculations,
+              [currentCalculatorType]: updatedCalculations
+            },
             editingCalculationId: null, // Clear editing state
             showSaveModal: false
           });
@@ -96,24 +113,42 @@ const useCalculatorStore = create(
           const newCalculation = {
             id: Date.now().toString(),
             timestamp: new Date().toISOString(),
+            calculatorType: currentCalculatorType,
             ...calculationData
           };
           set({ 
-            savedCalculations: [newCalculation, ...savedCalculations],
+            savedCalculations: {
+              ...savedCalculations,
+              [currentCalculatorType]: [newCalculation, ...currentCalculations]
+            },
             showSaveModal: false
           });
         }
       },
 
-      deleteCalculation: (id) => {
-        const { savedCalculations } = get();
+      deleteCalculation: (id, calculatorType) => {
+        const { savedCalculations, selectedCalculator } = get();
+        const currentCalculatorType = calculatorType || selectedCalculator?.id || 'average-buy';
+        const currentCalculations = savedCalculations[currentCalculatorType] || [];
+        
         set({ 
-          savedCalculations: savedCalculations.filter(calc => calc.id !== id)
+          savedCalculations: {
+            ...savedCalculations,
+            [currentCalculatorType]: currentCalculations.filter(calc => calc.id !== id)
+          }
         });
       },
 
-      clearAllHistory: () => {
-        set({ savedCalculations: [] });
+      clearAllHistory: (calculatorType) => {
+        const { savedCalculations, selectedCalculator } = get();
+        const currentCalculatorType = calculatorType || selectedCalculator?.id || 'average-buy';
+        
+        set({ 
+          savedCalculations: {
+            ...savedCalculations,
+            [currentCalculatorType]: []
+          }
+        });
       },
 
       // Load calculation back to calculator
@@ -131,6 +166,13 @@ const useCalculatorStore = create(
           loadedCalculation: null
           // Don't clear editingCalculationId here - it should persist until save
         });
+      },
+
+      // Get calculations for specific calculator type
+      getCalculationsForType: (calculatorType) => {
+        const { savedCalculations, selectedCalculator } = get();
+        const currentCalculatorType = calculatorType || selectedCalculator?.id || 'average-buy';
+        return savedCalculations[currentCalculatorType] || [];
       },
 
       // Clear editing state (call this when starting a new calculation)
