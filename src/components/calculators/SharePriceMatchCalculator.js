@@ -5,28 +5,32 @@ import useCalculatorStore from '../../store/calculatorStore';
 import SaveModal from '../SaveModal';
 
 const SharePriceMatchCalculator = () => {
-  const { 
-    toggleHistoryModal, 
-    toggleSaveModal, 
+  const {
+    toggleHistoryModal,
+    toggleSaveModal,
     saveCalculation,
-    getCalculationsForType, 
-    loadedCalculation, 
+    getCalculationsForType,
+    loadedCalculation,
     clearLoadedCalculation,
     editingCalculationId
   } = useCalculatorStore();
-  
+
   const savedCalculations = getCalculationsForType('share-price-match');
-  
+
+  const [sharesOwned, setSharesOwned] = useState('');
+  const [averagePrice, setAveragePrice] = useState('');
   const [currentPrice, setCurrentPrice] = useState('');
-  const [targetAmount, setTargetAmount] = useState('');
+  const [targetAveragePrice, setTargetAveragePrice] = useState('');
   const [result, setResult] = useState(null);
   const [currentStockName, setCurrentStockName] = useState('');
 
   // Handle loading saved calculations
   useEffect(() => {
     if (loadedCalculation) {
+      setSharesOwned(loadedCalculation.sharesOwned || '');
+      setAveragePrice(loadedCalculation.averagePrice || '');
       setCurrentPrice(loadedCalculation.currentPrice || '');
-      setTargetAmount(loadedCalculation.targetAmount || '');
+      setTargetAveragePrice(loadedCalculation.targetAveragePrice || '');
       setResult(loadedCalculation);
       setCurrentStockName(loadedCalculation.stockName || '');
       clearLoadedCalculation();
@@ -35,44 +39,86 @@ const SharePriceMatchCalculator = () => {
 
   const calculateShares = () => {
     // Validate inputs
+    if (!sharesOwned || isNaN(parseFloat(sharesOwned)) || parseFloat(sharesOwned) <= 0) {
+      Alert.alert('Error', 'Please enter a valid number of shares you own.');
+      return;
+    }
+
+    if (!averagePrice || isNaN(parseFloat(averagePrice)) || parseFloat(averagePrice) <= 0) {
+      Alert.alert('Error', 'Please enter a valid average price of your shares.');
+      return;
+    }
+
     if (!currentPrice || isNaN(parseFloat(currentPrice)) || parseFloat(currentPrice) <= 0) {
-      Alert.alert('Error', 'Please enter a valid current share price.');
+      Alert.alert('Error', 'Please enter a valid current market price.');
       return;
     }
 
-    if (!targetAmount || isNaN(parseFloat(targetAmount)) || parseFloat(targetAmount) <= 0) {
-      Alert.alert('Error', 'Please enter a valid target amount.');
+    if (!targetAveragePrice || isNaN(parseFloat(targetAveragePrice)) || parseFloat(targetAveragePrice) <= 0) {
+      Alert.alert('Error', 'Please enter a valid target average price.');
       return;
     }
 
-    const price = parseFloat(currentPrice);
-    const amount = parseFloat(targetAmount);
+    const owned = parseFloat(sharesOwned);
+    const avgPrice = parseFloat(averagePrice);
+    const current = parseFloat(currentPrice);
+    const target = parseFloat(targetAveragePrice);
     
-    // Calculate number of shares needed
-    const sharesNeeded = Math.floor(amount / price);
-    const actualInvestment = sharesNeeded * price;
-    const remainingAmount = amount - actualInvestment;
+    // Check if target average is achievable
+    if (target >= avgPrice) {
+      Alert.alert('Error', 'Target average price must be less than your current average price to reduce your average cost.');
+      return;
+    }
+
+    if (target <= current) {
+      Alert.alert('Error', 'Target average price must be greater than current market price.');
+      return;
+    }
+
+    // Calculate additional shares needed to achieve target average
+    // Formula: (Owned Shares × Current Average + Additional Shares × Current Price) ÷ (Owned Shares + Additional Shares) = Target Average
+    // Solving for Additional Shares:
+    // (Owned × Current Average + Additional × Current Price) = Target Average × (Owned + Additional)
+    // Owned × Current Average + Additional × Current Price = Target Average × Owned + Target Average × Additional
+    // Owned × Current Average - Target Average × Owned = Target Average × Additional - Additional × Current Price
+    // Owned × (Current Average - Target Average) = Additional × (Target Average - Current Price)
+    // Additional = [Owned × (Current Average - Target Average)] ÷ (Target Average - Current Price)
     
-    // Calculate if you can buy additional fractional shares
-    const fractionalShares = (amount / price) - sharesNeeded;
-    const totalSharesWithFraction = amount / price;
+    const additionalSharesNeeded = (owned * (avgPrice - target)) / (target - current);
+    
+    // Calculate the investment needed
+    const investmentNeeded = additionalSharesNeeded * current;
+    
+    // Calculate total shares after purchase
+    const totalSharesAfter = owned + additionalSharesNeeded;
+    
+    // Verify the new average price
+    const newAveragePrice = ((owned * avgPrice) + investmentNeeded) / totalSharesAfter;
+    
+    // Calculate percentage reduction
+    const priceReduction = ((avgPrice - target) / avgPrice) * 100;
+    const costReduction = (avgPrice - target) * owned;
 
     setResult({
-      currentPrice: price.toFixed(2),
-      targetAmount: amount.toFixed(2),
-      sharesNeeded: sharesNeeded,
-      actualInvestment: actualInvestment.toFixed(2),
-      remainingAmount: remainingAmount.toFixed(2),
-      fractionalShares: fractionalShares.toFixed(4),
-      totalSharesWithFraction: totalSharesWithFraction.toFixed(4),
-      canBuyFullShares: sharesNeeded > 0,
+      sharesOwned: owned,
+      averagePrice: avgPrice.toFixed(2),
+      currentPrice: current.toFixed(2),
+      targetAveragePrice: target.toFixed(2),
+      additionalSharesNeeded: Math.ceil(additionalSharesNeeded),
+      investmentNeeded: investmentNeeded.toFixed(2),
+      totalSharesAfter: Math.ceil(totalSharesAfter),
+      newAveragePrice: newAveragePrice.toFixed(2),
+      priceReduction: priceReduction.toFixed(2),
+      costReduction: costReduction.toFixed(2),
       stockName: currentStockName
     });
   };
 
   const resetCalculator = () => {
+    setSharesOwned('');
+    setAveragePrice('');
     setCurrentPrice('');
-    setTargetAmount('');
+    setTargetAveragePrice('');
     setResult(null);
     setCurrentStockName('');
   };
@@ -81,8 +127,10 @@ const SharePriceMatchCalculator = () => {
     if (editingCalculationId && result && currentStockName) {
       saveCalculation({
         ...result,
+        sharesOwned,
+        averagePrice,
         currentPrice,
-        targetAmount,
+        targetAveragePrice,
         stockName: currentStockName
       }, 'share-price-match');
     } else {
@@ -96,31 +144,64 @@ const SharePriceMatchCalculator = () => {
       <View style={styles.historyButtonContainer}>
         {currentStockName && (
           <View style={styles.stockNameContainer}>
-            <CommonText 
-              title={`📈 ${currentStockName}`} 
-              textStyle={[16, '600', '#4caf50']} 
+            <CommonText
+              title={`📈 ${currentStockName}`}
+              textStyle={[16, '600', '#4caf50']}
             />
           </View>
         )}
         <TouchableOpacity style={styles.historyButton} onPress={toggleHistoryModal}>
-          <CommonText 
-            title={`📊 History (${savedCalculations.length})`} 
-            textStyle={[16, '600', '#2196F3']} 
+          <CommonText
+            title={`📊 History (${savedCalculations.length})`}
+            textStyle={[16, '600', '#2196F3']}
           />
         </TouchableOpacity>
       </View>
 
-
-      {/* Current Share Price Input */}
+      {/* Shares Owned Input */}
       <View style={styles.inputSection}>
-        <CommonText 
-          title="Current Share Price" 
-          textStyle={[16, '600', '#333']} 
+        <CommonText
+          title="Number of Shares You Own"
+          textStyle={[16, '600', '#333']}
         />
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Enter current share price (e.g., 150.50)"
+            placeholder="Enter number of shares you currently own"
+            keyboardType="numeric"
+            value={sharesOwned}
+            onChangeText={setSharesOwned}
+          />
+        </View>
+      </View>
+
+      {/* Average Price Input */}
+      <View style={styles.inputSection}>
+        <CommonText
+          title="Your Average Price"
+          textStyle={[16, '600', '#333']}
+        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your average purchase price"
+            keyboardType="numeric"
+            value={averagePrice}
+            onChangeText={setAveragePrice}
+          />
+        </View>
+      </View>
+
+      {/* Current Market Price Input */}
+      <View style={styles.inputSection}>
+        <CommonText
+          title="Current Market Price"
+          textStyle={[16, '600', '#333']}
+        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter current market price"
             keyboardType="numeric"
             value={currentPrice}
             onChangeText={setCurrentPrice}
@@ -128,19 +209,19 @@ const SharePriceMatchCalculator = () => {
         </View>
       </View>
 
-      {/* Target Amount Input */}
+      {/* Target Average Price Input */}
       <View style={styles.inputSection}>
         <CommonText 
-          title="Target Amount to Invest" 
+          title="Target Average Price You Want to Achieve" 
           textStyle={[16, '600', '#333']} 
         />
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Enter amount you want to invest (e.g., 10000)"
+            placeholder="Enter your target average price (e.g., 43)"
             keyboardType="numeric"
-            value={targetAmount}
-            onChangeText={setTargetAmount}
+            value={targetAveragePrice}
+            onChangeText={setTargetAveragePrice}
           />
         </View>
       </View>
@@ -148,9 +229,9 @@ const SharePriceMatchCalculator = () => {
       {/* Action Buttons */}
       <View style={styles.buttonSection}>
         <TouchableOpacity style={styles.calculateButton} onPress={calculateShares}>
-          <CommonText title="Calculate Shares" textStyle={[16, 'bold', 'white']} />
+          <CommonText title="Calculate Additional Shares" textStyle={[16, 'bold', 'white']} />
         </TouchableOpacity>
-        
+
         <TouchableOpacity style={styles.resetButton} onPress={resetCalculator}>
           <CommonText title="Reset" textStyle={[16, '600', '#666']} />
         </TouchableOpacity>
@@ -160,121 +241,159 @@ const SharePriceMatchCalculator = () => {
       {result && (
         <View style={styles.resultSection}>
           <View style={styles.resultHeader}>
-            <CommonText 
-              title="📊 Calculation Results" 
-              textStyle={[22, 'bold', '#333']} 
-            />
+            <View style={{width: '70%', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <CommonText title="📊" textStyle={[22, 'bold', '#333']} />
+              <CommonText
+                title="Average Price Reduction Calculator"
+                textStyle={[22, 'bold', '#333']}
+              />
+            </View>
             <TouchableOpacity style={styles.saveResultButton} onPress={handleSave}>
               <CommonText title={editingCalculationId ? "💾 Update" : "💾 Save"} textStyle={[14, '600', '#4caf50']} />
             </TouchableOpacity>
           </View>
-          
-          {/* Key Metrics Card */}
-          <View style={styles.keyMetricsCard}>
-            <View style={styles.metricRow}>
-              <View style={styles.metricLabel}>
-                <CommonText title="Current Share Price" textStyle={[16, '600', '#666']} />
-              </View>
-              <CommonText 
-                title={`₹${result.currentPrice}`} 
-                textStyle={[20, 'bold', '#2196F3']} 
-              />
-            </View>
-            
-            <View style={styles.metricRow}>
-              <View style={styles.metricLabel}>
-                <CommonText title="Target Amount" textStyle={[16, '600', '#666']} />
-              </View>
-              <CommonText 
-                title={`₹${result.targetAmount}`} 
-                textStyle={[20, 'bold', '#333']} 
-              />
-            </View>
-          </View>
 
-          {/* Shares Calculation Card */}
-          <View style={styles.sharesCard}>
+          {/* Current Situation Card */}
+          <View style={styles.currentSituationCard}>
             <CommonText 
-              title="📈 Shares You Can Buy" 
+              title="📊 Current Situation" 
               textStyle={[18, 'bold', '#333']} 
             />
             
-            <View style={styles.sharesGrid}>
-              <View style={styles.sharesItem}>
-                <CommonText title="Full Shares" textStyle={[14, '500', '#666']} />
+            <View style={styles.situationGrid}>
+              <View style={styles.situationItem}>
+                <CommonText title="Shares Owned" textStyle={[14, '500', '#666']} />
                 <CommonText 
-                  title={result.sharesNeeded.toString()} 
-                  textStyle={[24, 'bold', '#4caf50']} 
+                  title={result.sharesOwned.toString()} 
+                  textStyle={[20, 'bold', '#2196F3']} 
                 />
                 <CommonText title="shares" textStyle={[12, 'normal', '#999']} />
               </View>
               
-              <View style={styles.sharesItem}>
-                <CommonText title="Actual Investment" textStyle={[14, '500', '#666']} />
+              <View style={styles.situationItem}>
+                <CommonText title="Current Average" textStyle={[14, '500', '#666']} />
                 <CommonText 
-                  title={`₹${result.actualInvestment}`} 
-                  textStyle={[18, 'bold', '#333']} 
-                />
-              </View>
-            </View>
-          </View>
-
-          {/* Remaining Amount Card */}
-          <View style={styles.remainingCard}>
-            <CommonText 
-              title="💰 Remaining Amount" 
-              textStyle={[18, 'bold', '#333']} 
-            />
-            
-            <View style={styles.remainingGrid}>
-              <View style={styles.remainingItem}>
-                <CommonText title="Unused Amount" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={`₹${result.remainingAmount}`} 
+                  title={`₹${result.averagePrice}`} 
                   textStyle={[20, 'bold', '#ff9800']} 
                 />
               </View>
               
-              <View style={styles.remainingItem}>
-                <CommonText title="Fractional Shares" textStyle={[14, '500', '#666']} />
+              <View style={styles.situationItem}>
+                <CommonText title="Market Price" textStyle={[14, '500', '#666']} />
                 <CommonText 
-                  title={result.fractionalShares} 
-                  textStyle={[16, 'bold', '#666']} 
+                  title={`₹${result.currentPrice}`} 
+                  textStyle={[20, 'bold', '#4caf50']} 
                 />
-                <CommonText title="shares" textStyle={[12, 'normal', '#999']} />
               </View>
             </View>
           </View>
 
-          {/* Total Shares with Fraction */}
-          <View style={styles.totalSharesCard}>
+          {/* Target Card */}
+          <View style={styles.targetCard}>
             <CommonText 
-              title="📊 Total Shares (Including Fraction)" 
+              title="🎯 Your Target" 
               textStyle={[18, 'bold', '#333']} 
             />
             
-            <View style={styles.totalSharesItem}>
-              <CommonText title="Total Shares" textStyle={[14, '500', '#666']} />
+            <View style={styles.targetItem}>
+              <CommonText title="Target Average Price" textStyle={[14, '500', '#666']} />
               <CommonText 
-                title={result.totalSharesWithFraction} 
-                textStyle={[24, 'bold', '#2196F3']} 
+                title={`₹${result.targetAveragePrice}`} 
+                textStyle={[24, 'bold', '#9c27b0']} 
               />
-              <CommonText title="shares" textStyle={[12, 'normal', '#999']} />
+            </View>
+          </View>
+
+          {/* Solution Card */}
+          <View style={styles.solutionCard}>
+            <CommonText 
+              title="📈 Solution to Achieve Target" 
+              textStyle={[18, 'bold', '#333']} 
+            />
+            
+            <View style={styles.solutionGrid}>
+              <View style={styles.solutionItem}>
+                <CommonText title="Additional Shares Needed" textStyle={[14, '500', '#666']} />
+                <CommonText 
+                  title={result.additionalSharesNeeded.toString()} 
+                  textStyle={[24, 'bold', '#2196F3']} 
+                />
+                <CommonText title="shares" textStyle={[12, 'normal', '#999']} />
+              </View>
+              
+              <View style={styles.solutionItem}>
+                <CommonText title="Investment Required" textStyle={[14, '500', '#666']} />
+                <CommonText 
+                  title={`₹${result.investmentNeeded}`} 
+                  textStyle={[20, 'bold', '#4caf50']} 
+                />
+              </View>
+            </View>
+          </View>
+
+          {/* After Purchase Card */}
+          <View style={styles.afterPurchaseCard}>
+            <CommonText 
+              title="📊 After Additional Purchase" 
+              textStyle={[18, 'bold', '#333']} 
+            />
+            
+            <View style={styles.afterPurchaseGrid}>
+              <View style={styles.afterPurchaseItem}>
+                <CommonText title="Total Shares" textStyle={[14, '500', '#666']} />
+                <CommonText 
+                  title={result.totalSharesAfter.toString()} 
+                  textStyle={[20, 'bold', '#333']} 
+                />
+                <CommonText title="shares" textStyle={[12, 'normal', '#999']} />
+              </View>
+              
+              <View style={styles.afterPurchaseItem}>
+                <CommonText title="New Average Price" textStyle={[14, '500', '#666']} />
+                <CommonText 
+                  title={`₹${result.newAveragePrice}`} 
+                  textStyle={[20, 'bold', '#4caf50']} 
+                />
+              </View>
+            </View>
+          </View>
+
+          {/* Benefits Card */}
+          <View style={styles.benefitsCard}>
+            <CommonText 
+              title="💰 Benefits" 
+              textStyle={[18, 'bold', '#333']} 
+            />
+            
+            <View style={styles.benefitsGrid}>
+              <View style={styles.benefitItem}>
+                <CommonText title="Price Reduction" textStyle={[14, '500', '#666']} />
+                <CommonText 
+                  title={`${result.priceReduction}%`} 
+                  textStyle={[20, 'bold', '#ff5722']} 
+                />
+              </View>
+              
+              <View style={styles.benefitItem}>
+                <CommonText title="Cost Reduction on Existing Shares" textStyle={[14, '500', '#666']} />
+                <CommonText 
+                  title={`₹${result.costReduction}`} 
+                  textStyle={[16, 'bold', '#4caf50']} 
+                />
+              </View>
             </View>
           </View>
 
           {/* Summary Banner */}
           <View style={styles.summaryBanner}>
             <CommonText 
-              title={`With ₹${result.targetAmount}, you can buy ${result.sharesNeeded} full shares at ₹${result.currentPrice} each`} 
+              title={`Buy ${result.additionalSharesNeeded} shares at ₹${result.currentPrice} to achieve average price of ₹${result.targetAveragePrice}`} 
               textStyle={[16, '600', '#333']} 
             />
-            {parseFloat(result.remainingAmount) > 0 && (
-              <CommonText 
-                title={`You'll have ₹${result.remainingAmount} remaining`} 
-                textStyle={[14, 'normal', '#666']} 
-              />
-            )}
+            <CommonText 
+              title={`Total investment needed: ₹${result.investmentNeeded}`} 
+              textStyle={[14, 'normal', '#666']} 
+            />
           </View>
         </View>
       )}
@@ -287,22 +406,22 @@ const SharePriceMatchCalculator = () => {
         />
         <View style={styles.formulaCard}>
           <CommonText 
-            title="Number of Shares = Target Amount ÷ Current Share Price" 
+            title="Additional Shares = [Owned Shares × (Current Average - Target Average)] ÷ (Target Average - Current Price)" 
             textStyle={[16, '600', '#666']} 
           />
           <CommonText 
-            title="Full Shares = Floor(Target Amount ÷ Current Share Price)" 
+            title="This calculates shares needed to achieve your target average price" 
             textStyle={[14, 'normal', '#888']} 
           />
           <CommonText 
-            title="Remaining Amount = Target Amount - (Full Shares × Current Price)" 
+            title="New Average = (Total Investment) ÷ (Total Shares)" 
             textStyle={[14, 'normal', '#888']} 
           />
         </View>
       </View>
 
       {/* Save Modal */}
-      <SaveModal calculationData={{ ...result, currentPrice, targetAmount }} reset={resetCalculator}/>
+      <SaveModal calculationData={{ ...result, sharesOwned, averagePrice, currentPrice, targetAveragePrice }} reset={resetCalculator}/>
     </ScrollView>
   );
 };
@@ -317,7 +436,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
-    paddingHorizontal: 20,
   },
   stockNameContainer: {
     backgroundColor: '#e8f5e8',
@@ -342,12 +460,11 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 12,
     marginBottom: 20,
-    marginHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: '#2196F3',
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 1,
+    elevation: 2,
   },
   inputContainer: {
     marginTop: 10,
@@ -364,7 +481,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
-    paddingHorizontal: 20,
   },
   calculateButton: {
     flex: 1,
@@ -387,7 +503,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 12,
     marginBottom: 20,
-    marginHorizontal: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -500,7 +615,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 12,
     marginBottom: 20,
-    marginHorizontal: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -514,6 +628,111 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderLeftWidth: 4,
     borderLeftColor: '#2196F3',
+  },
+  currentSituationCard: {
+    backgroundColor: '#f8f9fa',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  situationGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+  },
+  situationItem: {
+    width: '30%',
+    padding: 15,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    alignItems: 'center',
+  },
+  solutionCard: {
+    backgroundColor: '#e3f2fd',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#2196F3',
+  },
+  solutionGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+  },
+  solutionItem: {
+    width: '48%',
+    padding: 15,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    alignItems: 'center',
+  },
+  afterPurchaseCard: {
+    backgroundColor: '#f0f9ff',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#2196F3',
+  },
+  afterPurchaseGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+  },
+  afterPurchaseItem: {
+    width: '48%',
+    padding: 15,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    alignItems: 'center',
+  },
+  benefitsCard: {
+    backgroundColor: '#fff3e0',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#ff9800',
+  },
+  benefitsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+  },
+  benefitItem: {
+    width: '48%',
+    padding: 15,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    alignItems: 'center',
+  },
+  targetCard: {
+    backgroundColor: '#f3e5f5',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#9c27b0',
+  },
+  targetItem: {
+    padding: 15,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    alignItems: 'center',
+    marginTop: 15,
   },
 });
 
