@@ -132,13 +132,13 @@ const HistoryScreen = () => {
                     </View>
                   )}
                   
-                  <View style={styles.metricItem}>
+                  {/* <View style={styles.metricItem}>
                     <CommonText title="Current Price" textStyle={[12, '500', '#666']} />
                     <CommonText 
                       title={`₹${calculation.currentPrice}`} 
                       textStyle={[16, 'bold', '#333']} 
                     />
-                  </View>
+                  </View> */}
                   
                   {calculation.totalInvestment && (
                     <View style={styles.metricItem}>
@@ -256,6 +256,7 @@ const HistoryScreen = () => {
             ))}
           </>
         )}
+        <View style={{height: 100}} />
       </ScrollView>
     </View>
   );

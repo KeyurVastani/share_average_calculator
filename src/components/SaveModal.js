@@ -119,13 +119,6 @@ const SaveModal = ({ calculationData, reset }) => {
                         textStyle={[14, 'bold', '#333']} 
                       />
                     </View>
-                    <View style={styles.previewRow}>
-                      <CommonText title="P&L:" textStyle={[14, '500', '#666']} />
-                      <CommonText 
-                        title={`₹${calculationData.profitLoss} (${calculationData.profitLossPercentage}%)`} 
-                        textStyle={[14, 'bold', calculationData.isProfitable ? '#4caf50' : '#f44336']} 
-                      />
-                    </View>
                   </>
                 )}
                 

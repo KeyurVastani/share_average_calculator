@@ -202,7 +202,7 @@ const SharePriceMatchCalculator = () => {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* History Button */}
-      <View style={styles.historyButtonContainer}>
+      {/* <View style={styles.historyButtonContainer}>
         {currentStockName && (
           <View style={styles.stockNameContainer}>
             <CommonText
@@ -217,7 +217,7 @@ const SharePriceMatchCalculator = () => {
             textStyle={[16, '600', '#2196F3']}
           />
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* Shares Owned Input */}
       <View style={styles.inputSection}>
@@ -375,9 +375,9 @@ const SharePriceMatchCalculator = () => {
                 textStyle={[22, 'bold', '#333']}
               />
             </View>
-            <TouchableOpacity style={styles.saveResultButton} onPress={handleSave}>
+            {/* <TouchableOpacity style={styles.saveResultButton} onPress={handleSave}>
               <CommonText title={editingCalculationId ? "💾 Update" : "💾 Save"} textStyle={[14, '600', '#4caf50']} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
      

@@ -20,7 +20,6 @@ const AverageBuyCalculator = () => {
     { quantity: '', price: '', id: Date.now() },
     { quantity: '', price: '', id: Date.now() + 1 }
   ]);
-  const [currentPrice, setCurrentPrice] = useState('');
   const [result, setResult] = useState(null);
   const [currentStockName, setCurrentStockName] = useState(''); // Store current stock name
 
@@ -28,7 +27,6 @@ const AverageBuyCalculator = () => {
   useEffect(() => {
     if (loadedCalculation) {
       // Load the saved calculation data
-      setCurrentPrice(loadedCalculation.currentPrice);
       setResult(loadedCalculation);
       setCurrentStockName(loadedCalculation.stockName || ''); // Store the stock name
       
@@ -73,11 +71,6 @@ const AverageBuyCalculator = () => {
       return;
     }
 
-    if (!currentPrice || isNaN(parseFloat(currentPrice)) || parseFloat(currentPrice) <= 0) {
-      Alert.alert('Error', 'Please enter a valid current market price.');
-      return;
-    }
-
     let totalInvestment = 0;
     let totalQuantity = 0;
 
@@ -89,23 +82,12 @@ const AverageBuyCalculator = () => {
     });
 
     const averagePrice = totalInvestment / totalQuantity;
-    const currentMarketPrice = parseFloat(currentPrice);
-    
-    // Calculate profit/loss
-    const currentValue = totalQuantity * currentMarketPrice;
-    const profitLoss = currentValue - totalInvestment;
-    const profitLossPercentage = (profitLoss / totalInvestment) * 100;
 
     setResult({
       averagePrice: averagePrice.toFixed(2),
       totalInvestment: totalInvestment.toFixed(2),
       totalQuantity: totalQuantity.toFixed(2),
       numberOfPurchases: validPurchases.length,
-      currentPrice: currentMarketPrice.toFixed(2),
-      currentValue: currentValue.toFixed(2),
-      profitLoss: profitLoss.toFixed(2),
-      profitLossPercentage: profitLossPercentage.toFixed(2),
-      isProfitable: profitLoss >= 0,
       stockName: currentStockName // Preserve the stock name
     });
   };
@@ -115,7 +97,6 @@ const AverageBuyCalculator = () => {
       { quantity: '', price: '', id: Date.now() },
       { quantity: '', price: '', id: Date.now() + 1 }
     ]);
-    setCurrentPrice('');
     setResult(null);
     setCurrentStockName(''); // Clear the stock name
   };
@@ -129,7 +110,6 @@ const AverageBuyCalculator = () => {
       saveCalculation({
         ...result,
         purchases,
-        currentPrice,
         stockName: currentStockName // Use the stored stock name
       }, 'average-buy');
     } else {
@@ -141,17 +121,6 @@ const AverageBuyCalculator = () => {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* <View style={styles.header}>
-        <CommonText 
-          title="Average Buy Price Calculator" 
-          textStyle={[24, 'bold', '#333']} 
-        />
-        <CommonText 
-          title="Calculate the weighted average price of your stock purchases" 
-          textStyle={[16, 'normal', '#666']} 
-        />
-      </View> */}
-
       {/* History Button */}
       <View style={styles.historyButtonContainer}>
         {currentStockName && (
@@ -226,23 +195,6 @@ const AverageBuyCalculator = () => {
         ))}
       </View>
 
-      {/* Current Market Price Input */}
-      <View style={styles.inputSection}>
-        <CommonText 
-          title="Current Market Price" 
-          textStyle={[18, 'bold', '#333']} 
-        />
-        <View style={styles.currentPriceContainer}>
-          <TextInput
-            style={styles.currentPriceInput}
-            placeholder="Enter current market price"
-            keyboardType="numeric"
-            value={currentPrice}
-            onChangeText={setCurrentPrice}
-          />
-        </View>
-      </View>
-
       {/* Action Buttons */}
       <View style={styles.buttonSection}>
         <TouchableOpacity style={styles.calculateButton} onPress={calculateAveragePrice}>
@@ -267,108 +219,84 @@ const AverageBuyCalculator = () => {
             </TouchableOpacity>
           </View>
           
-          {/* Key Metrics Card */}
-          <View style={styles.keyMetricsCard}>
-            <View style={styles.metricRow}>
-              <View style={styles.metricLabel}>
-                <CommonText title="Average Buying Price" textStyle={[16, '600', '#666']} />
-                <CommonText title="(Weighted Average)" textStyle={[12, 'normal', '#999']} />
-              </View>
+          {/* Colorful Summary Banner */}
+          <View style={styles.colorfulSummaryBanner}>
+            <View style={styles.summaryIconContainer}>
+              <CommonText title="📈" textStyle={[32, 'normal', '#fff']} />
+            </View>
+            <View style={styles.summaryTextContainer}>
+              <CommonText 
+                title="Your Average Buy Price" 
+                textStyle={[18, 'bold', '#fff']} 
+              />
               <CommonText 
                 title={`₹${result.averagePrice}`} 
-                textStyle={[20, 'bold', '#2196F3']} 
-              />
-            </View>
-            
-            <View style={styles.metricRow}>
-              <View style={styles.metricLabel}>
-                <CommonText title="Current Market Price" textStyle={[16, '600', '#666']} />
-                <CommonText title="(Latest Price)" textStyle={[12, 'normal', '#999']} />
-              </View>
-              <CommonText 
-                title={`₹${result.currentPrice}`} 
-                textStyle={[20, 'bold', '#333']} 
+                textStyle={[24, 'bold', '#fff']} 
               />
             </View>
           </View>
 
-          {/* Investment Summary Card */}
-          <View style={styles.summaryCard}>
+     
+
+          {/* Colorful Investment Summary Cards */}
+          <View style={styles.colorfulSummarySection}>
             <CommonText 
               title="💰 Investment Summary" 
               textStyle={[18, 'bold', '#333']} 
             />
             
-            <View style={styles.summaryGrid}>
-              <View style={styles.summaryItem}>
-                <CommonText title="Total Investment" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={`₹${result.totalInvestment}`} 
-                  textStyle={[16, 'bold', '#333']} 
-                />
-              </View>
-              
-              <View style={styles.summaryItem}>
-                <CommonText title="Current Value" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={`₹${result.currentValue}`} 
-                  textStyle={[16, 'bold', '#333']} 
-                />
-              </View>
-              
-              <View style={styles.summaryItem}>
-                <CommonText title="Total Shares" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={result.totalQuantity} 
-                  textStyle={[16, 'bold', '#333']} 
-                />
-              </View>
-              
-              <View style={styles.summaryItem}>
-                <CommonText title="No. of Purchases" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={result.numberOfPurchases.toString()} 
-                  textStyle={[16, 'bold', '#333']} 
-                />
-              </View>
-            </View>
-          </View>
+            <View style={styles.colorfulSummaryGrid}>
+              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#e3f2fd', borderColor: '#2196F3' }]}>
+                <View style={styles.summaryItemIcon}>
+                  <CommonText title="💰" textStyle={[20, 'normal', '#2196F3']} />
+                  <CommonText title=" Total Investment" textStyle={[12, '500', '#666']} />
 
-          {/* Profit/Loss Section */}
-          <View style={[styles.profitLossCard, { 
-            backgroundColor: result.isProfitable ? '#f0f9ff' : '#fef2f2',
-            borderColor: result.isProfitable ? '#4caf50' : '#f44336'
-          }]}>
-            <View style={styles.profitLossHeader}>
-              <CommonText 
-                title={result.isProfitable ? "📈 PROFIT ANALYSIS" : "📉 LOSS ANALYSIS"} 
-                textStyle={[18, 'bold', result.isProfitable ? '#4caf50' : '#f44336']} 
-              />
-            </View>
-            
-            <View style={styles.profitLossGrid}>
-              <View style={styles.profitLossItem}>
-                <CommonText title="Absolute P&L" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={`₹${result.profitLoss}`} 
-                  textStyle={[18, 'bold', result.isProfitable ? '#4caf50' : '#f44336']} 
-                />
+                </View>
+                  <CommonText 
+                    title={`₹${result.totalInvestment}`} 
+                    textStyle={[16, 'bold', '#2196F3']} 
+                  />
               </View>
               
-              <View style={styles.profitLossItem}>
-                <CommonText title="Percentage Return" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={`${result.profitLossPercentage}%`} 
-                  textStyle={[18, 'bold', result.isProfitable ? '#4caf50' : '#f44336']} 
-                />
+              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#e8f5e8', borderColor: '#4caf50' }]}>
+                <View style={styles.summaryItemIcon}>
+                  <CommonText title="📈" textStyle={[20, 'normal', '#4caf50']} />
+                  <CommonText title=" Total Shares" textStyle={[12, '500', '#666']} />
+                </View>
+                <View style={styles.summaryItemContent}>
+                  <CommonText 
+                    title={result.totalQuantity} 
+                    textStyle={[16, 'bold', '#4caf50']} 
+                  />
+                </View>
               </View>
-            </View>
-            
-            <View style={styles.statusBanner}>
-              <CommonText 
-                title={result.isProfitable ? "🎉 You're in PROFIT!" : "⚠️ You're at a LOSS"} 
-                textStyle={[16, 'bold', result.isProfitable ? '#4caf50' : '#f44336']} 
-              />
+              
+              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#fff3e0', borderColor: '#ff9800' }]}>
+                <View style={styles.summaryItemIcon}>
+                  <CommonText title="📈" textStyle={[20, 'normal', '#ff9800']} />
+                  <CommonText title=" No. of Purchases" textStyle={[12, '500', '#666']} />
+
+                </View>
+                <View style={styles.summaryItemContent}>
+                  <CommonText 
+                    title={result.numberOfPurchases.toString()} 
+                    textStyle={[16, 'bold', '#ff9800']} 
+                  />
+                </View>
+              </View>
+              
+              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#f3e5f5', borderColor: '#9c27b0' }]}>
+                <View style={styles.summaryItemIcon}>
+                  <CommonText title="⚖️" textStyle={[20, 'normal', '#9c27b0']} />
+                  <CommonText title=" Avg Price per Share" textStyle={[12, '500', '#666']} />
+                </View>
+                <View style={styles.summaryItemContent}>
+                  <CommonText 
+                    title={`₹${result.averagePrice}`} 
+                    textStyle={[16, 'bold', '#9c27b0']} 
+                  />
+                </View>
+              </View>
             </View>
           </View>
         </View>
@@ -389,15 +317,11 @@ const AverageBuyCalculator = () => {
             title="Total Investment = Σ(Quantity × Price per Share)" 
             textStyle={[14, 'normal', '#888']} 
           />
-          <CommonText 
-            title="P&L % = ((Current Value - Total Investment) ÷ Total Investment) × 100" 
-            textStyle={[14, 'normal', '#888']} 
-          />
         </View>
       </View>
 
       {/* Save Modal */}
-      <SaveModal calculationData={{ ...result, purchases, currentPrice }}  reset={resetCalculator}/>
+      <SaveModal calculationData={{ ...result, purchases }}  reset={resetCalculator}/>
     </ScrollView>
   );
 };
@@ -653,6 +577,92 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderLeftWidth: 4,
     borderLeftColor: '#2196F3',
+  },
+  colorfulSummaryBanner: {
+    backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    backgroundColor: '#667eea',
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  summaryIconContainer: {
+    marginRight: 15,
+  },
+  summaryTextContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  colorfulSummarySection: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  colorfulSummaryGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    marginTop: 15,
+  },
+  colorfulSummaryItem: {
+    width: '100%',
+    marginBottom: 15,
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 2,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 3,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  summaryItemIcon: {
+    marginRight: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  summaryItemContent: {
+  },
+  quickStatsBanner: {
+    backgroundColor: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
+    backgroundColor: '#ff6b6b',
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  quickStatItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  quickStatDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
 });
 
