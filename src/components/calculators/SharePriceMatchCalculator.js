@@ -380,39 +380,7 @@ const SharePriceMatchCalculator = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Current Situation Card */}
-          <View style={styles.currentSituationCard}>
-            <CommonText 
-              title="📊 Current Situation" 
-              textStyle={[18, 'bold', '#333']} 
-            />
-            
-            <View style={styles.situationRows}>
-              <View style={styles.situationRow}>
-                <CommonText title="Current Shares Owned" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={result.sharesOwned.toString()} 
-                  textStyle={[18, 'bold', '#2196F3']} 
-                />
-              </View>
-              
-              <View style={styles.situationRow}>
-                <CommonText title="Current Average Price" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={`₹${result.averagePrice}`} 
-                  textStyle={[18, 'bold', '#ff9800']} 
-                />
-              </View>
-              
-              <View style={styles.situationRow}>
-                <CommonText title="Current Market Price" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={`₹${result.currentPrice}`} 
-                  textStyle={[18, 'bold', '#4caf50']} 
-                />
-              </View>
-            </View>
-          </View>
+     
 
           {/* Target Card */}
           <View style={styles.targetCard}>
@@ -438,13 +406,12 @@ const SharePriceMatchCalculator = () => {
             />
             
             <View style={styles.solutionGrid}>
-              <View style={styles.solutionItem}>
+              <View style={[styles.solutionItem,{marginBottom: 10}]}>
                 <CommonText title="Additional Shares Needed" textStyle={[14, '500', '#666']} />
                 <CommonText 
-                  title={result.additionalSharesNeeded.toString()} 
+                  title={result.additionalSharesNeeded.toString() + " shares"} 
                   textStyle={[24, 'bold', '#2196F3']} 
                 />
-                <CommonText title="shares" textStyle={[12, 'normal', '#999']} />
               </View>
               
               <View style={styles.solutionItem}>
@@ -795,12 +762,11 @@ const styles = StyleSheet.create({
     borderColor: '#2196F3',
   },
   solutionGrid: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 15,
   },
   solutionItem: {
-    width: '48%',
+    width: '100%',
     padding: 15,
     backgroundColor: 'white',
     borderRadius: 8,
