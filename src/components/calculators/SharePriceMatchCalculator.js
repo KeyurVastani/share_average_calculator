@@ -260,29 +260,28 @@ const SharePriceMatchCalculator = () => {
               textStyle={[18, 'bold', '#333']} 
             />
             
-            <View style={styles.situationGrid}>
-              <View style={styles.situationItem}>
-                <CommonText title="Shares Owned" textStyle={[14, '500', '#666']} />
+            <View style={styles.situationRows}>
+              <View style={styles.situationRow}>
+                <CommonText title="Current Shares Owned" textStyle={[14, '500', '#666']} />
                 <CommonText 
                   title={result.sharesOwned.toString()} 
-                  textStyle={[20, 'bold', '#2196F3']} 
+                  textStyle={[18, 'bold', '#2196F3']} 
                 />
-                <CommonText title="shares" textStyle={[12, 'normal', '#999']} />
               </View>
               
-              <View style={styles.situationItem}>
-                <CommonText title="Current Average" textStyle={[14, '500', '#666']} />
+              <View style={styles.situationRow}>
+                <CommonText title="Current Average Price" textStyle={[14, '500', '#666']} />
                 <CommonText 
                   title={`₹${result.averagePrice}`} 
-                  textStyle={[20, 'bold', '#ff9800']} 
+                  textStyle={[18, 'bold', '#ff9800']} 
                 />
               </View>
               
-              <View style={styles.situationItem}>
-                <CommonText title="Market Price" textStyle={[14, '500', '#666']} />
+              <View style={styles.situationRow}>
+                <CommonText title="Current Market Price" textStyle={[14, '500', '#666']} />
                 <CommonText 
                   title={`₹${result.currentPrice}`} 
-                  textStyle={[20, 'bold', '#4caf50']} 
+                  textStyle={[18, 'bold', '#4caf50']} 
                 />
               </View>
             </View>
@@ -650,6 +649,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e9ecef',
     alignItems: 'center',
+  },
+  situationRows: {
+    marginTop: 15,
+  },
+  situationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   solutionCard: {
     backgroundColor: '#e3f2fd',
