@@ -23,6 +23,15 @@ const SharePriceMatchCalculator = () => {
   const [targetAveragePrice, setTargetAveragePrice] = useState('');
   const [result, setResult] = useState(null);
   const [currentStockName, setCurrentStockName] = useState('');
+  
+  // Error states for each field
+  const [errors, setErrors] = useState({
+    sharesOwned: '',
+    averagePrice: '',
+    currentPrice: '',
+    targetAveragePrice: '',
+    general: ''
+  });
 
   // Handle loading saved calculations
   useEffect(() => {
@@ -34,28 +43,68 @@ const SharePriceMatchCalculator = () => {
       setResult(loadedCalculation);
       setCurrentStockName(loadedCalculation.stockName || '');
       clearLoadedCalculation();
+      // Clear errors when loading saved calculation
+      setErrors({
+        sharesOwned: '',
+        averagePrice: '',
+        currentPrice: '',
+        targetAveragePrice: '',
+        general: ''
+      });
     }
   }, [loadedCalculation, clearLoadedCalculation]);
 
+  // Clear errors when user starts typing
+  const clearFieldError = (fieldName) => {
+    setErrors(prev => ({
+      ...prev,
+      [fieldName]: '',
+      general: ''
+    }));
+  };
+
   const calculateShares = () => {
+    // Reset all errors first
+    setErrors({
+      sharesOwned: '',
+      averagePrice: '',
+      currentPrice: '',
+      targetAveragePrice: '',
+      general: ''
+    });
+
+    let hasErrors = false;
+    const newErrors = {
+      sharesOwned: '',
+      averagePrice: '',
+      currentPrice: '',
+      targetAveragePrice: '',
+      general: ''
+    };
+
     // Validate inputs
     if (!sharesOwned || isNaN(parseFloat(sharesOwned)) || parseFloat(sharesOwned) <= 0) {
-      Alert.alert('Error', 'Please enter a valid number of shares you own.');
-      return;
+      newErrors.sharesOwned = 'Please enter a valid positive number';
+      hasErrors = true;
     }
 
     if (!averagePrice || isNaN(parseFloat(averagePrice)) || parseFloat(averagePrice) <= 0) {
-      Alert.alert('Error', 'Please enter a valid average price of your shares.');
-      return;
+      newErrors.averagePrice = 'Please enter a valid positive number';
+      hasErrors = true;
     }
 
     if (!currentPrice || isNaN(parseFloat(currentPrice)) || parseFloat(currentPrice) <= 0) {
-      Alert.alert('Error', 'Please enter a valid current market price.');
-      return;
+      newErrors.currentPrice = 'Please enter a valid positive number';
+      hasErrors = true;
     }
 
     if (!targetAveragePrice || isNaN(parseFloat(targetAveragePrice)) || parseFloat(targetAveragePrice) <= 0) {
-      Alert.alert('Error', 'Please enter a valid target average price.');
+      newErrors.targetAveragePrice = 'Please enter a valid positive number';
+      hasErrors = true;
+    }
+
+    if (hasErrors) {
+      setErrors(newErrors);
       return;
     }
 
@@ -66,12 +115,17 @@ const SharePriceMatchCalculator = () => {
     
     // Check if target average is achievable
     if (target >= avgPrice) {
-      Alert.alert('Error', 'Target average price must be less than your current average price to reduce your average cost.');
-      return;
+      newErrors.targetAveragePrice = `Target (₹${target}) must be less than current average (₹${avgPrice})`;
+      hasErrors = true;
     }
 
     if (target <= current) {
-      Alert.alert('Error', 'Target average price must be greater than current market price.');
+      newErrors.targetAveragePrice = `Target (₹${target}) must be greater than current price (₹${current})`;
+      hasErrors = true;
+    }
+
+    if (hasErrors) {
+      setErrors(newErrors);
       return;
     }
 
@@ -121,6 +175,13 @@ const SharePriceMatchCalculator = () => {
     setTargetAveragePrice('');
     setResult(null);
     setCurrentStockName('');
+    setErrors({
+      sharesOwned: '',
+      averagePrice: '',
+      currentPrice: '',
+      targetAveragePrice: '',
+      general: ''
+    });
   };
 
   const handleSave = () => {
@@ -166,12 +227,26 @@ const SharePriceMatchCalculator = () => {
         />
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              errors.sharesOwned ? styles.inputError : null
+            ]}
             placeholder="Enter number of shares you currently own"
             keyboardType="numeric"
             value={sharesOwned}
-            onChangeText={setSharesOwned}
+            onChangeText={(text) => {
+              setSharesOwned(text);
+              clearFieldError('sharesOwned');
+            }}
           />
+          {errors.sharesOwned ? (
+            <View style={styles.errorContainer}>
+              <CommonText
+                title={`❌ ${errors.sharesOwned}`}
+                textStyle={[12, '500', '#d32f2f']}
+              />
+            </View>
+          ) : null}
         </View>
       </View>
 
@@ -183,12 +258,26 @@ const SharePriceMatchCalculator = () => {
         />
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              errors.averagePrice ? styles.inputError : null
+            ]}
             placeholder="Enter your average purchase price"
             keyboardType="numeric"
             value={averagePrice}
-            onChangeText={setAveragePrice}
+            onChangeText={(text) => {
+              setAveragePrice(text);
+              clearFieldError('averagePrice');
+            }}
           />
+          {errors.averagePrice ? (
+            <View style={styles.errorContainer}>
+              <CommonText
+                title={`❌ ${errors.averagePrice}`}
+                textStyle={[12, '500', '#d32f2f']}
+              />
+            </View>
+          ) : null}
         </View>
       </View>
 
@@ -200,12 +289,26 @@ const SharePriceMatchCalculator = () => {
         />
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              errors.currentPrice ? styles.inputError : null
+            ]}
             placeholder="Enter current market price"
             keyboardType="numeric"
             value={currentPrice}
-            onChangeText={setCurrentPrice}
+            onChangeText={(text) => {
+              setCurrentPrice(text);
+              clearFieldError('currentPrice');
+            }}
           />
+          {errors.currentPrice ? (
+            <View style={styles.errorContainer}>
+              <CommonText
+                title={`❌ ${errors.currentPrice}`}
+                textStyle={[12, '500', '#d32f2f']}
+              />
+            </View>
+          ) : null}
         </View>
       </View>
 
@@ -217,14 +320,38 @@ const SharePriceMatchCalculator = () => {
         />
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              errors.targetAveragePrice ? styles.inputError : null
+            ]}
             placeholder="Enter your target average price (e.g., 43)"
             keyboardType="numeric"
             value={targetAveragePrice}
-            onChangeText={setTargetAveragePrice}
+            onChangeText={(text) => {
+              setTargetAveragePrice(text);
+              clearFieldError('targetAveragePrice');
+            }}
           />
+          {errors.targetAveragePrice ? (
+            <View style={styles.errorContainer}>
+              <CommonText
+                title={`❌ ${errors.targetAveragePrice}`}
+                textStyle={[12, '500', '#d32f2f']}
+              />
+            </View>
+          ) : null}
         </View>
       </View>
+
+      {/* General Error Message */}
+      {errors.general ? (
+        <View style={styles.generalErrorContainer}>
+          <CommonText
+            title={`⚠️ ${errors.general}`}
+            textStyle={[14, '500', '#d32f2f']}
+          />
+        </View>
+      ) : null}
 
       {/* Action Buttons */}
       <View style={styles.buttonSection}>
@@ -741,6 +868,23 @@ const styles = StyleSheet.create({
     borderColor: '#e9ecef',
     alignItems: 'center',
     marginTop: 15,
+  },
+  inputError: {
+    borderColor: '#d32f2f',
+    borderWidth: 2,
+    backgroundColor: '#ffebee',
+  },
+  errorContainer: {
+    marginTop: 5,
+    paddingHorizontal: 5,
+  },
+  generalErrorContainer: {
+    backgroundColor: '#ffebee',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#d32f2f',
   },
 });
 
