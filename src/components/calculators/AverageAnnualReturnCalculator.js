@@ -4,7 +4,7 @@ import CommonText from '../CommonText';
 import useCalculatorStore from '../../store/calculatorStore';
 import SaveModal from '../SaveModal';
 
-const AverageAnnualReturnCalculator = () => {
+const CAGRCalculator = () => {
   const { 
     toggleHistoryModal, 
     toggleSaveModal, 
@@ -60,19 +60,45 @@ const AverageAnnualReturnCalculator = () => {
       return;
     }
 
+    // Calculate total return
+    const totalReturn = ((final - initial) / initial) * 100;
+
     // Calculate CAGR (Compound Annual Growth Rate)
     const cagr = Math.pow(final / initial, 1 / yearCount) - 1;
     const cagrPercentage = cagr * 100;
 
-    // Calculate total return
-    const totalReturn = ((final - initial) / initial) * 100;
+    // Calculate absolute gain
+    const absoluteGain = final - initial;
+
+    // Generate yearly breakdown
+    const yearlyBreakdown = [];
+    let currentInvestment = initial;
+    
+    for (let year = 1; year <= yearCount; year++) {
+      const yearValue = initial * Math.pow(1 + cagr, year);
+      const yearGain = yearValue - currentInvestment;
+      const yearReturn = ((yearValue - currentInvestment) / currentInvestment) * 100;
+      
+      yearlyBreakdown.push({
+        year: year,
+        investment: currentInvestment.toFixed(2),
+        value: yearValue.toFixed(2),
+        gain: yearGain.toFixed(2),
+        return: yearReturn.toFixed(2)
+      });
+      
+      // Update investment amount for next year (reinvest the returns)
+      currentInvestment = yearValue;
+    }
 
     setResult({
       averageAnnualReturn: cagrPercentage.toFixed(2),
       totalReturn: totalReturn.toFixed(2),
+      absoluteGain: absoluteGain.toFixed(2),
       initialValue: initial.toFixed(2),
       finalValue: final.toFixed(2),
       years: yearCount.toFixed(1),
+      yearlyBreakdown: yearlyBreakdown,
       stockName: currentStockName
     });
   };
@@ -86,183 +112,221 @@ const AverageAnnualReturnCalculator = () => {
   };
 
   const handleSave = () => {
-    if (!result) {
-      Alert.alert('Error', 'Please calculate a result first.');
-      return;
+    console.log('handleSave called:', { editingCalculationId, currentStockName, hasResult: !!result });
+    
+    if (editingCalculationId && result && currentStockName) {
+      // When editing and we have a stock name, automatically update without showing modal
+      console.log('Auto-updating calculation with stock name:', currentStockName);
+      saveCalculation({
+        ...result,
+        stockName: currentStockName // Use the stored stock name
+      }, 'cagr');
+    } else {
+      // Show modal for new calculations or when no stock name exists
+      console.log('Showing modal - editingCalculationId:', editingCalculationId, 'currentStockName:', currentStockName);
+      toggleSaveModal();
     }
-
-    const calculationData = {
-      ...result,
-      type: 'cagr',
-      timestamp: new Date().toISOString(),
-      inputs: {
-        initialValue,
-        finalValue,
-        years,
-        stockName: currentStockName
-      }
-    };
-
-    saveCalculation(calculationData);
-    toggleSaveModal();
   };
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* History Button */}
+      <View style={styles.historyButtonContainer}>
+        {currentStockName && (
+          <View style={styles.stockNameContainer}>
+            <CommonText 
+              title={`📈 ${currentStockName}`} 
+              textStyle={[16, '600', '#4caf50']} 
+            />
+          </View>
+        )}
+        <TouchableOpacity style={styles.historyButton} onPress={toggleHistoryModal}>
+          <CommonText 
+            title={`📊 History (${savedCalculations.length})`} 
+            textStyle={[16, '600', '#2196F3']} 
+          />
+        </TouchableOpacity>
+      </View>
+
+      {/* Input Section */}
       <View style={styles.inputSection}>
+        <View style={styles.sectionHeader}>
+          <CommonText 
+            title="Investment Details" 
+            textStyle={[18, 'bold', '#333']} 
+          />
+        </View>
 
-        <CommonText
-          title="Initial Investment Value"
-          textStyle={[16, 'bold', '#333']}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Enter initial value"
-          value={initialValue}
-          onChangeText={setInitialValue}
-          keyboardType="numeric"
-        />
+        <View style={styles.inputRow}>
+          <View style={styles.inputContainer}>
+            <CommonText title="Initial Investment" textStyle={[14, '500', '#666']} />
+            <TextInput
+              style={styles.input}
+              placeholder="e.g., 10000"
+              keyboardType="numeric"
+              value={initialValue}
+              onChangeText={setInitialValue}
+            />
+          </View>
+          
+          <View style={styles.inputContainer}>
+            <CommonText title="Final Value" textStyle={[14, '500', '#666']} />
+            <TextInput
+              style={styles.input}
+              placeholder="e.g., 15000"
+              keyboardType="numeric"
+              value={finalValue}
+              onChangeText={setFinalValue}
+            />
+          </View>
+        </View>
 
-        <CommonText
-          title="Final Investment Value"
-          textStyle={[16, 'bold', '#333']}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Enter final value"
-          value={finalValue}
-          onChangeText={setFinalValue}
-          keyboardType="numeric"
-        />
-
-        <CommonText
-          title="Investment Period (Years)"
-          textStyle={[16, 'bold', '#333']}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Enter number of years"
-          value={years}
-          onChangeText={setYears}
-          keyboardType="numeric"
-        />
+        <View style={styles.inputContainer}>
+          <CommonText title="Investment Period (Years)" textStyle={[14, '500', '#666']} />
+          <TextInput
+            style={styles.input}
+            placeholder="e.g., 5"
+            keyboardType="numeric"
+            value={years}
+            onChangeText={setYears}
+          />
+        </View>
       </View>
 
       {/* Action Buttons */}
       <View style={styles.buttonSection}>
-        <TouchableOpacity
-          style={styles.calculateButton}
-          onPress={calculateAverageAnnualReturn}
-        >
-          <CommonText
-            title="Calculate"
-            textStyle={[18, 'bold', 'white']}
-          />
+        <TouchableOpacity style={styles.calculateButton} onPress={calculateAverageAnnualReturn}>
+          <CommonText title="Calculate Returns" textStyle={[16, 'bold', 'white']} />
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.resetButton}
-          onPress={resetCalculator}
-        >
-          <CommonText
-            title="Reset"
-            textStyle={[18, 'bold', '#666']}
-          />
+        
+        <TouchableOpacity style={styles.resetButton} onPress={resetCalculator}>
+          <CommonText title="Reset" textStyle={[16, '600', '#666']} />
         </TouchableOpacity>
       </View>
 
-      {/* Result Section */}
+      {/* Results */}
       {result && (
         <View style={styles.resultSection}>
-          <CommonText
-            title="Results"
-            textStyle={[20, 'bold', '#333']}
-          />
+          <View style={styles.resultHeader}>
+            <CommonText 
+              title="📊 Calculation Results" 
+              textStyle={[22, 'bold', '#333']} 
+            />
+            <TouchableOpacity style={styles.saveResultButton} onPress={handleSave}>
+              <CommonText title={editingCalculationId ? "💾 Update" : "💾 Save"} textStyle={[14, '600', '#4caf50']} />
+            </TouchableOpacity>
+          </View>
           
-          <View style={styles.resultCard}>
-            <View style={styles.resultRow}>
-              <CommonText
-                title="Average Annual Return:"
-                textStyle={[16, 'bold', '#333']}
-              />
-              <CommonText
-                title={`${result.averageAnnualReturn}%`}
-                textStyle={[18, 'bold', '#2196F3']}
-              />
-            </View>
+          
+      
 
-            <View style={styles.resultRow}>
-              <CommonText
-                title="Total Return:"
-                textStyle={[16, 'bold', '#333']}
-              />
-              <CommonText
-                title={`${result.totalReturn}%`}
-                textStyle={[18, 'bold', '#4CAF50']}
-              />
-            </View>
-
-            <View style={styles.resultRow}>
-              <CommonText
-                title="Initial Value:"
-                textStyle={[16, 'bold', '#333']}
-              />
-              <CommonText
-                title={`₹${result.initialValue}`}
-                textStyle={[16, 'normal', '#666']}
-              />
-            </View>
-
-            <View style={styles.resultRow}>
-              <CommonText
-                title="Final Value:"
-                textStyle={[16, 'bold', '#333']}
-              />
-              <CommonText
-                title={`₹${result.finalValue}`}
-                textStyle={[16, 'normal', '#666']}
-              />
-            </View>
-
-            <View style={styles.resultRow}>
-              <CommonText
-                title="Investment Period:"
-                textStyle={[16, 'bold', '#333']}
-              />
-              <CommonText
-                title={`${result.years} years`}
-                textStyle={[16, 'normal', '#666']}
-              />
+          {/* Colorful Investment Summary Cards */}
+          <View style={styles.colorfulSummarySection}>
+            <CommonText 
+              title="💰 Investment Summary" 
+              textStyle={[18, 'bold', '#333']} 
+            />
+            
+            <View style={styles.colorfulSummaryGrid}>
+                           <View style={[styles.colorfulSummaryItem, { backgroundColor: '#e8f5e8', borderColor: '#4caf50' }]}>
+                 <View style={styles.summaryItemIcon}>
+                   <CommonText title="📊" textStyle={[20, 'normal', '#4caf50']} />
+                   <CommonText title="Your CAGR" textStyle={[12, '500', '#666']} />
+                 </View>
+                 <View style={styles.summaryItemContent}>
+                   <CommonText 
+                     title={`${result.averageAnnualReturn}%`} 
+                     textStyle={[16, 'bold', '#4caf50']} 
+                   />
+                 </View>
+               </View>
+              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#e3f2fd', borderColor: '#2196F3' }]}>
+                <View style={styles.summaryItemIcon}>
+                  <CommonText title="📈" textStyle={[20, 'normal', '#2196F3']} />
+                  <CommonText title=" Total Return" textStyle={[12, '500', '#666']} />
+                </View>
+                <View style={styles.summaryItemContent}>
+                  <CommonText 
+                    title={`${result.totalReturn}%`} 
+                    textStyle={[16, 'bold', '#2196F3']} 
+                  />
+                </View>
+              </View>
             </View>
           </View>
 
-          {/* Save and History Buttons */}
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={styles.saveButton}
-              onPress={handleSave}
-            >
-              <CommonText
-                title="Save Calculation"
-                textStyle={[16, 'bold', 'white']}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.historyButton}
-              onPress={toggleHistoryModal}
-            >
-              <CommonText
-                title="View History"
-                textStyle={[16, 'bold', '#2196F3']}
-              />
-            </TouchableOpacity>
+          {/* Yearly Breakdown Table */}
+          <View style={styles.yearlyBreakdownSection}>
+            <CommonText 
+              title="📅 Yearly Breakdown" 
+              textStyle={[18, 'bold', '#333']} 
+            />
+            <View style={styles.tableContainer}>
+                          <View style={styles.tableHeader}>
+              <View style={styles.tableHeaderCell}>
+                <CommonText title="Year" textStyle={[14, 'bold', '#333']} />
+              </View>
+              <View style={styles.tableHeaderCell}>
+                <CommonText title="Investment" textStyle={[14, 'bold', '#333']} />
+              </View>
+              <View style={styles.tableHeaderCell}>
+                <CommonText title="Value" textStyle={[14, 'bold', '#333']} />
+              </View>
+              <View style={styles.tableHeaderCell}>
+                <CommonText title="Gain" textStyle={[14, 'bold', '#333']} />
+              </View>
+              <View style={styles.tableHeaderCell}>
+                <CommonText title="Return %" textStyle={[14, 'bold', '#333']} />
+              </View>
+            </View>
+              
+              {result.yearlyBreakdown.map((yearData, index) => (
+                <View key={yearData.year} style={[
+                  styles.tableRow, 
+                  index % 2 === 0 ? styles.evenRow : styles.oddRow
+                ]}>
+                  <View style={styles.tableCell}>
+                    <CommonText title={`${yearData.year}`} textStyle={[14, '600', '#333']} />
+                  </View>
+                  <View style={styles.tableCell}>
+                    <CommonText title={`₹${yearData.investment}`} textStyle={[14, 'normal', '#666']} />
+                  </View>
+                  <View style={styles.tableCell}>
+                    <CommonText title={`₹${yearData.value}`} textStyle={[14, 'normal', '#666']} />
+                  </View>
+                  <View style={styles.tableCell}>
+                    <CommonText title={`₹${yearData.gain}`} textStyle={[14, 'normal', '#4caf50']} />
+                  </View>
+                  <View style={styles.tableCell}>
+                    <CommonText title={`${yearData.return}%`} textStyle={[14, 'normal', '#2196F3']} />
+                  </View>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
       )}
 
+      {/* Formula */}
+      <View style={styles.formulaSection}>
+        <CommonText 
+          title="Formula" 
+          textStyle={[18, 'bold', '#333']} 
+        />
+        <View style={styles.formulaCard}>
+          <CommonText 
+            title="CAGR = (Final Value / Initial Value)^(1/Years) - 1" 
+            textStyle={[16, '600', '#666']} 
+          />
+          <CommonText 
+            title="This calculates the compound annual growth rate" 
+            textStyle={[14, 'normal', '#888']} 
+          />
+        </View>
+      </View>
+
       {/* Save Modal */}
-      <SaveModal />
+      <SaveModal calculationData={result} reset={resetCalculator} />
     </ScrollView>
   );
 };
@@ -272,19 +336,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  header: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+  historyButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingHorizontal: 20,
+  },
+  stockNameContainer: {
+    backgroundColor: '#e8f5e8',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#4caf50',
+  },
+  historyButton: {
+    backgroundColor: '#e3f2fd',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: '#2196F3',
+    minWidth: 120,
+    alignItems: 'center',
   },
   inputSection: {
     backgroundColor: 'white',
@@ -292,22 +367,34 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  inputContainer: {
+    flex: 1,
+    marginRight: 10,
   },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 15,
+    padding: 12,
     fontSize: 16,
-    marginBottom: 20,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: 'white',
+    marginTop: 5,
   },
   buttonSection: {
     flexDirection: 'row',
@@ -315,22 +402,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   calculateButton: {
-    backgroundColor: '#2196F3',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 8,
     flex: 1,
-    marginRight: 10,
+    backgroundColor: '#2196F3',
+    padding: 15,
+    borderRadius: 8,
     alignItems: 'center',
+    marginRight: 10,
   },
   resetButton: {
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
+    backgroundColor: '#f5f5f5',
+    padding: 15,
     borderRadius: 8,
-    flex: 1,
-    marginLeft: 10,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   resultSection: {
     backgroundColor: 'white',
@@ -338,53 +423,177 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
   },
-  resultCard: {
-    backgroundColor: '#f8f9fa',
+  resultHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  saveResultButton: {
+    backgroundColor: '#e8f5e8',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#4caf50',
+  },
+  colorfulSummaryBanner: {
+    backgroundColor: '#667eea',
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  summaryIconContainer: {
+    marginRight: 15,
+  },
+  summaryTextContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  colorfulSummarySection: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  colorfulSummaryGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    marginTop: 15,
+  },
+  colorfulSummaryItem: {
+    width: '100%',
+    marginBottom: 15,
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 2,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 3,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  summaryItemIcon: {
+    marginRight: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  summaryItemContent: {
+  },
+  quickStatsBanner: {
+    backgroundColor: '#ff6b6b',
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  quickStatItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  quickStatDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  formulaSection: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  formulaCard: {
+    backgroundColor: '#e3f2fd',
     padding: 15,
     borderRadius: 8,
     marginTop: 15,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196F3',
   },
-  resultRow: {
+  yearlyBreakdownSection: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  tableContainer: {
+    marginTop: 15,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  tableHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
+    backgroundColor: '#f5f5f5',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
-  actionButtons: {
+  tableHeaderCell: {
+    flex: 1,
+    padding: 12,
+    alignItems: 'center',
+    borderRightWidth: 1,
+    borderRightColor: '#e0e0e0',
+  },
+  tableRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
-  saveButton: {
-    backgroundColor: '#4CAF50',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    flex: 1,
-    marginRight: 10,
-    alignItems: 'center',
+  evenRow: {
+    backgroundColor: '#fafafa',
   },
-  historyButton: {
-    backgroundColor: 'transparent',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+  oddRow: {
+    backgroundColor: '#ffffff',
+  },
+  tableCell: {
     flex: 1,
-    marginLeft: 10,
+    padding: 12,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#2196F3',
+    borderRightWidth: 1,
+    borderRightColor: '#e0e0e0',
   },
 });
 
-export default AverageAnnualReturnCalculator; 
+export default CAGRCalculator; 
