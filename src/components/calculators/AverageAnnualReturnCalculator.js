@@ -256,53 +256,55 @@ const CAGRCalculator = () => {
           </View>
 
           {/* Yearly Breakdown Table */}
-          <View style={styles.yearlyBreakdownSection}>
+          <View >
             <CommonText 
               title="📅 Yearly Breakdown" 
               textStyle={[18, 'bold', '#333']} 
             />
-            <View style={styles.tableContainer}>
-                          <View style={styles.tableHeader}>
-              <View style={styles.tableHeaderCell}>
-                <CommonText title="Year" textStyle={[14, 'bold', '#333']} />
-              </View>
-              <View style={styles.tableHeaderCell}>
-                <CommonText title="Investment" textStyle={[14, 'bold', '#333']} />
-              </View>
-              <View style={styles.tableHeaderCell}>
-                <CommonText title="Value" textStyle={[14, 'bold', '#333']} />
-              </View>
-              <View style={styles.tableHeaderCell}>
-                <CommonText title="Gain" textStyle={[14, 'bold', '#333']} />
-              </View>
-              <View style={styles.tableHeaderCell}>
-                <CommonText title="Return %" textStyle={[14, 'bold', '#333']} />
-              </View>
-            </View>
-              
-              {result.yearlyBreakdown.map((yearData, index) => (
-                <View key={yearData.year} style={[
-                  styles.tableRow, 
-                  index % 2 === 0 ? styles.evenRow : styles.oddRow
-                ]}>
-                  <View style={styles.tableCell}>
-                    <CommonText title={`${yearData.year}`} textStyle={[14, '600', '#333']} />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.tableContainer}>
+                <View style={styles.tableHeader}>
+                  <View style={[styles.tableHeaderCell, styles.yearColumn]}>
+                    <CommonText title="Year" textStyle={[14, 'bold', '#333']} />
                   </View>
-                  <View style={styles.tableCell}>
-                    <CommonText title={`₹${yearData.investment}`} textStyle={[14, 'normal', '#666']} />
+                  <View style={[styles.tableHeaderCell, styles.investmentColumn]}>
+                    <CommonText title="Investment" textStyle={[14, 'bold', '#333']} />
                   </View>
-                  <View style={styles.tableCell}>
-                    <CommonText title={`₹${yearData.value}`} textStyle={[14, 'normal', '#666']} />
+                  <View style={[styles.tableHeaderCell, styles.valueColumn]}>
+                    <CommonText title="Value" textStyle={[14, 'bold', '#333']} />
                   </View>
-                  <View style={styles.tableCell}>
-                    <CommonText title={`₹${yearData.gain}`} textStyle={[14, 'normal', '#4caf50']} />
+                  <View style={[styles.tableHeaderCell, styles.gainColumn]}>
+                    <CommonText title="Gain" textStyle={[14, 'bold', '#333']} />
                   </View>
-                  <View style={styles.tableCell}>
-                    <CommonText title={`${yearData.return}%`} textStyle={[14, 'normal', '#2196F3']} />
+                  <View style={[styles.tableHeaderCell, styles.returnColumn]}>
+                    <CommonText title="Return %" textStyle={[14, 'bold', '#333']} />
                   </View>
                 </View>
-              ))}
-            </View>
+                
+                {result.yearlyBreakdown.map((yearData, index) => (
+                  <View key={yearData.year} style={[
+                    styles.tableRow, 
+                    index % 2 === 0 ? styles.evenRow : styles.oddRow
+                  ]}>
+                    <View style={[styles.tableCell, styles.yearColumn]}>
+                      <CommonText title={`${yearData.year}`} textStyle={[14, '600', '#333']} />
+                    </View>
+                    <View style={[styles.tableCell, styles.investmentColumn]}>
+                      <CommonText title={`₹${yearData.investment}`} textStyle={[14, 'normal', '#666']} />
+                    </View>
+                    <View style={[styles.tableCell, styles.valueColumn]}>
+                      <CommonText title={`₹${yearData.value}`} textStyle={[14, 'normal', '#666']} />
+                    </View>
+                    <View style={[styles.tableCell, styles.gainColumn]}>
+                      <CommonText title={`₹${yearData.gain}`} textStyle={[14, 'normal', '#4caf50']} />
+                    </View>
+                    <View style={[styles.tableCell, styles.returnColumn]}>
+                      <CommonText title={`${yearData.return}%`} textStyle={[14, 'normal', '#2196F3']} />
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
           </View>
         </View>
       )}
@@ -545,23 +547,14 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: '#2196F3',
   },
-  yearlyBreakdownSection: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
+
   tableContainer: {
     marginTop: 15,
     borderRadius: 8,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#e0e0e0',
+    minWidth: 500, // Set minimum width for the table
   },
   tableHeader: {
     flexDirection: 'row',
@@ -570,7 +563,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
   },
   tableHeaderCell: {
-    flex: 1,
     padding: 12,
     alignItems: 'center',
     borderRightWidth: 1,
@@ -588,11 +580,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   tableCell: {
-    flex: 1,
     padding: 12,
     alignItems: 'center',
     borderRightWidth: 1,
     borderRightColor: '#e0e0e0',
+  },
+  
+  // Add specific width styles for each column
+  yearColumn: {
+    width: 70, // Year column can be smaller
+  },
+  investmentColumn: {
+    width: 110, // Investment column needs more space for currency
+  },
+  valueColumn: {
+    width: 110, // Value column needs more space for currency
+  },
+  gainColumn: {
+    width: 100, // Gain column for currency
+  },
+  returnColumn: {
+    width: 90, // Return % column
   },
 });
 
