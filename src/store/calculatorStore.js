@@ -15,6 +15,7 @@ const useCalculatorStore = create(
       savedCalculations: {
         'average-buy': [],
         'share-price-match': [],
+        'loss-recovery': [],
         'cagr': [],
         'sip': [],
         'intraday': [],
