@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
 import CommonText from '../CommonText';
 import useCalculatorStore from '../../store/calculatorStore';
@@ -15,6 +15,12 @@ const LossRecoveryCalculator = () => {
     editingCalculationId
   } = useCalculatorStore();
   
+  // Create refs for TextInput navigation
+  const sharesOwnedRef = useRef(null);
+  const averagePriceRef = useRef(null);
+  const currentLossPercentageRef = useRef(null);
+  const recoveryPercentageRef = useRef(null);
+
   const savedCalculations = getCalculationsForType('loss-recovery');
   const [sharesOwned, setSharesOwned] = useState('');
   const [averagePrice, setAveragePrice] = useState('');
@@ -22,6 +28,9 @@ const LossRecoveryCalculator = () => {
   const [recoveryPercentage, setRecoveryPercentage] = useState('');
   const [result, setResult] = useState(null);
   const [currentStockName, setCurrentStockName] = useState('');
+  
+  // Add loading state
+  const [isCalculating, setIsCalculating] = useState(false);
   
   // Error states for each field
   const [errors, setErrors] = useState({
@@ -118,86 +127,95 @@ const LossRecoveryCalculator = () => {
   }, [currentLossPercentage, recoveryPercentage]);
 
   const calculateRecovery = () => {
-    // Reset all errors first
-    setErrors({
-      sharesOwned: '',
-      averagePrice: '',
-      currentLossPercentage: '',
-      recoveryPercentage: '',
-      general: ''
-    });
-
-    let hasErrors = false;
-    const newErrors = {
-      sharesOwned: '',
-      averagePrice: '',
-      currentLossPercentage: '',
-      recoveryPercentage: '',
-      general: ''
-    };
-
-    // Validate inputs
-    if (!sharesOwned || isNaN(parseFloat(sharesOwned)) || parseFloat(sharesOwned) <= 0) {
-      newErrors.sharesOwned = 'Please enter a valid positive number';
-      hasErrors = true;
-    }
-
-    if (!averagePrice || isNaN(parseFloat(averagePrice)) || parseFloat(averagePrice) <= 0) {
-      newErrors.averagePrice = 'Please enter a valid positive number';
-      hasErrors = true;
-    }
-
-    if (!currentLossPercentage || isNaN(parseFloat(currentLossPercentage)) || parseFloat(currentLossPercentage) <= 0) {
-      newErrors.currentLossPercentage = 'Please enter a valid positive percentage';
-      hasErrors = true;
-    }
-
-    if (!recoveryPercentage || isNaN(parseFloat(recoveryPercentage)) || parseFloat(recoveryPercentage) <= 0) {
-      newErrors.recoveryPercentage = 'Please enter a valid positive percentage';
-      hasErrors = true;
-    }
-
-    if (hasErrors) {
-      setErrors(newErrors);
-      return;
-    }
-
-    const Q1 = parseFloat(sharesOwned);
-    const P1 = parseFloat(averagePrice);
-    const currentLoss = parseFloat(currentLossPercentage);
-    const recoverPercent = parseFloat(recoveryPercentage);
+    // Start loading
+    setIsCalculating(true);
     
-    // Check if recovery percentage is valid
-    if (recoverPercent >= currentLoss) {
-      newErrors.recoveryPercentage = `Recovery percentage (${recoverPercent}%) must be less than current loss percentage (${currentLoss}%)`;
-      hasErrors = true;
-    }
+    // Simulate processing time with 1 second delay
+    setTimeout(() => {
+      // Reset all errors first
+      setErrors({
+        sharesOwned: '',
+        averagePrice: '',
+        currentLossPercentage: '',
+        recoveryPercentage: '',
+        general: ''
+      });
 
-    if (currentLoss >= 100) {
-      newErrors.currentLossPercentage = 'Current loss percentage cannot be 100% or more';
-      hasErrors = true;
-    }
+      let hasErrors = false;
+      const newErrors = {
+        sharesOwned: '',
+        averagePrice: '',
+        currentLossPercentage: '',
+        recoveryPercentage: '',
+        general: ''
+      };
 
-    if (hasErrors) {
-      setErrors(newErrors);
-      return;
-    }
+      // Validate inputs
+      if (!sharesOwned || isNaN(parseFloat(sharesOwned)) || parseFloat(sharesOwned) <= 0) {
+        newErrors.sharesOwned = 'Please enter a valid positive number';
+        hasErrors = true;
+      }
 
-    // Use your exact calculation function
-    const calculationResult = calculateLossCoverFromRecoverPercent(Q1, P1, currentLoss, recoverPercent);
+      if (!averagePrice || isNaN(parseFloat(averagePrice)) || parseFloat(averagePrice) <= 0) {
+        newErrors.averagePrice = 'Please enter a valid positive number';
+        hasErrors = true;
+      }
 
-    setResult({
-      sharesOwned: Q1,
-      averagePrice: P1.toFixed(2),
-      currentLossPercentage: currentLoss.toFixed(2),
-      recoveryPercentage: recoverPercent.toFixed(2),
-      currentPrice: calculationResult.currentPrice,
-      newAveragePrice: calculationResult.newAveragePrice,
-      finalLossPercent: calculationResult.finalLossPercent,
-      additionalShares: calculationResult.additionalShares,
-      investmentAmount: calculationResult.investmentAmount,
-      stockName: currentStockName
-    });
+      if (!currentLossPercentage || isNaN(parseFloat(currentLossPercentage)) || parseFloat(currentLossPercentage) <= 0) {
+        newErrors.currentLossPercentage = 'Please enter a valid positive percentage';
+        hasErrors = true;
+      }
+
+      if (!recoveryPercentage || isNaN(parseFloat(recoveryPercentage)) || parseFloat(recoveryPercentage) <= 0) {
+        newErrors.recoveryPercentage = 'Please enter a valid positive percentage';
+        hasErrors = true;
+      }
+
+      if (hasErrors) {
+        setErrors(newErrors);
+        return;
+      }
+
+      const Q1 = parseFloat(sharesOwned);
+      const P1 = parseFloat(averagePrice);
+      const currentLoss = parseFloat(currentLossPercentage);
+      const recoverPercent = parseFloat(recoveryPercentage);
+      
+      // Check if recovery percentage is valid
+      if (recoverPercent >= currentLoss) {
+        newErrors.recoveryPercentage = `Recovery percentage (${recoverPercent}%) must be less than current loss percentage (${currentLoss}%)`;
+        hasErrors = true;
+      }
+
+      if (currentLoss >= 100) {
+        newErrors.currentLossPercentage = 'Current loss percentage cannot be 100% or more';
+        hasErrors = true;
+      }
+
+      if (hasErrors) {
+        setErrors(newErrors);
+        return;
+      }
+
+      // Use your exact calculation function
+      const calculationResult = calculateLossCoverFromRecoverPercent(Q1, P1, currentLoss, recoverPercent);
+
+      setResult({
+        sharesOwned: Q1,
+        averagePrice: P1.toFixed(2),
+        currentLossPercentage: currentLoss.toFixed(2),
+        recoveryPercentage: recoverPercent.toFixed(2),
+        currentPrice: calculationResult.currentPrice,
+        newAveragePrice: calculationResult.newAveragePrice,
+        finalLossPercent: calculationResult.finalLossPercent,
+        additionalShares: calculationResult.additionalShares,
+        investmentAmount: calculationResult.investmentAmount,
+        stockName: currentStockName
+      });
+
+      // End loading
+      setIsCalculating(false);
+    }, 1000);
   };
 
   const resetCalculator = () => {
@@ -231,6 +249,25 @@ const LossRecoveryCalculator = () => {
     }
   };
 
+  // Navigation handlers
+  const focusAveragePrice = () => {
+    averagePriceRef.current?.focus();
+  };
+
+  const focusCurrentLossPercentage = () => {
+    currentLossPercentageRef.current?.focus();
+  };
+
+  const focusRecoveryPercentage = () => {
+    recoveryPercentageRef.current?.focus();
+  };
+
+  const handleLastFieldSubmit = () => {
+    recoveryPercentageRef.current?.blur();
+    // Always call calculateRecovery when user presses "Done"
+    calculateRecovery();
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* History Button */}
@@ -258,6 +295,7 @@ const LossRecoveryCalculator = () => {
           <View style={styles.inputColumn}>
             <CommonText title="Shares Owned" textStyle={[15, '600', '#333']} />
             <TextInput
+              ref={sharesOwnedRef}
               style={[
                 styles.compactInput,
                 errors.sharesOwned ? styles.inputError : null
@@ -265,6 +303,9 @@ const LossRecoveryCalculator = () => {
               placeholder="100"
               keyboardType="numeric"
               value={sharesOwned}
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={focusAveragePrice}
               onChangeText={(text) => {
                 setSharesOwned(text);
                 clearFieldError('sharesOwned');
@@ -278,6 +319,7 @@ const LossRecoveryCalculator = () => {
           <View style={styles.inputColumn}>
             <CommonText title="Average Price" textStyle={[15, '600', '#333']} />
             <TextInput
+              ref={averagePriceRef}
               style={[
                 styles.compactInput,
                 errors.averagePrice ? styles.inputError : null
@@ -285,6 +327,9 @@ const LossRecoveryCalculator = () => {
               placeholder="₹100"
               keyboardType="numeric"
               value={averagePrice}
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={focusCurrentLossPercentage}
               onChangeText={(text) => {
                 setAveragePrice(text);
                 clearFieldError('averagePrice');
@@ -301,6 +346,7 @@ const LossRecoveryCalculator = () => {
           <View style={styles.inputColumn}>
             <CommonText title="Current Loss %" textStyle={[15, '600', '#333']} />
             <TextInput
+              ref={currentLossPercentageRef}
               style={[
                 styles.compactInput,
                 errors.currentLossPercentage ? styles.inputError : null
@@ -308,6 +354,9 @@ const LossRecoveryCalculator = () => {
               placeholder="20"
               keyboardType="numeric"
               value={currentLossPercentage}
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={focusRecoveryPercentage}
               onChangeText={(text) => {
                 setCurrentLossPercentage(text);
                 clearFieldError('currentLossPercentage');
@@ -321,6 +370,7 @@ const LossRecoveryCalculator = () => {
           <View style={styles.inputColumn}>
             <CommonText title="Recovery %" textStyle={[15, '600', '#333']} />
             <TextInput
+              ref={recoveryPercentageRef}
               style={[
                 styles.compactInput,
                 errors.recoveryPercentage ? styles.inputError : null
@@ -328,6 +378,8 @@ const LossRecoveryCalculator = () => {
               placeholder="17"
               keyboardType="numeric"
               value={recoveryPercentage}
+              returnKeyType="done"
+              onSubmitEditing={handleLastFieldSubmit}
               onChangeText={(text) => {
                 setRecoveryPercentage(text);
                 clearFieldError('recoveryPercentage');
@@ -360,12 +412,26 @@ const LossRecoveryCalculator = () => {
 
       {/* Action Buttons */}
       <View style={styles.buttonSection}>
-        <TouchableOpacity style={styles.calculateButton} onPress={calculateRecovery}>
-          <CommonText title="Calculate Recovery Plan" textStyle={[16, 'bold', 'white']} />
+        <TouchableOpacity 
+          style={[styles.calculateButton, isCalculating && styles.calculatingButton]} 
+          onPress={calculateRecovery}
+          disabled={isCalculating}
+        >
+          <CommonText 
+            title={isCalculating ? "🔄 Calculating..." : "Calculate Recovery Plan"} 
+            textStyle={[16, 'bold', 'white']} 
+          />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.resetButton} onPress={resetCalculator}>
-          <CommonText title="Reset" textStyle={[16, '600', '#666']} />
+        <TouchableOpacity 
+          style={[styles.resetButton, isCalculating && styles.disabledButton]} 
+          onPress={resetCalculator}
+          disabled={isCalculating}
+        >
+          <CommonText 
+            title="Reset" 
+            textStyle={[16, '600', isCalculating ? '#ccc' : '#666']} 
+          />
         </TouchableOpacity>
       </View>
 
@@ -556,6 +622,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 10,
   },
+  calculatingButton: {
+    backgroundColor: '#1976D2',
+    opacity: 0.8,
+  },
   resetButton: {
     backgroundColor: '#f5f5f5',
     padding: 12,
@@ -563,6 +633,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#ddd',
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
   resultSection: {
     backgroundColor: 'white',
