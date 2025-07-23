@@ -58,6 +58,11 @@ const LossRecoveryCalculator = () => {
     // Step 5: Total investment needed
     const totalInvestment = Q2 * P2;
 
+    // Add validation to ensure all values are valid numbers
+    if (!isFinite(P2) || !isFinite(P_avg) || !isFinite(Q2) || !isFinite(totalInvestment)) {
+      throw new Error('Calculation resulted in invalid values. Please check your inputs.');
+    }
+
     return {
       currentPrice: P2.toFixed(2),
       newAveragePrice: P_avg.toFixed(2),
@@ -197,21 +202,43 @@ const LossRecoveryCalculator = () => {
         return;
       }
 
-      // Use your exact calculation function
-      const calculationResult = calculateLossCoverFromRecoverPercent(Q1, P1, currentLoss, recoverPercent);
+      try {
+        // Use your exact calculation function
+        const calculationResult = calculateLossCoverFromRecoverPercent(Q1, P1, currentLoss, recoverPercent);
 
-      setResult({
-        sharesOwned: Q1,
-        averagePrice: P1.toFixed(2),
-        currentLossPercentage: currentLoss.toFixed(2),
-        recoveryPercentage: recoverPercent.toFixed(2),
-        currentPrice: calculationResult.currentPrice,
-        newAveragePrice: calculationResult.newAveragePrice,
-        finalLossPercent: calculationResult.finalLossPercent,
-        additionalShares: calculationResult.additionalShares,
-        investmentAmount: calculationResult.investmentAmount,
-        stockName: currentStockName
-      });
+        // Calculate total investment (previous + additional) with proper validation
+        const previousInvestment = Q1 * P1;
+        const additionalInvestment = parseFloat(calculationResult.investmentAmount);
+        
+        // Ensure both values are valid numbers
+        if (!isFinite(previousInvestment) || !isFinite(additionalInvestment)) {
+          throw new Error('Invalid calculation values');
+        }
+        
+        const totalInvestment = previousInvestment + additionalInvestment;
+
+        setResult({
+          sharesOwned: Q1,
+          averagePrice: P1.toFixed(2),
+          currentLossPercentage: currentLoss.toFixed(2),
+          recoveryPercentage: recoverPercent.toFixed(2),
+          currentPrice: calculationResult.currentPrice,
+          newAveragePrice: calculationResult.newAveragePrice,
+          finalLossPercent: calculationResult.finalLossPercent,
+          additionalShares: calculationResult.additionalShares,
+          investmentAmount: calculationResult.investmentAmount,
+          previousInvestment: previousInvestment.toFixed(2),
+          totalInvestment: totalInvestment.toFixed(2),
+          stockName: currentStockName
+        });
+
+      } catch (error) {
+        setErrors(prev => ({
+          ...prev,
+          general: error.message || 'Calculation error occurred. Please check your inputs.'
+        }));
+        setResult(null);
+      }
 
       // End loading
       setIsCalculating(false);
@@ -500,11 +527,22 @@ const LossRecoveryCalculator = () => {
           
           <View style={styles.resultItem}>
             <View style={styles.resultLabelContainer}>
-              <CommonText title="Total Investment Needed" textStyle={[14, '600', '#333']} />
+              <CommonText title="Additional Investment Needed" textStyle={[14, '600', '#333']} />
               <CommonText title="(Additional shares × Current price)" textStyle={[10, 'normal', '#666']} />
             </View>
             <CommonText 
               title={result ? `₹${result.investmentAmount}` : '₹--'} 
+              textStyle={[20, 'bold', result ? '#ff9800' : '#ccc']} 
+            />
+          </View>
+          
+          <View style={styles.resultItem}>
+            <View style={styles.resultLabelContainer}>
+              <CommonText title="Total Investment After Recovery" textStyle={[14, '600', '#333']} />
+              <CommonText title="(Previous + Additional investment)" textStyle={[10, 'normal', '#666']} />
+            </View>
+            <CommonText 
+              title={result ? `₹${result.totalInvestment}` : '₹--'} 
               textStyle={[20, 'bold', result ? '#d32f2f' : '#ccc']} 
             />
           </View>
@@ -521,11 +559,15 @@ const LossRecoveryCalculator = () => {
                   textStyle={[14, 'normal', '#333']} 
                 />
                 <CommonText 
-                  title={`• Reduce loss from ${result.currentLossPercentage}% to ${result.finalLossPercent}%`} 
+                  title={`• Additional investment: ₹${result.investmentAmount}`} 
                   textStyle={[14, 'normal', '#333']} 
                 />
                 <CommonText 
-                  title={`• Total investment: ₹${result.investmentAmount}`} 
+                  title={`• Total investment after recovery: ₹${result.totalInvestment}`} 
+                  textStyle={[14, 'normal', '#333']} 
+                />
+                <CommonText 
+                  title={`• Reduce loss from ${result.currentLossPercentage}% to ${result.finalLossPercent}%`} 
                   textStyle={[14, 'normal', '#333']} 
                 />
               </>

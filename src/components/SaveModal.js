@@ -148,6 +148,50 @@ const SaveModal = ({ calculationData, reset }) => {
                     </View>
                   </>
                 )}
+                
+                {/* Loss Recovery Calculator Preview */}
+                {calculationData.additionalShares && (
+                  <>
+                    <View style={styles.previewRow}>
+                      <CommonText title="Current Market Price:" textStyle={[14, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculationData.currentPrice}`} 
+                        textStyle={[14, 'bold', '#2196F3']} 
+                      />
+                    </View>
+                    <View style={styles.previewRow}>
+                      <CommonText title="Additional Shares:" textStyle={[14, '500', '#666']} />
+                      <CommonText 
+                        title={`${calculationData.additionalShares} shares`} 
+                        textStyle={[14, 'bold', '#4caf50']} 
+                      />
+                    </View>
+                    <View style={styles.previewRow}>
+                      <CommonText title="Additional Investment:" textStyle={[14, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculationData.investmentAmount}`} 
+                        textStyle={[14, 'bold', '#ff9800']} 
+                      />
+                    </View>
+                    <View style={styles.previewRow}>
+                      <CommonText title="Total Investment:" textStyle={[14, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${(
+                          parseFloat(calculationData.sharesOwned || 0) * parseFloat(calculationData.averagePrice || 0) + 
+                          parseFloat(calculationData.investmentAmount || 0)
+                        ).toFixed(2)}`} 
+                        textStyle={[14, 'bold', '#d32f2f']} 
+                      />
+                    </View>
+                    <View style={styles.previewRow}>
+                      <CommonText title="Final Loss After Recovery:" textStyle={[14, '500', '#666']} />
+                      <CommonText 
+                        title={`${calculationData.finalLossPercent}%`} 
+                        textStyle={[14, 'bold', '#9c27b0']} 
+                      />
+                    </View>
+                  </>
+                )}
               </View>
             )}
           </View>
