@@ -7,6 +7,7 @@ import SharePriceMatchCalculator from './components/calculators/SharePriceMatchC
 import CommonText from './components/CommonText';
 import HistoryScreen from './components/HistoryScreen';
 import LossRecoveryCalculator from './components/calculators/LossRecoveryCalculator';
+import DividendYieldCalculator from './components/calculators/DividendYieldCalculator';
 
 const { width, height } = Dimensions.get('window');
 
@@ -359,6 +360,10 @@ function App() {
 
     if (selectedCalculator.id === 'loss-recovery') {
       return <LossRecoveryCalculator />;
+    }
+
+    if (selectedCalculator.id === 'dividend-yield') {
+      return <DividendYieldCalculator />;
     }
 
     // Default calculator view for other calculators
