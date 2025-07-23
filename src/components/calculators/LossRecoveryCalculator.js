@@ -251,132 +251,99 @@ const LossRecoveryCalculator = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Number of Shares Input */}
-      <View style={styles.inputSection}>
-        <CommonText
-          title="Number of Shares You Own"
-          textStyle={[16, '600', '#333']}
-        />
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={[
-              styles.input,
-              errors.sharesOwned ? styles.inputError : null
-            ]}
-            placeholder="Enter number of shares you own"
-            keyboardType="numeric"
-            value={sharesOwned}
-            onChangeText={(text) => {
-              setSharesOwned(text);
-              clearFieldError('sharesOwned');
-            }}
-          />
-          {errors.sharesOwned ? (
-            <View style={styles.errorContainer}>
-              <CommonText
-                title={`❌ ${errors.sharesOwned}`}
-                textStyle={[12, '500', '#d32f2f']}
-              />
-            </View>
-          ) : null}
+      {/* Compact Input Section */}
+      <View style={styles.compactInputSection}>
+        {/* Row 1: Shares and Average Price */}
+        <View style={styles.inputRow}>
+          <View style={styles.inputColumn}>
+            <CommonText title="Shares Owned" textStyle={[14, '600', '#333']} />
+            <TextInput
+              style={[
+                styles.compactInput,
+                errors.sharesOwned ? styles.inputError : null
+              ]}
+              placeholder="100"
+              keyboardType="numeric"
+              value={sharesOwned}
+              onChangeText={(text) => {
+                setSharesOwned(text);
+                clearFieldError('sharesOwned');
+              }}
+            />
+            {errors.sharesOwned ? (
+              <CommonText title={errors.sharesOwned} textStyle={[10, '500', '#d32f2f']} />
+            ) : null}
+          </View>
+          
+          <View style={styles.inputColumn}>
+            <CommonText title="Average Price" textStyle={[14, '600', '#333']} />
+            <TextInput
+              style={[
+                styles.compactInput,
+                errors.averagePrice ? styles.inputError : null
+              ]}
+              placeholder="₹100"
+              keyboardType="numeric"
+              value={averagePrice}
+              onChangeText={(text) => {
+                setAveragePrice(text);
+                clearFieldError('averagePrice');
+              }}
+            />
+            {errors.averagePrice ? (
+              <CommonText title={errors.averagePrice} textStyle={[10, '500', '#d32f2f']} />
+            ) : null}
+          </View>
         </View>
-      </View>
 
-      {/* Average Price Input */}
-      <View style={styles.inputSection}>
-        <CommonText
-          title="Average Price"
-          textStyle={[16, '600', '#333']}
-        />
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={[
-              styles.input,
-              errors.averagePrice ? styles.inputError : null
-            ]}
-            placeholder="Enter your average price"
-            keyboardType="numeric"
-            value={averagePrice}
-            onChangeText={(text) => {
-              setAveragePrice(text);
-              clearFieldError('averagePrice');
-            }}
-          />
-          {errors.averagePrice ? (
-            <View style={styles.errorContainer}>
-              <CommonText
-                title={`❌ ${errors.averagePrice}`}
-                textStyle={[12, '500', '#d32f2f']}
-              />
-            </View>
-          ) : null}
+        {/* Row 2: Current Loss and Recovery */}
+        <View style={styles.inputRow}>
+          <View style={styles.inputColumn}>
+            <CommonText title="Current Loss %" textStyle={[14, '600', '#333']} />
+            <TextInput
+              style={[
+                styles.compactInput,
+                errors.currentLossPercentage ? styles.inputError : null
+              ]}
+              placeholder="20"
+              keyboardType="numeric"
+              value={currentLossPercentage}
+              onChangeText={(text) => {
+                setCurrentLossPercentage(text);
+                clearFieldError('currentLossPercentage');
+              }}
+            />
+            {errors.currentLossPercentage ? (
+              <CommonText title={errors.currentLossPercentage} textStyle={[10, '500', '#d32f2f']} />
+            ) : null}
+          </View>
+          
+          <View style={styles.inputColumn}>
+            <CommonText title="Recovery %" textStyle={[14, '600', '#333']} />
+            <TextInput
+              style={[
+                styles.compactInput,
+                errors.recoveryPercentage ? styles.inputError : null
+              ]}
+              placeholder="17"
+              keyboardType="numeric"
+              value={recoveryPercentage}
+              onChangeText={(text) => {
+                setRecoveryPercentage(text);
+                clearFieldError('recoveryPercentage');
+              }}
+            />
+            {errors.recoveryPercentage ? (
+              <CommonText title={errors.recoveryPercentage} textStyle={[10, '500', '#d32f2f']} />
+            ) : null}
+          </View>
         </View>
-      </View>
 
-      {/* Current Loss Percentage Input */}
-      <View style={styles.inputSection}>
-        <CommonText
-          title="Current Loss Percentage"
-          textStyle={[16, '600', '#333']}
-        />
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={[
-              styles.input,
-              errors.currentLossPercentage ? styles.inputError : null
-            ]}
-            placeholder="Enter current loss percentage (e.g., 20 for 20%)"
-            keyboardType="numeric"
-            value={currentLossPercentage}
-            onChangeText={(text) => {
-              setCurrentLossPercentage(text);
-              clearFieldError('currentLossPercentage');
-            }}
-          />
-          {errors.currentLossPercentage ? (
-            <View style={styles.errorContainer}>
-              <CommonText
-                title={`❌ ${errors.currentLossPercentage}`}
-                textStyle={[12, '500', '#d32f2f']}
-              />
-            </View>
-          ) : null}
-        </View>
-      </View>
-
-      {/* Recovery Percentage Input */}
-      <View style={styles.inputSection}>
-        <CommonText 
-          title="How Much to Recover (Percentage)" 
-          textStyle={[16, '600', '#333']} 
-        />
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={[
-              styles.input,
-              errors.recoveryPercentage ? styles.inputError : null
-            ]}
-            placeholder="Enter recovery percentage (e.g., 17 for 17%)"
-            keyboardType="numeric"
-            value={recoveryPercentage}
-            onChangeText={(text) => {
-              setRecoveryPercentage(text);
-              clearFieldError('recoveryPercentage');
-            }}
-          />
-          {errors.recoveryPercentage ? (
-            <View style={styles.errorContainer}>
-              <CommonText
-                title={`❌ ${errors.recoveryPercentage}`}
-                textStyle={[12, '500', '#d32f2f']}
-              />
-            </View>
-          ) : null}
-        </View>
+        {/* Help Text */}
         <View style={styles.helpTextContainer}>
           <CommonText 
-            title="💡 Recovery percentage must be less than current loss percentage" 
-            textStyle={[12, 'normal', '#666']} 
+            title=" Recovery % must be less than Current Loss %" 
+            textStyle={[11, 'normal', '#666']} 
           />
         </View>
       </View>
@@ -418,31 +385,65 @@ const LossRecoveryCalculator = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Results Display */}
+          {/* Results Display with Field Labels */}
           <View style={styles.resultsDisplay}>
             <View style={styles.resultItem}>
-              <CommonText title="Current Price (P₂):" textStyle={[16, '600', '#333']} />
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Current Market Price" textStyle={[14, '600', '#333']} />
+                <CommonText title="(Calculated from your loss %)" textStyle={[10, 'normal', '#666']} />
+              </View>
               <CommonText title={`₹${result.currentPrice}`} textStyle={[20, 'bold', '#2196F3']} />
             </View>
             
             <View style={styles.resultItem}>
-              <CommonText title="New Average Price:" textStyle={[16, '600', '#333']} />
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Target Average Price" textStyle={[14, '600', '#333']} />
+                <CommonText title="(To achieve target loss %)" textStyle={[10, 'normal', '#666']} />
+              </View>
               <CommonText title={`₹${result.newAveragePrice}`} textStyle={[20, 'bold', '#4caf50']} />
             </View>
             
             <View style={styles.resultItem}>
-              <CommonText title="Final Loss After Recovery:" textStyle={[16, '600', '#333']} />
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Final Loss After Recovery" textStyle={[14, '600', '#333']} />
+                <CommonText title="(Current loss % - Recovery %)" textStyle={[10, 'normal', '#666']} />
+              </View>
               <CommonText title={`${result.finalLossPercent}%`} textStyle={[20, 'bold', '#ff9800']} />
             </View>
             
             <View style={styles.resultItem}>
-              <CommonText title="Additional Shares to Buy:" textStyle={[16, '600', '#333']} />
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Additional Shares to Buy" textStyle={[14, '600', '#333']} />
+                <CommonText title="(At current market price)" textStyle={[10, 'normal', '#666']} />
+              </View>
               <CommonText title={result.additionalShares} textStyle={[20, 'bold', '#9c27b0']} />
             </View>
             
             <View style={styles.resultItem}>
-              <CommonText title="Investment Amount Needed:" textStyle={[16, '600', '#333']} />
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Total Investment Needed" textStyle={[14, '600', '#333']} />
+                <CommonText title="(Additional shares × Current price)" textStyle={[10, 'normal', '#666']} />
+              </View>
               <CommonText title={`₹${result.investmentAmount}`} textStyle={[20, 'bold', '#d32f2f']} />
+            </View>
+          </View>
+
+          {/* Summary Card */}
+          <View style={styles.summaryCard}>
+            <CommonText title=" Summary" textStyle={[16, 'bold', '#333']} />
+            <View style={styles.summaryContent}>
+              <CommonText 
+                title={`• Buy ${result.additionalShares} shares at ₹${result.currentPrice}`} 
+                textStyle={[14, 'normal', '#333']} 
+              />
+              <CommonText 
+                title={`• Reduce loss from ${result.currentLossPercentage}% to ${result.finalLossPercent}%`} 
+                textStyle={[14, 'normal', '#333']} 
+              />
+              <CommonText 
+                title={`• Total investment: ₹${result.investmentAmount}`} 
+                textStyle={[14, 'normal', '#333']} 
+              />
             </View>
           </View>
         </View>
@@ -484,27 +485,35 @@ const styles = StyleSheet.create({
     minWidth: 120,
     alignItems: 'center',
   },
-  inputSection: {
+  compactInputSection: {
     backgroundColor: 'white',
-    padding: 20,
+    padding: 15,
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: 15,
     shadowColor: '#2196F3',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 1,
     elevation: 2,
   },
-  inputContainer: {
-    marginTop: 10,
+  inputRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
-  input: {
+  inputColumn: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  compactInput: {
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
+    borderRadius: 6,
+    padding: 8,
+    fontSize: 14,
     backgroundColor: 'white',
+    marginTop: 4,
+    height: 36,
   },
   helpTextContainer: {
     marginTop: 8,
@@ -513,19 +522,19 @@ const styles = StyleSheet.create({
   buttonSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   calculateButton: {
     flex: 1,
     backgroundColor: '#2196F3',
-    padding: 15,
+    padding: 12,
     borderRadius: 8,
     alignItems: 'center',
     marginRight: 10,
   },
   resetButton: {
     backgroundColor: '#f5f5f5',
-    padding: 15,
+    padding: 12,
     borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
@@ -562,6 +571,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e9ecef',
+    marginBottom: 15,
   },
   resultItem: {
     flexDirection: 'row',
@@ -571,14 +581,24 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
   },
+  resultLabelContainer: {
+    flex: 1,
+    marginRight: 10,
+  },
+  summaryCard: {
+    backgroundColor: '#e3f2fd',
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2196F3',
+  },
+  summaryContent: {
+    marginTop: 10,
+  },
   inputError: {
     borderColor: '#d32f2f',
     borderWidth: 2,
     backgroundColor: '#ffebee',
-  },
-  errorContainer: {
-    marginTop: 5,
-    paddingHorizontal: 5,
   },
   generalErrorContainer: {
     backgroundColor: '#ffebee',
