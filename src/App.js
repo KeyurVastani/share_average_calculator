@@ -6,6 +6,7 @@ import AverageBuyCalculator from './components/calculators/AverageBuyCalculator'
 import SharePriceMatchCalculator from './components/calculators/SharePriceMatchCalculator';
 import CommonText from './components/CommonText';
 import HistoryScreen from './components/HistoryScreen';
+import LossRecoveryCalculator from './components/calculators/LossRecoveryCalculator';
 
 const { width, height } = Dimensions.get('window');
 
@@ -116,6 +117,23 @@ function App() {
           'Optimize share purchases'
         ],
         formula: 'Number of Shares = Target Amount ÷ Current Share Price'
+      }
+    },
+    {
+      id: 'loss-recovery',
+      name: 'Loss Recovery Calculator',
+      description: 'Calculate recovery based on percentage',
+      icon: '🔄',
+      info: {
+        title: 'Loss Recovery Calculator',
+        description: 'Calculate how much additional investment you need to recover a specific percentage of your losses.',
+        features: [
+          'Calculate recovery investment',
+          'Set target recovery percentage',
+          'Understand loss reduction',
+          'Plan recovery strategy'
+        ],
+        formula: 'Additional Shares = (Loss Amount × Recovery %) ÷ Current Price'
       }
     },
     {
@@ -337,6 +355,10 @@ function App() {
 
     if (selectedCalculator.id === 'share-price-match') {
       return <SharePriceMatchCalculator />;
+    }
+
+    if (selectedCalculator.id === 'loss-recovery') {
+      return <LossRecoveryCalculator />;
     }
 
     // Default calculator view for other calculators
