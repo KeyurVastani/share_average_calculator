@@ -8,6 +8,7 @@ import CommonText from './components/CommonText';
 import HistoryScreen from './components/HistoryScreen';
 import LossRecoveryCalculator from './components/calculators/LossRecoveryCalculator';
 import DividendYieldCalculator from './components/calculators/DividendYieldCalculator';
+import AverageAnnualReturnCalculator from './components/calculators/AverageAnnualReturnCalculator';
 
 const { width, height } = Dimensions.get('window');
 
@@ -37,19 +38,19 @@ function App() {
   const calculatorTypes = [
     {
       id: 'cagr',
-      name: 'CAGR Calculator',
-      description: 'Compound Annual Growth Rate calculations',
+      name: 'Average Annual Return Calculator',
+      description: 'Calculate average annual returns and growth rates',
       icon: '📈',
       info: {
-        title: 'CAGR Calculator',
-        description: 'The Compound Annual Growth Rate (CAGR) calculator helps you determine the mean annual growth rate of an investment over a specified period of time.',
+        title: 'Average Annual Return Calculator',
+        description: 'Calculate the average annual return of your investments to understand long-term performance and compare different investment opportunities.',
         features: [
-          'Calculate annualized returns',
+          'Calculate average annual returns',
           'Compare investment performance',
-          'Project future growth',
-          'Analyze historical data'
+          'Analyze growth patterns',
+          'Evaluate long-term investments'
         ],
-        formula: 'CAGR = (End Value / Start Value)^(1/n) - 1'
+        formula: 'Average Annual Return = (End Value / Start Value)^(1/n) - 1'
       }
     },
     {
@@ -350,6 +351,10 @@ function App() {
     }
 
     // Render specific calculator based on ID
+    if (selectedCalculator.id === 'cagr') {
+      return <AverageAnnualReturnCalculator />;
+    }
+
     if (selectedCalculator.id === 'average-buy') {
       return <AverageBuyCalculator />;
     }
