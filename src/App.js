@@ -9,6 +9,7 @@ import HistoryScreen from './components/HistoryScreen';
 import LossRecoveryCalculator from './components/calculators/LossRecoveryCalculator';
 import DividendYieldCalculator from './components/calculators/DividendYieldCalculator';
 import CAGRCalculator from './components/calculators/AverageAnnualReturnCalculator';
+import StockSplitBonusCalculator from './components/calculators/StockSplitBonusCalculator';
 
 const { width, height } = Dimensions.get('window');
 
@@ -369,6 +370,10 @@ function App() {
 
     if (selectedCalculator.id === 'dividend-yield') {
       return <DividendYieldCalculator />;
+    }
+
+    if (selectedCalculator.id === 'stock-split') {
+      return <StockSplitBonusCalculator />;
     }
 
     // Default calculator view for other calculators
