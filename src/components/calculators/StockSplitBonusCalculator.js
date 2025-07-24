@@ -8,6 +8,61 @@ export const PixelSpacing = ({ size = 0, left = 0 ,right = 0,top = 0,bottom = 0}
   <View style={{ height: size, marginLeft: left, marginRight: right, marginTop: top, marginBottom: bottom }} />
 );
 
+// Stock Split Calculation Function
+const calculateStockSplit = ({
+  originalShares,
+  originalPrice,
+  splitNumerator,
+  splitDenominator,
+}) => {
+  // 🛡️ Input validation
+  if (
+    !originalShares || !originalPrice ||
+    !splitNumerator || !splitDenominator
+  ) {
+    return { error: "All fields are required." };
+  }
+
+  if (
+    originalShares <= 0 || originalPrice <= 0 ||
+    splitNumerator <= 0 || splitDenominator <= 0
+  ) {
+    return { error: "All values must be greater than 0." };
+  }
+
+  if (splitNumerator === splitDenominator) {
+    return {
+      error: "1:1 split has no effect. Consider using a bonus share instead.",
+    };
+  }
+
+  // ⚙️ Calculations
+  const ratio = splitNumerator / splitDenominator;
+  const newShares = originalShares * ratio;
+  const newPrice = originalPrice / ratio;
+  const totalValue = originalShares * originalPrice;
+
+  const isForwardSplit = splitNumerator > splitDenominator;
+  const isReverseSplit = splitNumerator < splitDenominator;
+
+  return {
+    originalShares,
+    originalPrice,
+    splitRatio: `${splitNumerator}:${splitDenominator}`,
+    newShares,
+    newPrice: parseFloat(newPrice.toFixed(2)),
+    totalValue,
+    type: isForwardSplit
+      ? "✅ Forward Stock Split"
+      : isReverseSplit
+      ? "⚠️ Reverse Stock Split"
+      : "❌ No effective split",
+    message: isForwardSplit
+      ? "You will get more shares at a lower price."
+      : "You will get fewer shares at a higher price.",
+  };
+};
+
 const StockSplitBonusCalculator = () => {
   const { 
     toggleHistoryModal, 
@@ -86,8 +141,8 @@ const StockSplitBonusCalculator = () => {
         return false;
       }
 
-      if (numerator <= denominator) {
-        Alert.alert('Error', 'Numerator must be greater than denominator (e.g. 2 for 2:1 split).');
+      if (numerator === denominator) {
+        Alert.alert('Error', '1:1 split has no effect. Consider using a bonus share instead.');
         return false;
       }
     }
@@ -127,13 +182,26 @@ const StockSplitBonusCalculator = () => {
     let extraShares = 0;
     let fractionalShares = 0;
     let totalValue = shares * price;
+    let splitInfo = null;
 
     // Calculate stock split effect
     if (corporateActionType === 'split' && splitNumerator > 0 && splitDenominatorValue > 0) {
-      const splitRatio = splitNumerator / splitDenominatorValue;
-      extraShares = (shares * splitRatio) - shares;
-      newShares = shares * splitRatio;
-      totalValue = newShares * (price / splitRatio);
+      const splitResult = calculateStockSplit({
+        originalShares: shares,
+        originalPrice: price,
+        splitNumerator: splitNumerator,
+        splitDenominator: splitDenominatorValue,
+      });
+
+      if (splitResult.error) {
+        Alert.alert('Error', splitResult.error);
+        return;
+      }
+
+      extraShares = splitResult.newShares - shares;
+      newShares = splitResult.newShares;
+      totalValue = splitResult.totalValue;
+      splitInfo = splitResult;
     }
 
     // Calculate bonus share effect (2:3 format means 2 bonus shares for every 3 shares held)
@@ -152,6 +220,7 @@ const StockSplitBonusCalculator = () => {
       totalShares: newShares.toFixed(0),
       totalValue: totalValue.toFixed(2),
       actionType: corporateActionType,
+      splitInfo: splitInfo,
       currentShares,
       currentPrice,
       splitRatio,
@@ -284,7 +353,7 @@ const StockSplitBonusCalculator = () => {
                 onChangeText={setSplitRatio}
               />
               <CommonText 
-                title="Enter 2 if ration 2:1" 
+                title="Enter 2 if ratio 2:1" 
                 textStyle={[12, '400', '#999']} 
               />
             </View>
@@ -299,7 +368,7 @@ const StockSplitBonusCalculator = () => {
                 onChangeText={setSplitDenominator}
               />
               <CommonText 
-                title="Enter 1 if ration 2:1" 
+                title="Enter 1 if ratio 2:1" 
                 textStyle={[12, '400', '#999']} 
               />
             </View>
@@ -316,7 +385,7 @@ const StockSplitBonusCalculator = () => {
                 onChangeText={setBonusRatio}
               />
               <CommonText 
-                title="Enter 2 if ration 2:3 " 
+                title="Enter 2 if ratio 2:3 " 
                 textStyle={[12, '400', '#999']} 
               />
             </View>
@@ -331,7 +400,7 @@ const StockSplitBonusCalculator = () => {
                 onChangeText={setBonusDenominator}
               />
               <CommonText 
-                title="Enter 3 if ration 2:3" 
+                title="Enter 3 if ratio 2:3" 
                 textStyle={[12, '400', '#999']} 
               />
             </View>
@@ -378,10 +447,46 @@ const StockSplitBonusCalculator = () => {
               </View>
             </View>
 
-            <PixelSpacing size={18}/>
+            {/* Split Information */}
+            {result.splitInfo && (
+              <>
+                <PixelSpacing size={12}/>
+                <View style={[styles.simpleResultItem, { 
+                  backgroundColor: result.splitInfo.type.includes('Reverse') ? '#ffebee' : '#e8f5e8',
+                  borderColor: result.splitInfo.type.includes('Reverse') ? '#f44336' : '#4caf50'
+                }]}>
+                  <View style={styles.simpleResultIcon}>
+                    <CommonText 
+                      title={result.splitInfo.type.includes('Reverse') ? "⚠️" : "✅"} 
+                      textStyle={[24, 'normal', result.splitInfo.type.includes('Reverse') ? '#f44336' : '#4caf50']} 
+                    />
+                  </View>
+                  <View style={styles.simpleResultContent}>
+                    <CommonText 
+                      title={result.splitInfo.type} 
+                      textStyle={[14, '500', '#666']} 
+                    />
+                    <CommonText 
+                      title={result.splitInfo.splitRatio} 
+                      textStyle={[20, 'bold', result.splitInfo.type.includes('Reverse') ? '#f44336' : '#4caf50']} 
+                    />
+                  </View>
+                </View>
+                <PixelSpacing size={8}/>
+                <View style={styles.splitMessageContainer}>
+                  <CommonText 
+                    title={result.splitInfo.message} 
+                    textStyle={[12, '400', result.splitInfo.type.includes('Reverse') ? '#f44336' : '#4caf50']} 
+                  />
+                </View>
+              </>
+            )}
+
+     
                 {/* Fractional Shares Section */}
           {parseFloat(result.fractionalShares) > 0 && (
             <>
+                   <PixelSpacing size={12}/>
               <View style={[styles.simpleResultItem, { backgroundColor: '#fff3e0', borderColor: '#ff9800' }]}>
                 <View style={styles.simpleResultIcon}>
                   <CommonText title="🔢" textStyle={[24, 'normal', '#ff9800']} />
@@ -412,7 +517,7 @@ const StockSplitBonusCalculator = () => {
                 </View>
             </>
           )}
-            <PixelSpacing size={18}/>
+            <PixelSpacing size={12}/>
 
             <View style={[styles.simpleResultItem, { backgroundColor: '#e3f2fd', borderColor: '#2196F3' }]}>
               <View style={styles.simpleResultIcon}>
@@ -429,7 +534,7 @@ const StockSplitBonusCalculator = () => {
                 />
               </View>
             </View>
-            <PixelSpacing size={18}/>
+            <PixelSpacing size={12}/>
             
             <View style={[styles.simpleResultItem, { backgroundColor: '#f3e5f5', borderColor: '#9c27b0' }]}>
               <View style={styles.simpleResultIcon}>
@@ -473,7 +578,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    padding: 16,
+    // padding: 16,
   },
   inputSection: {
     backgroundColor: 'white',
@@ -579,6 +684,9 @@ const styles = StyleSheet.create({
   },
   simpleResultContent: {
     flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   noteSection: {
     marginTop: 20,
@@ -587,6 +695,14 @@ const styles = StyleSheet.create({
     borderTopColor: '#eee',
   },
   redNoteSection: {
+  },
+  splitMessageContainer: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#eee',
   },
 });
 
