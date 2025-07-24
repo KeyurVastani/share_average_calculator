@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, Text } from 'react-native';
 import CommonText from '../CommonText';
 import useCalculatorStore from '../../store/calculatorStore';
 import SaveModal from '../SaveModal';
+
+export const PixelSpacing = ({ size = 0, left = 0 ,right = 0,top = 0,bottom = 0}) => (
+  <View style={{ height: size, marginLeft: left, marginRight: right, marginTop: top, marginBottom: bottom }} />
+);
 
 const StockSplitBonusCalculator = () => {
   const { 
@@ -140,15 +144,14 @@ const StockSplitBonusCalculator = () => {
     if (actionType === 'bonus' && bonusNumerator > 0 && bonusDenominatorValue > 0) {
       // Bonus Shares = (Original Shares × Bonus Numerator) ÷ Bonus Denominator
       // For 2:3 ratio: Bonus Shares = (Original Shares × 2) ÷ 3
-      const exactBonusShares = (shares * bonusNumerator) / bonusDenominatorValue;
-      extraShares = Math.floor(exactBonusShares);
-      fractionalShares = exactBonusShares - extraShares;
-      newShares = shares + extraShares;
+      extraShares = (shares * bonusNumerator) / bonusDenominatorValue;
+      fractionalShares = extraShares - Math.floor(extraShares);
+      newShares = shares + Math.floor(extraShares);
       totalValue = newShares * price; // Price remains the same for bonus shares
     }
 
     setResult({
-      extraShares: extraShares.toFixed(0),
+      extraShares: extraShares.toFixed(2),
       fractionalShares: fractionalShares.toFixed(2),
       totalShares: newShares.toFixed(0),
       totalValue: totalValue.toFixed(2),
@@ -378,8 +381,11 @@ const StockSplitBonusCalculator = () => {
                 />
               </View>
             </View>
-            
-            {parseFloat(result.fractionalShares) > 0 && (
+
+            <PixelSpacing size={18}/>
+                {/* Fractional Shares Section */}
+          {parseFloat(result.fractionalShares) > 0 && (
+            <>
               <View style={[styles.simpleResultItem, { backgroundColor: '#fff3e0', borderColor: '#ff9800' }]}>
                 <View style={styles.simpleResultIcon}>
                   <CommonText title="🔢" textStyle={[24, 'normal', '#ff9800']} />
@@ -395,8 +401,23 @@ const StockSplitBonusCalculator = () => {
                   />
                 </View>
               </View>
-            )}
-            
+              <PixelSpacing size={12}/>
+
+              {/* Red Note */}
+                <CommonText 
+                  title="⚠️ Note:" 
+                  textStyle={[14, 'bold', '#d32f2f']} 
+                />
+                <View style={{marginLeft: 24}}>
+                <CommonText 
+                  title="The fractional value is paid in cash or ignored based on company policy." 
+                  textStyle={[12,400, '#d32f2f']} 
+                />
+                </View>
+            </>
+          )}
+            <PixelSpacing size={18}/>
+
             <View style={[styles.simpleResultItem, { backgroundColor: '#e3f2fd', borderColor: '#2196F3' }]}>
               <View style={styles.simpleResultIcon}>
                 <CommonText title="📈" textStyle={[24, 'normal', '#2196F3']} />
@@ -412,6 +433,7 @@ const StockSplitBonusCalculator = () => {
                 />
               </View>
             </View>
+            <PixelSpacing size={18}/>
             
             <View style={[styles.simpleResultItem, { backgroundColor: '#f3e5f5', borderColor: '#9c27b0' }]}>
               <View style={styles.simpleResultIcon}>
@@ -423,26 +445,14 @@ const StockSplitBonusCalculator = () => {
                   textStyle={[14, '500', '#666']} 
                 />
                 <CommonText 
-                  title={`$${result.totalValue}`} 
+                  title={`₹${result.totalValue}`} 
                   textStyle={[20, 'bold', '#9c27b0']} 
                 />
               </View>
             </View>
           </View>
 
-          {/* Fractional Shares Note */}
-          {parseFloat(result.fractionalShares) > 0 && (
-            <View style={styles.noteSection}>
-              <CommonText 
-                title="📝 Note:" 
-                textStyle={[14, 'bold', '#666']} 
-              />
-              <CommonText 
-                title="The fractional value is paid in cash or ignored based on company policy." 
-                textStyle={[12, '400', '#999']} 
-              />
-            </View>
-          )}
+      
         </View>
       )}
 
@@ -554,7 +564,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   simpleResultsGrid: {
-    gap: 16,
+    // gap: 16,
   },
   simpleResultItem: {
     flexDirection: 'row',
@@ -579,6 +589,8 @@ const styles = StyleSheet.create({
     paddingTop: 15,
     borderTopWidth: 1,
     borderTopColor: '#eee',
+  },
+  redNoteSection: {
   },
 });
 
