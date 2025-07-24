@@ -16,7 +16,9 @@ const StockSplitBonusCalculator = () => {
     getCalculationsForType, 
     loadedCalculation, 
     clearLoadedCalculation,
-    editingCalculationId
+    editingCalculationId,
+    corporateActionType,
+    setCorporateActionType
   } = useCalculatorStore();
   
   const savedCalculations = getCalculationsForType('stock-split');
@@ -26,7 +28,6 @@ const StockSplitBonusCalculator = () => {
   const [splitDenominator, setSplitDenominator] = useState('');
   const [bonusRatio, setBonusRatio] = useState('');
   const [bonusDenominator, setBonusDenominator] = useState('');
-  const [actionType, setActionType] = useState('split'); // 'split' or 'bonus'
   const [result, setResult] = useState(null);
 
   // Handle loading saved calculations
@@ -39,13 +40,13 @@ const StockSplitBonusCalculator = () => {
       setSplitDenominator(loadedCalculation.splitDenominator || '');
       setBonusRatio(loadedCalculation.bonusRatio || '');
       setBonusDenominator(loadedCalculation.bonusDenominator || '');
-      setActionType(loadedCalculation.actionType || 'split');
+      setCorporateActionType(loadedCalculation.actionType || 'split');
       clearLoadedCalculation();
     }
   }, [loadedCalculation, clearLoadedCalculation]);
 
   const handleActionTypeChange = (type) => {
-    setActionType(type);
+    setCorporateActionType(type);
     if (type === 'split') {
       setBonusRatio('');
       setBonusDenominator('');
@@ -71,7 +72,7 @@ const StockSplitBonusCalculator = () => {
     }
 
     // Validate split ratio
-    if (actionType === 'split') {
+    if (corporateActionType === 'split') {
       if (!splitRatio || !splitDenominator) {
         Alert.alert('Error', 'Please enter both numerator and denominator for split ratio.');
         return false;
@@ -86,13 +87,13 @@ const StockSplitBonusCalculator = () => {
       }
 
       if (numerator <= denominator) {
-        Alert.alert('Error', 'Numerator must be greater than denominator (e.g., 2 for 2:1 split).');
+        Alert.alert('Error', 'Numerator must be greater than denominator (e.g. 2 for 2:1 split).');
         return false;
       }
     }
 
     // Validate bonus ratio
-    if (actionType === 'bonus') {
+    if (corporateActionType === 'bonus') {
       if (!bonusRatio || !bonusDenominator) {
         Alert.alert('Error', 'Please enter both numerator and denominator for bonus ratio.');
         return false;
@@ -103,11 +104,6 @@ const StockSplitBonusCalculator = () => {
 
       if (isNaN(numerator) || isNaN(denominator) || numerator <= 0 || denominator <= 0) {
         Alert.alert('Error', 'Numerator and denominator must be positive numbers.');
-        return false;
-      }
-
-      if (numerator >= denominator) {
-        Alert.alert('Error', 'Numerator must be less than denominator (e.g., 2 for 2:3 bonus).');
         return false;
       }
     }
@@ -133,7 +129,7 @@ const StockSplitBonusCalculator = () => {
     let totalValue = shares * price;
 
     // Calculate stock split effect
-    if (actionType === 'split' && splitNumerator > 0 && splitDenominatorValue > 0) {
+    if (corporateActionType === 'split' && splitNumerator > 0 && splitDenominatorValue > 0) {
       const splitRatio = splitNumerator / splitDenominatorValue;
       extraShares = (shares * splitRatio) - shares;
       newShares = shares * splitRatio;
@@ -141,7 +137,7 @@ const StockSplitBonusCalculator = () => {
     }
 
     // Calculate bonus share effect (2:3 format means 2 bonus shares for every 3 shares held)
-    if (actionType === 'bonus' && bonusNumerator > 0 && bonusDenominatorValue > 0) {
+    if (corporateActionType === 'bonus' && bonusNumerator > 0 && bonusDenominatorValue > 0) {
       // Bonus Shares = (Original Shares × Bonus Numerator) ÷ Bonus Denominator
       // For 2:3 ratio: Bonus Shares = (Original Shares × 2) ÷ 3
       extraShares = (shares * bonusNumerator) / bonusDenominatorValue;
@@ -155,7 +151,7 @@ const StockSplitBonusCalculator = () => {
       fractionalShares: fractionalShares.toFixed(2),
       totalShares: newShares.toFixed(0),
       totalValue: totalValue.toFixed(2),
-      actionType: actionType,
+      actionType: corporateActionType,
       currentShares,
       currentPrice,
       splitRatio,
@@ -172,7 +168,7 @@ const StockSplitBonusCalculator = () => {
     setSplitDenominator('');
     setBonusRatio('');
     setBonusDenominator('');
-    setActionType('split');
+    setCorporateActionType('split');
     setResult(null);
   };
 
@@ -186,7 +182,7 @@ const StockSplitBonusCalculator = () => {
         splitDenominator,
         bonusRatio,
         bonusDenominator,
-        actionType
+        actionType: corporateActionType
       }, 'stock-split');
     } else {
       toggleSaveModal();
@@ -209,7 +205,7 @@ const StockSplitBonusCalculator = () => {
             <CommonText title="Current Shares" textStyle={[14, '500', '#666']} />
             <TextInput
               style={styles.input}
-              placeholder="e.g., 100"
+              placeholder="e.g. 100"
               keyboardType="numeric"
               value={currentShares}
               onChangeText={setCurrentShares}
@@ -220,7 +216,7 @@ const StockSplitBonusCalculator = () => {
             <CommonText title="Current Price" textStyle={[14, '500', '#666']} />
             <TextInput
               style={styles.input}
-              placeholder="e.g., 150.00"
+              placeholder="e.g. 150.00"
               keyboardType="numeric"
               value={currentPrice}
               onChangeText={setCurrentPrice}
@@ -242,26 +238,26 @@ const StockSplitBonusCalculator = () => {
           <TouchableOpacity 
             style={[
               styles.actionTypeButton, 
-              actionType === 'split' && styles.actionTypeButtonActive
+              corporateActionType === 'split' && styles.actionTypeButtonActive
             ]} 
             onPress={() => handleActionTypeChange('split')}
           >
             <CommonText 
               title="📊 Stock Split" 
-              textStyle={[14, '600', actionType === 'split' ? 'white' : '#666']} 
+              textStyle={[14, '600', corporateActionType === 'split' ? 'white' : '#666']} 
             />
           </TouchableOpacity>
           
           <TouchableOpacity 
             style={[
               styles.actionTypeButton, 
-              actionType === 'bonus' && styles.actionTypeButtonActive
+              corporateActionType === 'bonus' && styles.actionTypeButtonActive
             ]} 
             onPress={() => handleActionTypeChange('bonus')}
           >
             <CommonText 
               title="🎁 Bonus Shares" 
-              textStyle={[14, '600', actionType === 'bonus' ? 'white' : '#666']} 
+              textStyle={[14, '600', corporateActionType === 'bonus' ? 'white' : '#666']} 
             />
           </TouchableOpacity>
         </View>
@@ -271,24 +267,24 @@ const StockSplitBonusCalculator = () => {
       <View style={styles.inputSection}>
         <View style={styles.sectionHeader}>
           <CommonText 
-            title={actionType === 'split' ? "📊 Stock Split Details" : "🎁 Bonus Share Details"} 
+            title={corporateActionType === 'split' ? "📊 Stock Split Details" : "🎁 Bonus Share Details"} 
             textStyle={[18, 'bold', '#333']} 
           />
         </View>
         
-        {actionType === 'split' ? (
+        {corporateActionType === 'split' ? (
           <View style={styles.inputRow}>
             <View style={styles.inputContainer}>
               <CommonText title="Split Numerator" textStyle={[14, '500', '#666']} />
               <TextInput
                 style={styles.input}
-                placeholder="e.g., 2"
+                placeholder="e.g. 2"
                 keyboardType="numeric"
                 value={splitRatio}
                 onChangeText={setSplitRatio}
               />
               <CommonText 
-                title="Numerator (e.g., 2)" 
+                title="Enter 2 if ration 2:1" 
                 textStyle={[12, '400', '#999']} 
               />
             </View>
@@ -297,13 +293,13 @@ const StockSplitBonusCalculator = () => {
               <CommonText title="Split Denominator" textStyle={[14, '500', '#666']} />
               <TextInput
                 style={styles.input}
-                placeholder="e.g., 1"
+                placeholder="e.g. 1"
                 keyboardType="numeric"
                 value={splitDenominator}
                 onChangeText={setSplitDenominator}
               />
               <CommonText 
-                title="Denominator (e.g., 1)" 
+                title="Enter 1 if ration 2:1" 
                 textStyle={[12, '400', '#999']} 
               />
             </View>
@@ -314,13 +310,13 @@ const StockSplitBonusCalculator = () => {
               <CommonText title="Bonus Numerator" textStyle={[14, '500', '#666']} />
               <TextInput
                 style={styles.input}
-                placeholder="e.g., 2 (for 2:3 bonus)"
+                placeholder="e.g. 2"
                 keyboardType="numeric"
                 value={bonusRatio}
                 onChangeText={setBonusRatio}
               />
               <CommonText 
-                title="Enter numerator (e.g., 2 for 2:3 bonus)" 
+                title="Enter 2 if ration 2:3 " 
                 textStyle={[12, '400', '#999']} 
               />
             </View>
@@ -329,13 +325,13 @@ const StockSplitBonusCalculator = () => {
               <CommonText title="Bonus Denominator" textStyle={[14, '500', '#666']} />
               <TextInput
                 style={styles.input}
-                placeholder="e.g., 3 (for 2:3 bonus)"
+                placeholder="e.g. 3 "
                 keyboardType="numeric"
                 value={bonusDenominator}
                 onChangeText={setBonusDenominator}
               />
               <CommonText 
-                title="Enter denominator (e.g., 3 for 2:3 bonus)" 
+                title="Enter 3 if ration 2:3" 
                 textStyle={[12, '400', '#999']} 
               />
             </View>
@@ -466,7 +462,7 @@ const StockSplitBonusCalculator = () => {
           splitDenominator,
           bonusRatio,
           bonusDenominator,
-          actionType
+          actionType: corporateActionType
         }}
       />
     </ScrollView>

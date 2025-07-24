@@ -12,6 +12,7 @@ const useCalculatorStore = create(
       showInfoModal: false,
       showHistoryModal: false,
       showSaveModal: false,
+      corporateActionType: 'split', // Store the selected corporate action type
       savedCalculations: {
         'average-buy': [],
         'share-price-match': [],
@@ -47,6 +48,16 @@ const useCalculatorStore = create(
 
       setSaveModalVisible: (visible) => {
         set({ showSaveModal: visible });
+      },
+      
+      // Corporate Action Type functions
+      setCorporateActionType: (actionType) => {
+        set({ corporateActionType: actionType });
+      },
+      
+      getCorporateActionType: () => {
+        const { corporateActionType } = get();
+        return corporateActionType;
       },
       
       // Combined actions for better UX
@@ -190,6 +201,7 @@ const useCalculatorStore = create(
           showInfoModal: false,
           showHistoryModal: false,
           showSaveModal: false,
+          corporateActionType: 'split',
           loadedCalculation: null,
           editingCalculationId: null,
         });
@@ -201,6 +213,7 @@ const useCalculatorStore = create(
       partialize: (state) => ({
         selectedCalculator: state.selectedCalculator, // only persist selectedCalculator
         savedCalculations: state.savedCalculations, // persist saved calculations
+        corporateActionType: state.corporateActionType, // persist corporate action type
       }),
     }
   )
