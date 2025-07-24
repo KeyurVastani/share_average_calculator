@@ -54,23 +54,23 @@ function App() {
         formula: 'CAGR = (Final Value / Initial Value)^(1/Years) - 1'
       }
     },
-    {
-      id: 'sip',
-      name: 'SIP Calculator',
-      description: 'Systematic Investment Plan calculations',
-      icon: '💰',
-      info: {
-        title: 'SIP Calculator',
-        description: 'The Systematic Investment Plan (SIP) calculator helps you estimate the future value of regular investments made at fixed intervals.',
-        features: [
-          'Calculate future corpus',
-          'Plan regular investments',
-          'Understand compound growth',
-          'Set financial goals'
-        ],
-        formula: 'Future Value = P × [(1 + r)^n - 1] / r'
-      }
-    },
+    // {
+    //   id: 'sip',
+    //   name: 'SIP Calculator',
+    //   description: 'Systematic Investment Plan calculations',
+    //   icon: '💰',
+    //   info: {
+    //     title: 'SIP Calculator',
+    //     description: 'The Systematic Investment Plan (SIP) calculator helps you estimate the future value of regular investments made at fixed intervals.',
+    //     features: [
+    //       'Calculate future corpus',
+    //       'Plan regular investments',
+    //       'Understand compound growth',
+    //       'Set financial goals'
+    //     ],
+    //     formula: 'Future Value = P × [(1 + r)^n - 1] / r'
+    //   }
+    // },
     {
       id: 'intraday',
       name: 'Intraday Profit/Loss Calculator',
@@ -140,23 +140,6 @@ function App() {
       }
     },
     {
-      id: 'options-pnl',
-      name: 'Options P&L Calculator',
-      description: 'Options profit and loss calculations',
-      icon: '📉',
-      info: {
-        title: 'Options P&L Calculator',
-        description: 'Calculate profit and loss for options trading, including calls and puts.',
-        features: [
-          'Calculate options P&L',
-          'Support for calls and puts',
-          'Include premium costs',
-          'Analyze risk-reward'
-        ],
-        formula: 'P&L = (Current Price - Strike Price) × Lot Size - Premium Paid'
-      }
-    },
-    {
       id: 'dividend-yield',
       name: 'Dividend Yield Calculator',
       description: 'Calculate dividend yield percentage',
@@ -171,6 +154,23 @@ function App() {
           'Plan income portfolio'
         ],
         formula: 'Dividend Yield = (Annual Dividend / Current Price) × 100'
+      }
+    },
+    {
+      id: 'stock-split',
+      name: 'Stock Split / Bonus Share Calculator',
+      description: 'Calculate stock splits and bonus shares',
+      icon: '🎁',
+      info: {
+        title: 'Stock Split / Bonus Calculator',
+        description: 'Calculate the impact of stock splits and bonus share issues on your holdings.',
+        features: [
+          'Calculate post-split holdings',
+          'Adjust average price',
+          'Track bonus shares',
+          'Update portfolio value'
+        ],
+        formula: 'New Quantity = Old Quantity × Split Ratio'
       }
     },
     {
@@ -225,20 +225,20 @@ function App() {
       }
     },
     {
-      id: 'stock-split',
-      name: 'Stock Split / Bonus Share Calculator',
-      description: 'Calculate stock splits and bonus shares',
-      icon: '🎁',
+      id: 'options-pnl',
+      name: 'Options P&L Calculator',
+      description: 'Options profit and loss calculations',
+      icon: '📉',
       info: {
-        title: 'Stock Split / Bonus Calculator',
-        description: 'Calculate the impact of stock splits and bonus share issues on your holdings.',
+        title: 'Options P&L Calculator',
+        description: 'Calculate profit and loss for options trading, including calls and puts.',
         features: [
-          'Calculate post-split holdings',
-          'Adjust average price',
-          'Track bonus shares',
-          'Update portfolio value'
+          'Calculate options P&L',
+          'Support for calls and puts',
+          'Include premium costs',
+          'Analyze risk-reward'
         ],
-        formula: 'New Quantity = Old Quantity × Split Ratio'
+        formula: 'P&L = (Current Price - Strike Price) × Lot Size - Premium Paid'
       }
     },
   ];
@@ -317,9 +317,11 @@ function App() {
         >
           <View style={styles.modalCardHeader}>
             <Text style={styles.modalCardIcon}>{item.icon}</Text>
-            <View style={styles.modalCardBadge}>
-              <Text style={styles.modalCardBadgeText}>{index + 1}</Text>
-            </View>
+            {isSelected && (
+              <View style={styles.modalCardBadge}>
+                <Text style={styles.modalCardBadgeText}>✓</Text>
+              </View>
+            )}
           </View>
           <Text style={styles.modalCalculatorName}>{item.name}</Text>
           <Text style={styles.modalCalculatorDescription}>{item.description}</Text>
