@@ -53,9 +53,9 @@ const calculateStockSplit = ({
     newPrice: parseFloat(newPrice.toFixed(2)),
     totalValue,
     type: isForwardSplit
-      ? "✅ Forward Stock Split"
+      ? "Forward Stock Split"
       : isReverseSplit
-      ? "⚠️ Reverse Stock Split"
+      ? "Reverse Stock Split"
       : "❌ No effective split",
     message: isForwardSplit
       ? "You will get more shares at a lower price."
@@ -84,6 +84,7 @@ const StockSplitBonusCalculator = () => {
   const [bonusRatio, setBonusRatio] = useState('');
   const [bonusDenominator, setBonusDenominator] = useState('');
   const [result, setResult] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Handle loading saved calculations
   useEffect(() => {
@@ -167,67 +168,82 @@ const StockSplitBonusCalculator = () => {
   };
 
   const calculateSplitAndBonus = () => {
+    // Clear previous results and start loading
+    setResult(null);
+    setIsLoading(true);
+
+    // Validate inputs
     if (!validateInputs()) {
+      setIsLoading(false);
       return;
     }
 
-    const shares = parseFloat(currentShares);
-    const price = parseFloat(currentPrice);
-    const splitNumerator = splitRatio ? parseFloat(splitRatio) : 0;
-    const splitDenominatorValue = splitDenominator ? parseFloat(splitDenominator) : 0;
-    const bonusNumerator = bonusRatio ? parseFloat(bonusRatio) : 0;
-    const bonusDenominatorValue = bonusDenominator ? parseFloat(bonusDenominator) : 0;
+    try {
+      const shares = parseFloat(currentShares);
+      const price = parseFloat(currentPrice);
+      const splitNumerator = splitRatio ? parseFloat(splitRatio) : 0;
+      const splitDenominatorValue = splitDenominator ? parseFloat(splitDenominator) : 0;
+      const bonusNumerator = bonusRatio ? parseFloat(bonusRatio) : 0;
+      const bonusDenominatorValue = bonusDenominator ? parseFloat(bonusDenominator) : 0;
 
-    let newShares = shares;
-    let extraShares = 0;
-    let fractionalShares = 0;
-    let totalValue = shares * price;
-    let splitInfo = null;
+      let newShares = shares;
+      let extraShares = 0;
+      let fractionalShares = 0;
+      let totalValue = shares * price;
+      let splitInfo = null;
 
-    // Calculate stock split effect
-    if (corporateActionType === 'split' && splitNumerator > 0 && splitDenominatorValue > 0) {
-      const splitResult = calculateStockSplit({
-        originalShares: shares,
-        originalPrice: price,
-        splitNumerator: splitNumerator,
-        splitDenominator: splitDenominatorValue,
-      });
+      // Calculate stock split effect
+      if (corporateActionType === 'split' && splitNumerator > 0 && splitDenominatorValue > 0) {
+        const splitResult = calculateStockSplit({
+          originalShares: shares,
+          originalPrice: price,
+          splitNumerator: splitNumerator,
+          splitDenominator: splitDenominatorValue,
+        });
 
-      if (splitResult.error) {
-        Alert.alert('Error', splitResult.error);
-        return;
+        if (splitResult.error) {
+          Alert.alert('Error', splitResult.error);
+          setIsLoading(false);
+          return;
+        }
+
+        extraShares = splitResult.newShares - shares;
+        newShares = splitResult.newShares;
+        totalValue = splitResult.totalValue;
+        splitInfo = splitResult;
       }
 
-      extraShares = splitResult.newShares - shares;
-      newShares = splitResult.newShares;
-      totalValue = splitResult.totalValue;
-      splitInfo = splitResult;
-    }
+      // Calculate bonus share effect (2:3 format means 2 bonus shares for every 3 shares held)
+      if (corporateActionType === 'bonus' && bonusNumerator > 0 && bonusDenominatorValue > 0) {
+        // Bonus Shares = (Original Shares × Bonus Numerator) ÷ Bonus Denominator
+        // For 2:3 ratio: Bonus Shares = (Original Shares × 2) ÷ 3
+        extraShares = (shares * bonusNumerator) / bonusDenominatorValue;
+        fractionalShares = extraShares - Math.floor(extraShares);
+        newShares = shares + Math.floor(extraShares);
+        totalValue = newShares * price; // Price remains the same for bonus shares
+      }
 
-    // Calculate bonus share effect (2:3 format means 2 bonus shares for every 3 shares held)
-    if (corporateActionType === 'bonus' && bonusNumerator > 0 && bonusDenominatorValue > 0) {
-      // Bonus Shares = (Original Shares × Bonus Numerator) ÷ Bonus Denominator
-      // For 2:3 ratio: Bonus Shares = (Original Shares × 2) ÷ 3
-      extraShares = (shares * bonusNumerator) / bonusDenominatorValue;
-      fractionalShares = extraShares - Math.floor(extraShares);
-      newShares = shares + Math.floor(extraShares);
-      totalValue = newShares * price; // Price remains the same for bonus shares
-    }
+      // Set the result
+      setResult({
+        extraShares: extraShares.toFixed(2),
+        fractionalShares: fractionalShares.toFixed(2),
+        totalShares: newShares.toFixed(0),
+        totalValue: totalValue.toFixed(2),
+        actionType: corporateActionType,
+        splitInfo: splitInfo,
+        currentShares,
+        currentPrice,
+        splitRatio,
+        splitDenominator,
+        bonusRatio,
+        bonusDenominator
+      });
 
-    setResult({
-      extraShares: extraShares.toFixed(2),
-      fractionalShares: fractionalShares.toFixed(2),
-      totalShares: newShares.toFixed(0),
-      totalValue: totalValue.toFixed(2),
-      actionType: corporateActionType,
-      splitInfo: splitInfo,
-      currentShares,
-      currentPrice,
-      splitRatio,
-      splitDenominator,
-      bonusRatio,
-      bonusDenominator
-    });
+    } catch (error) {
+      Alert.alert('Error', 'Your entered values are wrong. Please check your inputs and try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const resetCalculator = () => {
@@ -239,6 +255,7 @@ const StockSplitBonusCalculator = () => {
     setBonusDenominator('');
     setCorporateActionType('split');
     setResult(null);
+    setIsLoading(false);
   };
 
   const handleSave = () => {
@@ -410,17 +427,46 @@ const StockSplitBonusCalculator = () => {
 
       {/* Action Buttons */}
       <View style={styles.buttonSection}>
-        <TouchableOpacity style={styles.calculateButton} onPress={calculateSplitAndBonus}>
-          <CommonText title="Calculate" textStyle={[16, 'bold', 'white']} />
+        <TouchableOpacity 
+          style={[
+            styles.calculateButton, 
+            isLoading && styles.calculateButtonDisabled
+          ]} 
+          onPress={calculateSplitAndBonus}
+          disabled={isLoading}
+        >
+          <CommonText 
+            title={isLoading ? "Calculating..." : "Calculate"} 
+            textStyle={[16, 'bold', 'white']} 
+          />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.resetButton} onPress={resetCalculator}>
+        <TouchableOpacity 
+          style={styles.resetButton} 
+          onPress={resetCalculator}
+          disabled={isLoading}
+        >
           <CommonText title="Reset" textStyle={[16, '600', '#666']} />
         </TouchableOpacity>
       </View>
 
       {/* Results */}
-      {result && (
+      {isLoading && (
+        <View style={styles.resultSection}>
+          <View style={styles.loadingContainer}>
+            <CommonText 
+              title="🔄 Calculating..." 
+              textStyle={[18, 'bold', '#666']} 
+            />
+            <CommonText 
+              title="Please wait while we process your calculation" 
+              textStyle={[14, '400', '#999']} 
+            />
+          </View>
+        </View>
+      )}
+
+      {result && !isLoading && (
         <View style={styles.resultSection}>
           <View style={styles.resultHeader}>
             <CommonText 
@@ -642,6 +688,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 10,
   },
+  calculateButtonDisabled: {
+    backgroundColor: '#a0d7e7', // A slightly different shade for disabled state
+    opacity: 0.7,
+  },
   resetButton: {
     backgroundColor: '#f5f5f5',
     paddingVertical: 16,
@@ -703,6 +753,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     borderWidth: 1,
     borderColor: '#eee',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
   },
 });
 
