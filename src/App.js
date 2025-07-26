@@ -10,6 +10,7 @@ import LossRecoveryCalculator from './components/calculators/LossRecoveryCalcula
 import DividendYieldCalculator from './components/calculators/DividendYieldCalculator';
 import CAGRCalculator from './components/calculators/AverageAnnualReturnCalculator';
 import StockSplitBonusCalculator from './components/calculators/StockSplitBonusCalculator';
+import ProfitLossCalculator from './components/calculators/ProfitLossCalculator';
 
 const { width, height } = Dimensions.get('window');
 
@@ -162,15 +163,34 @@ function App() {
       description: 'Calculate stock splits and bonus shares',
       icon: '🎁',
       info: {
-        title: 'Stock Split / Bonus Calculator',
-        description: 'Calculate the impact of stock splits and bonus share issues on your holdings.',
+        title: 'Stock Split / Bonus Share Calculator',
+        description: 'Calculate the effects of stock splits and bonus share distributions on your portfolio.',
         features: [
-          'Calculate post-split holdings',
-          'Adjust average price',
-          'Track bonus shares',
+          'Calculate stock split effects',
+          'Handle bonus share distributions',
+          'Support reverse splits',
+          'Track fractional shares',
           'Update portfolio value'
         ],
         formula: 'New Quantity = Old Quantity × Split Ratio'
+      }
+    },
+    {
+      id: 'profit-loss',
+      name: 'Profit & Loss Calculator',
+      description: 'Calculate profit and loss from trades',
+      icon: '💰',
+      info: {
+        title: 'Profit & Loss Calculator',
+        description: 'Calculate profit and loss from your stock trades with percentage returns.',
+        features: [
+          'Calculate profit/loss amount',
+          'Show percentage returns',
+          'Track total buy/sell values',
+          'Support multiple quantities',
+          'Save trade history'
+        ],
+        formula: 'P&L = (Sell Price - Buy Price) × Quantity'
       }
     },
     {
@@ -377,6 +397,14 @@ function App() {
     if (selectedCalculator.id === 'stock-split') {
       return <StockSplitBonusCalculator />;
     }
+
+    if (selectedCalculator.id === 'profit-loss') {
+      return <ProfitLossCalculator />;
+    }
+
+    // if (selectedCalculator.id === 'stop-loss') {
+    //   return <StopLossCalculator />;
+    // }
 
     // Default calculator view for other calculators
     return (
@@ -947,7 +975,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   modalList: {
-    padding: 15,
+    paddingHorizontal: 15,
+    paddingTop: 15,
+    paddingBottom: 0,
   },
   modalCardContainer: {
     width: '48%',

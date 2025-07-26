@@ -25,7 +25,8 @@ const useCalculatorStore = create(
         'stop-loss': [],
         'margin': [],
         'tax-brokerage': [],
-        'stock-split': []
+        'stock-split': [],
+        'profit-loss': []
       },
       loadedCalculation: null,
       editingCalculationId: null, // Track which calculation is being edited
