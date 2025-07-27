@@ -11,6 +11,7 @@ import DividendYieldCalculator from './components/calculators/DividendYieldCalcu
 import CAGRCalculator from './components/calculators/AverageAnnualReturnCalculator';
 import StockSplitBonusCalculator from './components/calculators/StockSplitBonusCalculator';
 import ProfitLossCalculator from './components/calculators/ProfitLossCalculator';
+import MarginCalculator from './components/calculators/MarginCalculator';
 
 const { width, height } = Dimensions.get('window');
 
@@ -72,23 +73,6 @@ function App() {
     //     formula: 'Future Value = P × [(1 + r)^n - 1] / r'
     //   }
     // },
-    {
-      id: 'intraday',
-      name: 'Intraday Profit/Loss Calculator',
-      description: 'Calculate intraday trading P&L',
-      icon: '📊',
-      info: {
-        title: 'Intraday P&L Calculator',
-        description: 'Calculate your profit or loss from intraday trading, including all charges and taxes.',
-        features: [
-          'Calculate net P&L',
-          'Include brokerage charges',
-          'Account for taxes',
-          'Track daily performance'
-        ],
-        formula: 'P&L = (Sell Price - Buy Price) × Quantity - Charges'
-      }
-    },
     {
       id: 'average-buy',
       name: 'Average Buying Price Calculator',
@@ -194,6 +178,24 @@ function App() {
       }
     },
     {
+      id: 'margin',
+      name: 'Margin Calculator',
+      description: 'Calculate margin requirements for trading',
+      icon: '📊',
+      info: {
+        title: 'Margin Calculator',
+        description: 'Calculate margin requirements for intraday and delivery trading with leverage options.',
+        features: [
+          'Calculate delivery margin (1x leverage)',
+          'Calculate intraday margin (custom leverage)',
+          'Show shares that can be bought',
+          'Track remaining amount',
+          'Compare both trading modes'
+        ],
+        formula: 'Shares = (Amount × Leverage) ÷ Share Price'
+      }
+    },
+    {
       id: 'stop-loss',
       name: 'Stop Loss / Target Calculator',
       description: 'Calculate stop loss and target levels',
@@ -208,23 +210,6 @@ function App() {
           'Plan exit strategies'
         ],
         formula: 'Stop Loss = Entry Price - (Entry Price × Risk %)'
-      }
-    },
-    {
-      id: 'margin',
-      name: 'Margin Requirement Calculator',
-      description: 'Calculate margin requirements',
-      icon: '💳',
-      info: {
-        title: 'Margin Requirement Calculator',
-        description: 'Calculate the margin requirements for trading on leverage and understand your capital needs.',
-        features: [
-          'Calculate margin requirements',
-          'Understand leverage',
-          'Plan capital allocation',
-          'Manage risk exposure'
-        ],
-        formula: 'Margin Required = (Position Value × Margin Rate) / 100'
       }
     },
     {
@@ -259,6 +244,23 @@ function App() {
           'Analyze risk-reward'
         ],
         formula: 'P&L = (Current Price - Strike Price) × Lot Size - Premium Paid'
+      }
+    },
+    {
+      id: 'intraday',
+      name: 'Intraday Profit/Loss Calculator',
+      description: 'Calculate intraday trading P&L',
+      icon: '📊',
+      info: {
+        title: 'Intraday P&L Calculator',
+        description: 'Calculate your profit or loss from intraday trading, including all charges and taxes.',
+        features: [
+          'Calculate net P&L',
+          'Include brokerage charges',
+          'Account for taxes',
+          'Track daily performance'
+        ],
+        formula: 'P&L = (Sell Price - Buy Price) × Quantity - Charges'
       }
     },
   ];
@@ -400,6 +402,10 @@ function App() {
 
     if (selectedCalculator.id === 'profit-loss') {
       return <ProfitLossCalculator />;
+    }
+
+    if (selectedCalculator.id === 'margin') {
+      return <MarginCalculator />;
     }
 
     // if (selectedCalculator.id === 'stop-loss') {
