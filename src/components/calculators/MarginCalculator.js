@@ -1,34 +1,52 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import CommonText from '../CommonText';
 import useCalculatorStore from '../../store/calculatorStore';
 import SaveModal from '../SaveModal';
 
-export const PixelSpacing = ({ size = 0, left = 0, right = 0, top = 0, bottom = 0 }) => (
-  <View style={{ height: size, marginLeft: left, marginRight: right, marginTop: top, marginBottom: bottom }} />
+export const PixelSpacing = ({
+  size = 0,
+  left = 0,
+  right = 0,
+  top = 0,
+  bottom = 0,
+}) => (
+  <View
+    style={{
+      height: size,
+      marginLeft: left,
+      marginRight: right,
+      marginTop: top,
+      marginBottom: bottom,
+    }}
+  />
 );
 
 const MarginCalculator = () => {
-  const {
-    toggleSaveModal,
-    saveCalculation,
-    editingCalculationId
-  } = useCalculatorStore();
+  const { toggleSaveModal, saveCalculation, editingCalculationId } =
+    useCalculatorStore();
 
   const [amount, setAmount] = useState('');
   const [sharePrice, setSharePrice] = useState('');
   const [selectedOptions, setSelectedOptions] = useState({
     intraday: false,
-    delivery: false
+    delivery: false,
   });
   const [intradayLeverage, setIntradayLeverage] = useState('');
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleOptionToggle = (option) => {
+  const handleOptionToggle = option => {
     setSelectedOptions(prev => ({
       ...prev,
-      [option]: !prev[option]
+      [option]: !prev[option],
     }));
   };
 
@@ -41,18 +59,35 @@ const MarginCalculator = () => {
     const amountValue = parseFloat(amount);
     const priceValue = parseFloat(sharePrice);
 
-    if (isNaN(amountValue) || isNaN(priceValue) || amountValue <= 0 || priceValue <= 0) {
-      Alert.alert('Error', 'Please enter valid positive numbers for Amount and Share Price.');
+    if (
+      isNaN(amountValue) ||
+      isNaN(priceValue) ||
+      amountValue <= 0 ||
+      priceValue <= 0
+    ) {
+      Alert.alert(
+        'Error',
+        'Please enter valid positive numbers for Amount and Share Price.',
+      );
       return false;
     }
 
     if (!selectedOptions.intraday && !selectedOptions.delivery) {
-      Alert.alert('Error', 'Please select at least one option (Intraday or Delivery).');
+      Alert.alert(
+        'Error',
+        'Please select at least one option (Intraday or Delivery).',
+      );
       return false;
     }
 
-    if (selectedOptions.intraday && (!intradayLeverage || parseFloat(intradayLeverage) <= 0)) {
-      Alert.alert('Error', 'Please enter a valid leverage value for Intraday trading.');
+    if (
+      selectedOptions.intraday &&
+      (!intradayLeverage || parseFloat(intradayLeverage) <= 0)
+    ) {
+      Alert.alert(
+        'Error',
+        'Please enter a valid leverage value for Intraday trading.',
+      );
       return false;
     }
 
@@ -73,7 +108,9 @@ const MarginCalculator = () => {
     try {
       const amountValue = parseFloat(amount);
       const priceValue = parseFloat(sharePrice);
-      const leverage = selectedOptions.intraday ? parseFloat(intradayLeverage) : 1;
+      const leverage = selectedOptions.intraday
+        ? parseFloat(intradayLeverage)
+        : 1;
 
       const results = {};
 
@@ -92,30 +129,34 @@ const MarginCalculator = () => {
           shares: deliveryShares,
           value: deliveryValue.toFixed(2),
           remaining: deliveryRemaining.toFixed(2),
-          leverage: 1
+          leverage: 1,
         };
       }
 
       if (selectedOptions.intraday) {
         // Intraday calculation (custom leverage)
         const intradayMargin = amountValue;
-        const intradayShares = Math.floor((amountValue * leverage) / priceValue);
+        const intradayShares = Math.floor(
+          (amountValue * leverage) / priceValue,
+        );
         const intradayValue = intradayShares * priceValue;
-        const intradayRemaining = (amountValue * leverage) - intradayValue;
+        const intradayRemaining = amountValue * leverage - intradayValue;
 
         results.intraday = {
           margin: intradayMargin.toFixed(2),
           shares: intradayShares,
           value: intradayValue.toFixed(2),
           remaining: intradayRemaining.toFixed(2),
-          leverage: leverage
+          leverage: leverage,
         };
       }
 
       setResult(results);
-
     } catch (error) {
-      Alert.alert('Error', 'Your entered values are wrong. Please check your inputs and try again.');
+      Alert.alert(
+        'Error',
+        'Your entered values are wrong. Please check your inputs and try again.',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +167,7 @@ const MarginCalculator = () => {
     setSharePrice('');
     setSelectedOptions({
       intraday: false,
-      delivery: false
+      delivery: false,
     });
     setIntradayLeverage('');
     setResult(null);
@@ -135,13 +176,16 @@ const MarginCalculator = () => {
 
   const handleSave = () => {
     if (editingCalculationId && result) {
-      saveCalculation({
-        ...result,
-        amount,
-        sharePrice,
-        selectedOptions,
-        intradayLeverage
-      }, 'margin');
+      saveCalculation(
+        {
+          ...result,
+          amount,
+          sharePrice,
+          selectedOptions,
+          intradayLeverage,
+        },
+        'margin',
+      );
     } else {
       toggleSaveModal();
     }
@@ -149,6 +193,86 @@ const MarginCalculator = () => {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Trading Options */}
+      <View style={styles.inputSection}>
+        <View style={styles.sectionHeader}>
+          <CommonText
+            title="📊 Trading Options"
+            textStyle={[18, 'bold', '#333']}
+          />
+        </View>
+
+        <View style={styles.optionsRow}>
+          <TouchableOpacity
+            style={styles.optionContainer}
+            onPress={() => handleOptionToggle('delivery')}
+          >
+            <View
+              style={[
+                styles.checkbox,
+                selectedOptions.delivery && styles.checkboxSelected,
+              ]}
+            >
+              {selectedOptions.delivery && (
+                <CommonText title="✓" textStyle={[12, 'bold', 'white']} />
+              )}
+            </View>
+            <View style={styles.optionContent}>
+              <CommonText title="📦 Delivery" textStyle={[16, '600', '#333']} />
+              <CommonText
+                title="   Leverage: 1x"
+                textStyle={[12, '400', '#666']}
+              />
+            </View>
+          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <TouchableOpacity
+              style={styles.optionContainer}
+              onPress={() => handleOptionToggle('intraday')}
+            >
+              <View
+                style={[
+                  styles.checkbox,
+                  selectedOptions.intraday && styles.checkboxSelected,
+                ]}
+              >
+                {selectedOptions.intraday && (
+                  <CommonText title="✓" textStyle={[12, 'bold', 'white']} />
+                )}
+              </View>
+              <View style={styles.optionContent}>
+                <CommonText
+                  title="⚡ Intraday"
+                  textStyle={[16, '600', '#333']}
+                />
+                <CommonText
+                  title="Custom Leverage"
+                  textStyle={[12, '400', '#666']}
+                />
+              </View>
+            </TouchableOpacity>
+
+            {/* Leverage Input for Intraday */}
+            {selectedOptions.intraday && (
+              <View style={styles.leverageContainer}>
+                <CommonText
+                  title="Leverage (x)"
+                  textStyle={[14, '500', '#666']}
+                />
+                <View style={{ flex: 1 }}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. 5"
+                    keyboardType="numeric"
+                    value={intradayLeverage}
+                    onChangeText={setIntradayLeverage}
+                  />
+                </View>
+              </View>
+            )}
+          </View>
+        </View>
+      </View>
       {/* Investment Details */}
       <View style={styles.inputSection}>
         <View style={styles.sectionHeader}>
@@ -183,92 +307,18 @@ const MarginCalculator = () => {
         </View>
       </View>
 
-      {/* Trading Options */}
-      <View style={styles.inputSection}>
-        <View style={styles.sectionHeader}>
-          <CommonText
-            title="📊 Trading Options"
-            textStyle={[18, 'bold', '#333']}
-          />
-        </View>
-
-        <View style={styles.optionsRow}>
-          <TouchableOpacity
-            style={styles.optionContainer}
-            onPress={() => handleOptionToggle('delivery')}
-          >
-            <View style={[
-              styles.checkbox,
-              selectedOptions.delivery && styles.checkboxSelected
-            ]}>
-              {selectedOptions.delivery && (
-                <CommonText title="✓" textStyle={[12, 'bold', 'white']} />
-              )}
-            </View>
-            <View style={styles.optionContent}>
-              <CommonText
-                title="📦 Delivery"
-                textStyle={[16, '600', '#333']}
-              />
-              <CommonText
-                title="Leverage: 1x"
-                textStyle={[12, '400', '#666']}
-              />
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.optionContainer}
-            onPress={() => handleOptionToggle('intraday')}
-          >
-            <View style={[
-              styles.checkbox,
-              selectedOptions.intraday && styles.checkboxSelected
-            ]}>
-              {selectedOptions.intraday && (
-                <CommonText title="✓" textStyle={[12, 'bold', 'white']} />
-              )}
-            </View>
-            <View style={styles.optionContent}>
-              <CommonText
-                title="⚡ Intraday"
-                textStyle={[16, '600', '#333']}
-              />
-              <CommonText
-                title="Custom Leverage"
-                textStyle={[12, '400', '#666']}
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* Leverage Input for Intraday */}
-        {selectedOptions.intraday && (
-          <View style={styles.leverageContainer}>
-            <CommonText title="Leverage (x)" textStyle={[14, '500', '#666']} />
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. 5"
-              keyboardType="numeric"
-              value={intradayLeverage}
-              onChangeText={setIntradayLeverage}
-            />
-          </View>
-        )}
-      </View>
-
       {/* Action Buttons */}
       <View style={styles.buttonSection}>
         <TouchableOpacity
           style={[
             styles.calculateButton,
-            isLoading && styles.calculateButtonDisabled
+            isLoading && styles.calculateButtonDisabled,
           ]}
           onPress={calculateMargin}
           disabled={isLoading}
         >
           <CommonText
-            title={isLoading ? "Calculating..." : "Calculate Margin"}
+            title={isLoading ? 'Calculating...' : 'Calculate Margin'}
             textStyle={[16, 'bold', 'white']}
           />
         </TouchableOpacity>
@@ -306,38 +356,79 @@ const MarginCalculator = () => {
               title="📊 Margin Results"
               textStyle={[22, 'bold', '#333']}
             />
-            <TouchableOpacity style={styles.saveResultButton} onPress={handleSave}>
-              <CommonText title={editingCalculationId ? "💾 Update" : "💾 Save"} textStyle={[14, '600', '#4caf50']} />
+            <TouchableOpacity
+              style={styles.saveResultButton}
+              onPress={handleSave}
+            >
+              <CommonText
+                title={editingCalculationId ? '💾 Update' : '💾 Save'}
+                textStyle={[14, '600', '#4caf50']}
+              />
             </TouchableOpacity>
           </View>
 
           {/* Delivery Results */}
           {result.delivery && (
-            <View style={[styles.resultCard, { backgroundColor: '#e8f5e8', borderColor: '#4caf50' }]}>
+            <View
+              style={[
+                styles.resultCard,
+                { backgroundColor: '#e8f5e8', borderColor: '#4caf50' },
+              ]}
+            >
               <View style={styles.resultCardHeader}>
-                <CommonText title="📦 Delivery Trading" textStyle={[18, 'bold', '#4caf50']} />
-                <CommonText title={`Leverage: ${result.delivery.leverage}x`} textStyle={[14, '500', '#666']} />
+                <CommonText
+                  title="📦 Delivery Trading"
+                  textStyle={[18, 'bold', '#4caf50']}
+                />
+                <CommonText
+                  title={`Leverage: ${result.delivery.leverage}x`}
+                  textStyle={[14, '500', '#666']}
+                />
               </View>
-              
+
               <View style={styles.resultGrid}>
                 <View style={styles.resultItem}>
-                  <CommonText title="Margin Used" textStyle={[12, '500', '#666']} />
-                  <CommonText title={`₹${result.delivery.margin}`} textStyle={[16, 'bold', '#4caf50']} />
+                  <CommonText
+                    title="Margin Used"
+                    textStyle={[12, '500', '#666']}
+                  />
+                  <CommonText
+                    title={`₹${result.delivery.margin}`}
+                    textStyle={[16, 'bold', '#4caf50']}
+                  />
                 </View>
-                
+
                 <View style={styles.resultItem}>
-                  <CommonText title="Shares Can Buy" textStyle={[12, '500', '#666']} />
-                  <CommonText title={result.delivery.shares.toString()} textStyle={[16, 'bold', '#4caf50']} />
+                  <CommonText
+                    title="Shares Can Buy"
+                    textStyle={[12, '500', '#666']}
+                  />
+                  <CommonText
+                    title={result.delivery.shares.toString()}
+                    textStyle={[16, 'bold', '#4caf50']}
+                  />
                 </View>
-                
+
                 <View style={styles.resultItem}>
-                  <CommonText title="Total Value" textStyle={[12, '500', '#666']} />
-                  <CommonText title={`₹${result.delivery.value}`} textStyle={[16, 'bold', '#4caf50']} />
+                  <CommonText
+                    title="Total Value"
+                    textStyle={[12, '500', '#666']}
+                  />
+                  <CommonText
+                    title={`₹${result.delivery.value}`}
+                    textStyle={[16, 'bold', '#4caf50']}
+                  />
                 </View>
-                
+
                 <View style={styles.resultItem}>
-                  <CommonText title="Remaining" textStyle={[12, '500', '#666']} />
-                  <CommonText title={`₹${result.delivery.remaining}`} textStyle={[16, 'bold', '#4caf50']} />
+                  <CommonText
+                    title="Remaining"
+                    textStyle={[12, '500', '#666']}
+                  />
+                  <CommonText
+                    title={`₹${result.delivery.remaining}`}
+                    textStyle={[16, 'bold', '#4caf50']}
+                  />
                 </View>
               </View>
             </View>
@@ -345,31 +436,66 @@ const MarginCalculator = () => {
 
           {/* Intraday Results */}
           {result.intraday && (
-            <View style={[styles.resultCard, { backgroundColor: '#fff3e0', borderColor: '#ff9800' }]}>
+            <View
+              style={[
+                styles.resultCard,
+                { backgroundColor: '#fff3e0', borderColor: '#ff9800' },
+              ]}
+            >
               <View style={styles.resultCardHeader}>
-                <CommonText title="⚡ Intraday Trading" textStyle={[18, 'bold', '#ff9800']} />
-                <CommonText title={`Leverage: ${result.intraday.leverage}x`} textStyle={[14, '500', '#666']} />
+                <CommonText
+                  title="⚡ Intraday Trading"
+                  textStyle={[18, 'bold', '#ff9800']}
+                />
+                <CommonText
+                  title={`Leverage: ${result.intraday.leverage}x`}
+                  textStyle={[14, '500', '#666']}
+                />
               </View>
-              
+
               <View style={styles.resultGrid}>
                 <View style={styles.resultItem}>
-                  <CommonText title="Margin Used" textStyle={[12, '500', '#666']} />
-                  <CommonText title={`₹${result.intraday.margin}`} textStyle={[16, 'bold', '#ff9800']} />
+                  <CommonText
+                    title="Margin Used"
+                    textStyle={[12, '500', '#666']}
+                  />
+                  <CommonText
+                    title={`₹${result.intraday.margin}`}
+                    textStyle={[16, 'bold', '#ff9800']}
+                  />
                 </View>
-                
+
                 <View style={styles.resultItem}>
-                  <CommonText title="Shares Can Buy" textStyle={[12, '500', '#666']} />
-                  <CommonText title={result.intraday.shares.toString()} textStyle={[16, 'bold', '#ff9800']} />
+                  <CommonText
+                    title="Shares Can Buy"
+                    textStyle={[12, '500', '#666']}
+                  />
+                  <CommonText
+                    title={result.intraday.shares.toString()}
+                    textStyle={[16, 'bold', '#ff9800']}
+                  />
                 </View>
-                
+
                 <View style={styles.resultItem}>
-                  <CommonText title="Total Value" textStyle={[12, '500', '#666']} />
-                  <CommonText title={`₹${result.intraday.value}`} textStyle={[16, 'bold', '#ff9800']} />
+                  <CommonText
+                    title="Total Value"
+                    textStyle={[12, '500', '#666']}
+                  />
+                  <CommonText
+                    title={`₹${result.intraday.value}`}
+                    textStyle={[16, 'bold', '#ff9800']}
+                  />
                 </View>
-                
+
                 <View style={styles.resultItem}>
-                  <CommonText title="Remaining" textStyle={[12, '500', '#666']} />
-                  <CommonText title={`₹${result.intraday.remaining}`} textStyle={[16, 'bold', '#ff9800']} />
+                  <CommonText
+                    title="Remaining"
+                    textStyle={[12, '500', '#666']}
+                  />
+                  <CommonText
+                    title={`₹${result.intraday.remaining}`}
+                    textStyle={[16, 'bold', '#ff9800']}
+                  />
                 </View>
               </View>
             </View>
@@ -384,7 +510,7 @@ const MarginCalculator = () => {
           amount,
           sharePrice,
           selectedOptions,
-          intradayLeverage
+          intradayLeverage,
         }}
       />
     </ScrollView>
@@ -434,17 +560,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
     marginBottom: 16,
+    alignItems: 'flex-start',
   },
   optionContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
     flex: 1,
-    padding: 12,
-    backgroundColor: '#fafafa',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    gap: 12,
   },
   checkbox: {
     width: 24,
@@ -553,4 +675,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MarginCalculator; 
+export default MarginCalculator;
