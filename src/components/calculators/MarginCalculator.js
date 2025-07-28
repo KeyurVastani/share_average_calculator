@@ -134,19 +134,17 @@ const MarginCalculator = () => {
       }
 
       if (selectedOptions.intraday) {
-        // Intraday calculation (custom leverage)
-        const intradayMargin = amountValue;
-        const intradayShares = Math.floor(
-          (amountValue * leverage) / priceValue,
-        );
-        const intradayValue = intradayShares * priceValue;
-        const intradayRemaining = amountValue * leverage - intradayValue;
+        // Intraday calculation (share-based with leverage)
+        const sharesCanBuy = Math.floor((amountValue * leverage) / priceValue);
+        const shareValue = priceValue / leverage; // Price per share divided by leverage
+        const totalInvestment = sharesCanBuy * shareValue; // Actual investment value
+        const remainingAmount = amountValue - totalInvestment; // Remaining amount
 
         results.intraday = {
-          margin: intradayMargin.toFixed(2),
-          shares: intradayShares,
-          value: intradayValue.toFixed(2),
-          remaining: intradayRemaining.toFixed(2),
+          shares: sharesCanBuy,
+          shareValue: shareValue.toFixed(2),
+          totalInvestment: totalInvestment.toFixed(2),
+          remainingAmount: remainingAmount.toFixed(2),
           leverage: leverage,
         };
       }
@@ -367,139 +365,147 @@ const MarginCalculator = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Delivery Results */}
-          {result.delivery && (
-            <View
-              style={[
-                styles.resultCard,
-                { backgroundColor: '#e8f5e8', borderColor: '#4caf50' },
-              ]}
-            >
-              <View style={styles.resultCardHeader}>
-                <CommonText
-                  title="📦 Delivery Trading"
-                  textStyle={[18, 'bold', '#4caf50']}
-                />
-                <CommonText
-                  title={`Leverage: ${result.delivery.leverage}x`}
-                  textStyle={[14, '500', '#666']}
-                />
-              </View>
-
-              <View style={styles.resultGrid}>
+          {/* Results Display with Field Labels */}
+          <View style={styles.resultsDisplay}>
+            {/* Delivery Results */}
+            {result.delivery && (
+              <>
                 <View style={styles.resultItem}>
-                  <CommonText
-                    title="Margin Used"
-                    textStyle={[12, '500', '#666']}
-                  />
-                  <CommonText
-                    title={`₹${result.delivery.margin}`}
-                    textStyle={[16, 'bold', '#4caf50']}
-                  />
+                  <View style={styles.resultLabelContainer}>
+                    <CommonText title="📦 Delivery Trading" textStyle={[14, '600', '#333']} />
+                    <CommonText title="(Leverage: 1x)" textStyle={[10, 'normal', '#666']} />
+                  </View>
                 </View>
-
+                
                 <View style={styles.resultItem}>
-                  <CommonText
-                    title="Shares Can Buy"
-                    textStyle={[12, '500', '#666']}
-                  />
+                  <View style={styles.resultLabelContainer}>
+                    <CommonText title="Total Number of Shares" textStyle={[14, '600', '#333']} />
+                    <CommonText title="(Shares you can buy)" textStyle={[10, 'normal', '#666']} />
+                  </View>
                   <CommonText
                     title={result.delivery.shares.toString()}
-                    textStyle={[16, 'bold', '#4caf50']}
+                    textStyle={[20, 'bold', '#4caf50']}
                   />
                 </View>
 
                 <View style={styles.resultItem}>
-                  <CommonText
-                    title="Total Value"
-                    textStyle={[12, '500', '#666']}
-                  />
+                  <View style={styles.resultLabelContainer}>
+                    <CommonText title="Total Value" textStyle={[14, '600', '#333']} />
+                    <CommonText title="(Shares × Share Price)" textStyle={[10, 'normal', '#666']} />
+                  </View>
                   <CommonText
                     title={`₹${result.delivery.value}`}
-                    textStyle={[16, 'bold', '#4caf50']}
+                    textStyle={[20, 'bold', '#2196F3']}
                   />
                 </View>
 
                 <View style={styles.resultItem}>
-                  <CommonText
-                    title="Remaining"
-                    textStyle={[12, '500', '#666']}
-                  />
+                  <View style={styles.resultLabelContainer}>
+                    <CommonText title="Total Remaining" textStyle={[14, '600', '#333']} />
+                    <CommonText title="(Amount - Total Value)" textStyle={[10, 'normal', '#666']} />
+                  </View>
                   <CommonText
                     title={`₹${result.delivery.remaining}`}
-                    textStyle={[16, 'bold', '#4caf50']}
-                  />
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* Intraday Results */}
-          {result.intraday && (
-            <View
-              style={[
-                styles.resultCard,
-                { backgroundColor: '#fff3e0', borderColor: '#ff9800' },
-              ]}
-            >
-              <View style={styles.resultCardHeader}>
-                <CommonText
-                  title="⚡ Intraday Trading"
-                  textStyle={[18, 'bold', '#ff9800']}
-                />
-                <CommonText
-                  title={`Leverage: ${result.intraday.leverage}x`}
-                  textStyle={[14, '500', '#666']}
-                />
-              </View>
-
-              <View style={styles.resultGrid}>
-                <View style={styles.resultItem}>
-                  <CommonText
-                    title="Margin Used"
-                    textStyle={[12, '500', '#666']}
-                  />
-                  <CommonText
-                    title={`₹${result.intraday.margin}`}
-                    textStyle={[16, 'bold', '#ff9800']}
+                    textStyle={[20, 'bold', '#ff9800']}
                   />
                 </View>
 
+                {result.intraday && <View style={styles.separator} />}
+              </>
+            )}
+
+            {/* Intraday Results */}
+            {result.intraday && (
+              <>
                 <View style={styles.resultItem}>
-                  <CommonText
-                    title="Shares Can Buy"
-                    textStyle={[12, '500', '#666']}
-                  />
+                  <View style={styles.resultLabelContainer}>
+                    <CommonText title="⚡ Intraday Trading" textStyle={[14, '600', '#333']} />
+                    <CommonText title={`(Leverage: ${result.intraday.leverage}x)`} textStyle={[10, 'normal', '#666']} />
+                  </View>
+                </View>
+                
+                <View style={styles.resultItem}>
+                  <View style={styles.resultLabelContainer}>
+                    <CommonText title="Total Number of Shares" textStyle={[14, '600', '#333']} />
+                    <CommonText title="(Shares you can buy)" textStyle={[10, 'normal', '#666']} />
+                  </View>
                   <CommonText
                     title={result.intraday.shares.toString()}
-                    textStyle={[16, 'bold', '#ff9800']}
+                    textStyle={[20, 'bold', '#9c27b0']}
                   />
                 </View>
 
                 <View style={styles.resultItem}>
+                  <View style={styles.resultLabelContainer}>
+                    <CommonText title="Share Value (After Leverage)" textStyle={[14, '600', '#333']} />
+                    <CommonText title="(Share Price ÷ Leverage)" textStyle={[10, 'normal', '#666']} />
+                  </View>
                   <CommonText
-                    title="Total Value"
-                    textStyle={[12, '500', '#666']}
-                  />
-                  <CommonText
-                    title={`₹${result.intraday.value}`}
-                    textStyle={[16, 'bold', '#ff9800']}
+                    title={`₹${result.intraday.shareValue}`}
+                    textStyle={[20, 'bold', '#e91e63']}
                   />
                 </View>
 
                 <View style={styles.resultItem}>
+                  <View style={styles.resultLabelContainer}>
+                    <CommonText title="Total Investment" textStyle={[14, '600', '#333']} />
+                    <CommonText title="(Shares × Share Value)" textStyle={[10, 'normal', '#666']} />
+                  </View>
                   <CommonText
-                    title="Remaining"
-                    textStyle={[12, '500', '#666']}
-                  />
-                  <CommonText
-                    title={`₹${result.intraday.remaining}`}
-                    textStyle={[16, 'bold', '#ff9800']}
+                    title={`₹${result.intraday.totalInvestment}`}
+                    textStyle={[20, 'bold', '#9c27b0']}
                   />
                 </View>
-              </View>
+
+                <View style={styles.resultItem}>
+                  <View style={styles.resultLabelContainer}>
+                    <CommonText title="Remaining Amount" textStyle={[14, '600', '#333']} />
+                    <CommonText title="(Amount - Total Investment)" textStyle={[10, 'normal', '#666']} />
+                  </View>
+                  <CommonText
+                    title={`₹${result.intraday.remainingAmount}`}
+                    textStyle={[20, 'bold', '#ff5722']}
+                  />
+                </View>
+              </>
+            )}
+          </View>
+
+          {/* Summary Card */}
+          <View style={styles.summaryCard}>
+            <CommonText title="📋 Summary" textStyle={[16, 'bold', '#333']} />
+            <View style={styles.summaryContent}>
+              {result ? (
+                <>
+                  {result.delivery && (
+                    <CommonText 
+                      title={`• Delivery: Buy ${result.delivery.shares} shares worth ₹${result.delivery.value}`} 
+                      textStyle={[14, 'normal', '#333']} 
+                    />
+                  )}
+                  {result.intraday && (
+                    <CommonText 
+                      title={`• Intraday: Buy ${result.intraday.shares} shares at ₹${result.intraday.shareValue} each = ₹${result.intraday.totalInvestment} (${result.intraday.leverage}x leverage)`} 
+                      textStyle={[14, 'normal', '#333']} 
+                    />
+                  )}
+                  <CommonText 
+                    title={`• Investment Amount: ₹${amount}`} 
+                    textStyle={[14, 'normal', '#333']} 
+                  />
+                  <CommonText 
+                    title={`• Share Price: ₹${sharePrice}`} 
+                    textStyle={[14, 'normal', '#333']} 
+                  />
+                </>
+              ) : (
+                <CommonText 
+                  title="• Enter your values and calculate to see margin results" 
+                  textStyle={[14, 'normal', '#666']} 
+                />
+              )}
             </View>
-          )}
+          </View>
         </View>
       )}
 
@@ -666,12 +672,37 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   resultItem: {
-    flex: 1,
-    minWidth: '45%',
-    padding: 12,
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+  },
+  resultsDisplay: {
+    backgroundColor: '#f8f9fa',
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    marginBottom: 15,
+  },
+  resultLabelContainer: {
+    flex: 1,
+    marginRight: 10,
+  },
+  separator: {
+    height: 16,
+  },
+  summaryCard: {
+    backgroundColor: '#e3f2fd',
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2196F3',
+  },
+  summaryContent: {
+    marginTop: 10,
   },
 });
 
