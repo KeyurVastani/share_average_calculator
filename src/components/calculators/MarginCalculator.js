@@ -348,14 +348,12 @@ const MarginCalculator = () => {
                 <View style={styles.resultItem}>
                   <View style={styles.resultLabelContainer}>
                     <CommonText title="📦 Delivery Trading" textStyle={[14, '600', '#333']} />
-                    <CommonText title="(Leverage: 1x)" textStyle={[10, 'normal', '#666']} />
                   </View>
                 </View>
                 
                 <View style={styles.resultItem}>
                   <View style={styles.resultLabelContainer}>
                     <CommonText title="Total Number of Shares" textStyle={[14, '600', '#333']} />
-                    <CommonText title="(Shares you can buy)" textStyle={[10, 'normal', '#666']} />
                   </View>
                   <CommonText
                     title={result.delivery.shares.toString()}
@@ -366,7 +364,6 @@ const MarginCalculator = () => {
                 <View style={styles.resultItem}>
                   <View style={styles.resultLabelContainer}>
                     <CommonText title="Total Value" textStyle={[14, '600', '#333']} />
-                    <CommonText title="(Shares × Share Price)" textStyle={[10, 'normal', '#666']} />
                   </View>
                   <CommonText
                     title={`₹${result.delivery.value}`}
@@ -377,7 +374,6 @@ const MarginCalculator = () => {
                 <View style={styles.resultItem}>
                   <View style={styles.resultLabelContainer}>
                     <CommonText title="Total Remaining" textStyle={[14, '600', '#333']} />
-                    <CommonText title="(Amount - Total Value)" textStyle={[10, 'normal', '#666']} />
                   </View>
                   <CommonText
                     title={`₹${result.delivery.remaining}`}
@@ -395,14 +391,12 @@ const MarginCalculator = () => {
                 <View style={styles.resultItem}>
                   <View style={styles.resultLabelContainer}>
                     <CommonText title="⚡ Intraday Trading" textStyle={[14, '600', '#333']} />
-                    <CommonText title={`(Leverage: ${result.intraday.leverage}x)`} textStyle={[10, 'normal', '#666']} />
                   </View>
                 </View>
                 
                 <View style={styles.resultItem}>
                   <View style={styles.resultLabelContainer}>
                     <CommonText title="Total Number of Shares" textStyle={[14, '600', '#333']} />
-                    <CommonText title="(Shares you can buy)" textStyle={[10, 'normal', '#666']} />
                   </View>
                   <CommonText
                     title={result.intraday.shares.toString()}
@@ -413,7 +407,6 @@ const MarginCalculator = () => {
                 <View style={styles.resultItem}>
                   <View style={styles.resultLabelContainer}>
                     <CommonText title="Share Value (After Leverage)" textStyle={[14, '600', '#333']} />
-                    <CommonText title="(Share Price ÷ Leverage)" textStyle={[10, 'normal', '#666']} />
                   </View>
                   <CommonText
                     title={`₹${result.intraday.shareValue}`}
@@ -424,7 +417,6 @@ const MarginCalculator = () => {
                 <View style={styles.resultItem}>
                   <View style={styles.resultLabelContainer}>
                     <CommonText title="Total Investment" textStyle={[14, '600', '#333']} />
-                    <CommonText title="(Shares × Share Value)" textStyle={[10, 'normal', '#666']} />
                   </View>
                   <CommonText
                     title={`₹${result.intraday.totalInvestment}`}
@@ -435,7 +427,6 @@ const MarginCalculator = () => {
                 <View style={styles.resultItem}>
                   <View style={styles.resultLabelContainer}>
                     <CommonText title="Remaining Amount" textStyle={[14, '600', '#333']} />
-                    <CommonText title="(Amount - Total Investment)" textStyle={[10, 'normal', '#666']} />
                   </View>
                   <CommonText
                     title={`₹${result.intraday.remainingAmount}`}
@@ -445,7 +436,7 @@ const MarginCalculator = () => {
               </>
             )}
           </View>
-
+di
           {/* Summary Card */}
           <View style={styles.summaryCard}>
             <CommonText title="📋 Summary" textStyle={[16, 'bold', '#333']} />
@@ -493,12 +484,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    padding: 16,
+    padding: 5,
   },
   inputSection: {
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -507,7 +499,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   sectionHeader: {
-    marginBottom: 16,
+    marginBottom: 10,
   },
   inputRow: {
     flexDirection: 'row',
@@ -634,13 +626,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
   },
   resultsDisplay: {
     backgroundColor: '#f8f9fa',
-    padding: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e9ecef',

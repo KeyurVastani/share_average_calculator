@@ -159,22 +159,23 @@ function App() {
         formula: 'New Quantity = Old Quantity × Split Ratio'
       }
     },
+  
+   
     {
-      id: 'profit-loss',
-      name: 'Profit & Loss Calculator',
-      description: 'Calculate profit and loss from trades',
-      icon: '💰',
+      id: 'tax-brokerage',
+      name: 'Tax / Brokerage Charges Calculator',
+      description: 'Calculate taxes and brokerage fees',
+      icon: '🧾',
       info: {
-        title: 'Profit & Loss Calculator',
-        description: 'Calculate profit and loss from your stock trades with percentage returns.',
+        title: 'Tax / Brokerage Calculator',
+        description: 'Calculate all applicable taxes and brokerage charges for your trades.',
         features: [
-          'Calculate profit/loss amount',
-          'Show percentage returns',
-          'Track total buy/sell values',
-          'Support multiple quantities',
-          'Save trade history'
+          'Calculate brokerage charges',
+          'Include taxes (STT, GST)',
+          'Estimate total costs',
+          'Plan trade profitability'
         ],
-        formula: 'P&L = (Sell Price - Buy Price) × Quantity'
+        formula: 'Total Charges = Brokerage + STT + GST + Other Taxes'
       }
     },
     {
@@ -196,71 +197,21 @@ function App() {
       }
     },
     {
-      id: 'stop-loss',
-      name: 'Stop Loss / Target Calculator',
-      description: 'Calculate stop loss and target levels',
-      icon: '🛑',
+      id: 'profit-loss',
+      name: 'Intraday and Delivery Profit & Loss Calculator',
+      description: 'Calculate profit and loss from trades',
+      icon: '💰',
       info: {
-        title: 'Stop Loss / Target Calculator',
-        description: 'Calculate optimal stop loss and target levels based on your risk tolerance and market analysis.',
+        title: 'Profit & Loss Calculator',
+        description: 'Calculate profit and loss from your stock trades with percentage returns.',
         features: [
-          'Calculate stop loss levels',
-          'Set target prices',
-          'Manage risk',
-          'Plan exit strategies'
+          'Calculate profit/loss amount',
+          'Show percentage returns',
+          'Track total buy/sell values',
+          'Support multiple quantities',
+          'Save trade history'
         ],
-        formula: 'Stop Loss = Entry Price - (Entry Price × Risk %)'
-      }
-    },
-    {
-      id: 'tax-brokerage',
-      name: 'Tax / Brokerage Charges Calculator',
-      description: 'Calculate taxes and brokerage fees',
-      icon: '🧾',
-      info: {
-        title: 'Tax / Brokerage Calculator',
-        description: 'Calculate all applicable taxes and brokerage charges for your trades.',
-        features: [
-          'Calculate brokerage charges',
-          'Include taxes (STT, GST)',
-          'Estimate total costs',
-          'Plan trade profitability'
-        ],
-        formula: 'Total Charges = Brokerage + STT + GST + Other Taxes'
-      }
-    },
-    {
-      id: 'options-pnl',
-      name: 'Options P&L Calculator',
-      description: 'Options profit and loss calculations',
-      icon: '📉',
-      info: {
-        title: 'Options P&L Calculator',
-        description: 'Calculate profit and loss for options trading, including calls and puts.',
-        features: [
-          'Calculate options P&L',
-          'Support for calls and puts',
-          'Include premium costs',
-          'Analyze risk-reward'
-        ],
-        formula: 'P&L = (Current Price - Strike Price) × Lot Size - Premium Paid'
-      }
-    },
-    {
-      id: 'intraday',
-      name: 'Intraday Profit/Loss Calculator',
-      description: 'Calculate intraday trading P&L',
-      icon: '📊',
-      info: {
-        title: 'Intraday P&L Calculator',
-        description: 'Calculate your profit or loss from intraday trading, including all charges and taxes.',
-        features: [
-          'Calculate net P&L',
-          'Include brokerage charges',
-          'Account for taxes',
-          'Track daily performance'
-        ],
-        formula: 'P&L = (Sell Price - Buy Price) × Quantity - Charges'
+        formula: 'P&L = (Sell Price - Buy Price) × Quantity'
       }
     },
   ];
