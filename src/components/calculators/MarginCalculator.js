@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import CommonText from '../CommonText';
 import useCalculatorStore from '../../store/calculatorStore';
-import SaveModal from '../SaveModal';
+
 
 export const PixelSpacing = ({
   size = 0,
@@ -30,8 +30,7 @@ export const PixelSpacing = ({
 );
 
 const MarginCalculator = () => {
-  const { toggleSaveModal, saveCalculation, editingCalculationId } =
-    useCalculatorStore();
+  const { } = useCalculatorStore();
 
   const [amount, setAmount] = useState('');
   const [sharePrice, setSharePrice] = useState('');
@@ -172,22 +171,7 @@ const MarginCalculator = () => {
     setIsLoading(false);
   };
 
-  const handleSave = () => {
-    if (editingCalculationId && result) {
-      saveCalculation(
-        {
-          ...result,
-          amount,
-          sharePrice,
-          selectedOptions,
-          intradayLeverage,
-        },
-        'margin',
-      );
-    } else {
-      toggleSaveModal();
-    }
-  };
+
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -354,15 +338,6 @@ const MarginCalculator = () => {
               title="📊 Margin Results"
               textStyle={[22, 'bold', '#333']}
             />
-            <TouchableOpacity
-              style={styles.saveResultButton}
-              onPress={handleSave}
-            >
-              <CommonText
-                title={editingCalculationId ? '💾 Update' : '💾 Save'}
-                textStyle={[14, '600', '#4caf50']}
-              />
-            </TouchableOpacity>
           </View>
 
           {/* Results Display with Field Labels */}
@@ -509,16 +484,7 @@ const MarginCalculator = () => {
         </View>
       )}
 
-      <SaveModal
-        calculationType="margin"
-        calculationData={{
-          ...result,
-          amount,
-          sharePrice,
-          selectedOptions,
-          intradayLeverage,
-        }}
-      />
+
     </ScrollView>
   );
 };
@@ -636,14 +602,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  saveResultButton: {
-    backgroundColor: '#e8f5e8',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: '#4caf50',
-  },
+
   loadingContainer: {
     alignItems: 'center',
     paddingVertical: 20,
