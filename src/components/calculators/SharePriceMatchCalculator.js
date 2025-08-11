@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, Dimensions } from 'react-native';
 import CommonText from '../CommonText';
 import useCalculatorStore from '../../store/calculatorStore';
 import SaveModal from '../SaveModal';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const SharePriceMatchCalculator = () => {
   const {
@@ -23,6 +25,8 @@ const SharePriceMatchCalculator = () => {
   const [targetAveragePrice, setTargetAveragePrice] = useState('');
   const [result, setResult] = useState(null);
   const [currentStockName, setCurrentStockName] = useState('');
+  const [isEditing, setIsEditing] = useState(false); // Track if we're in editing mode
+  const [hasChanges, setHasChanges] = useState(false); // Track if changes were made
   
   // Error states for each field
   const [errors, setErrors] = useState({
@@ -33,6 +37,39 @@ const SharePriceMatchCalculator = () => {
     general: ''
   });
 
+  // Wrapper functions to track changes
+  const handleSharesOwnedChange = (text) => {
+    setSharesOwned(text);
+    clearFieldError('sharesOwned');
+    if (isEditing) {
+      setHasChanges(true);
+    }
+  };
+
+  const handleAveragePriceChange = (text) => {
+    setAveragePrice(text);
+    clearFieldError('averagePrice');
+    if (isEditing) {
+      setHasChanges(true);
+    }
+  };
+
+  const handleCurrentPriceChange = (text) => {
+    setCurrentPrice(text);
+    clearFieldError('currentPrice');
+    if (isEditing) {
+      setHasChanges(true);
+    }
+  };
+
+  const handleTargetAveragePriceChange = (text) => {
+    setTargetAveragePrice(text);
+    clearFieldError('targetAveragePrice');
+    if (isEditing) {
+      setHasChanges(true);
+    }
+  };
+
   // Handle loading saved calculations
   useEffect(() => {
     if (loadedCalculation) {
@@ -42,6 +79,11 @@ const SharePriceMatchCalculator = () => {
       setTargetAveragePrice(loadedCalculation.targetAveragePrice || '');
       setResult(loadedCalculation);
       setCurrentStockName(loadedCalculation.stockName || '');
+      
+      // Set editing mode
+      setIsEditing(true);
+      setHasChanges(false);
+      
       clearLoadedCalculation();
       // Clear errors when loading saved calculation
       setErrors({
@@ -166,6 +208,11 @@ const SharePriceMatchCalculator = () => {
       costReduction: costReduction.toFixed(2),
       stockName: currentStockName
     });
+    
+    // Mark that changes have been made if we're in editing mode
+    if (isEditing) {
+      setHasChanges(true);
+    }
   };
 
   const resetCalculator = () => {
@@ -175,6 +222,8 @@ const SharePriceMatchCalculator = () => {
     setTargetAveragePrice('');
     setResult(null);
     setCurrentStockName('');
+    setIsEditing(false); // Clear editing mode
+    setHasChanges(false); // Clear changes flag
     setErrors({
       sharesOwned: '',
       averagePrice: '',
@@ -185,7 +234,11 @@ const SharePriceMatchCalculator = () => {
   };
 
   const handleSave = () => {
-    if (editingCalculationId && result && currentStockName) {
+    console.log('handleSave called:', { editingCalculationId, currentStockName, hasResult: !!result, isEditing, hasChanges });
+    
+    if (isEditing && result && currentStockName) {
+      // When editing and we have a stock name, automatically update without showing modal
+      console.log('Auto-updating calculation with stock name:', currentStockName);
       saveCalculation({
         ...result,
         sharesOwned,
@@ -194,7 +247,12 @@ const SharePriceMatchCalculator = () => {
         targetAveragePrice,
         stockName: currentStockName
       }, 'share-price-match');
+      
+      // Keep editing state but mark as no changes (button will be disabled)
+      setHasChanges(false);
     } else {
+      // Show modal for new calculations or when no stock name exists
+      console.log('Showing modal - editingCalculationId:', editingCalculationId, 'currentStockName:', currentStockName);
       toggleSaveModal();
     }
   };
@@ -202,144 +260,128 @@ const SharePriceMatchCalculator = () => {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* History Button */}
-      {/* <View style={styles.historyButtonContainer}>
+      <View style={styles.historyButtonContainer}>
         {currentStockName && (
           <View style={styles.stockNameContainer}>
-            <CommonText
-              title={`📈 ${currentStockName}`}
-              textStyle={[16, '600', '#4caf50']}
+            <CommonText 
+              title={`📈 ${currentStockName}`} 
+              textStyle={[16, '600', '#4caf50']} 
             />
           </View>
         )}
         <TouchableOpacity style={styles.historyButton} onPress={toggleHistoryModal}>
-          <CommonText
-            title={`📊 History (${savedCalculations.length})`}
-            textStyle={[16, '600', '#2196F3']}
+          <CommonText 
+            title={`📊 History (${savedCalculations.length})`} 
+            textStyle={[16, '600', '#2196F3']} 
           />
         </TouchableOpacity>
-      </View> */}
-
-      {/* Shares Owned Input */}
-      <View style={styles.inputSection}>
-        <CommonText
-          title="Number of Shares You Own"
-          textStyle={[16, '600', '#333']}
-        />
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={[
-              styles.input,
-              errors.sharesOwned ? styles.inputError : null
-            ]}
-            placeholder="Enter number of shares you currently own"
-            keyboardType="numeric"
-            value={sharesOwned}
-            onChangeText={(text) => {
-              setSharesOwned(text);
-              clearFieldError('sharesOwned');
-            }}
-          />
-          {errors.sharesOwned ? (
-            <View style={styles.errorContainer}>
-              <CommonText
-                title={`❌ ${errors.sharesOwned}`}
-                textStyle={[12, '500', '#d32f2f']}
-              />
-            </View>
-          ) : null}
-        </View>
       </View>
 
-      {/* Average Price Input */}
+      {/* Input Section */}
       <View style={styles.inputSection}>
-        <CommonText
-          title="Your Average Price"
-          textStyle={[16, '600', '#333']}
-        />
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={[
-              styles.input,
-              errors.averagePrice ? styles.inputError : null
-            ]}
-            placeholder="Enter your average purchase price"
-            keyboardType="numeric"
-            value={averagePrice}
-            onChangeText={(text) => {
-              setAveragePrice(text);
-              clearFieldError('averagePrice');
-            }}
+        <View style={styles.sectionHeader}>
+          <CommonText 
+            title="Investment Details" 
+            textStyle={[18, 'bold', '#333']} 
           />
-          {errors.averagePrice ? (
-            <View style={styles.errorContainer}>
-              <CommonText
-                title={`❌ ${errors.averagePrice}`}
-                textStyle={[12, '500', '#d32f2f']}
-              />
-            </View>
-          ) : null}
         </View>
-      </View>
 
-      {/* Current Market Price Input */}
-      <View style={styles.inputSection}>
-        <CommonText
-          title="Current Market Price"
-          textStyle={[16, '600', '#333']}
-        />
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={[
-              styles.input,
-              errors.currentPrice ? styles.inputError : null
-            ]}
-            placeholder="Enter current market price"
-            keyboardType="numeric"
-            value={currentPrice}
-            onChangeText={(text) => {
-              setCurrentPrice(text);
-              clearFieldError('currentPrice');
-            }}
-          />
-          {errors.currentPrice ? (
-            <View style={styles.errorContainer}>
-              <CommonText
-                title={`❌ ${errors.currentPrice}`}
-                textStyle={[12, '500', '#d32f2f']}
-              />
-            </View>
-          ) : null}
+        {/* Row 1: Shares Owned and Average Price */}
+        <View style={styles.inputRow}>
+          <View style={styles.inputContainer}>
+            <CommonText title="Shares Owned" textStyle={[14, '500', '#666']} />
+            <TextInput
+              style={[
+                styles.input,
+                errors.sharesOwned ? styles.inputError : null
+              ]}
+              placeholder="e.g., 100"
+              placeholderTextColor="#666"
+              keyboardType="numeric"
+              value={sharesOwned}
+              onChangeText={handleSharesOwnedChange}
+            />
+            {errors.sharesOwned ? (
+              <View style={styles.errorContainer}>
+                <CommonText
+                  title={`❌ ${errors.sharesOwned}`}
+                  textStyle={[12, '500', '#d32f2f']}
+                />
+              </View>
+            ) : null}
+          </View>
+          
+          <View style={styles.inputContainer}>
+            <CommonText title="Average Price" textStyle={[14, '500', '#666']} />
+            <TextInput
+              style={[
+                styles.input,
+                errors.averagePrice ? styles.inputError : null
+              ]}
+              placeholder="e.g., 50.00"
+              placeholderTextColor="#666"
+              keyboardType="numeric"
+              value={averagePrice}
+              onChangeText={handleAveragePriceChange}
+            />
+            {errors.averagePrice ? (
+              <View style={styles.errorContainer}>
+                <CommonText
+                  title={`❌ ${errors.averagePrice}`}
+                  textStyle={[12, '500', '#d32f2f']}
+                />
+              </View>
+            ) : null}
+          </View>
         </View>
-      </View>
 
-      {/* Target Average Price Input */}
-      <View style={styles.inputSection}>
-        <CommonText 
-          title="Target Average Price You Want to Achieve" 
-          textStyle={[16, '600', '#333']} 
-        />
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={[
-              styles.input,
-              errors.targetAveragePrice ? styles.inputError : null
-            ]}
-            placeholder="Enter your target average price (e.g., 43)"
-            keyboardType="numeric"
-            value={targetAveragePrice}
-            onChangeText={(text) => {
-              setTargetAveragePrice(text);
-              clearFieldError('targetAveragePrice');
-            }}
-          />
-          {errors.targetAveragePrice ? (
-            <View style={styles.errorContainer}>
-              <CommonText
-                title={`❌ ${errors.targetAveragePrice}`}
-                textStyle={[12, '500', '#d32f2f']}
-              />
-            </View>
-          ) : null}
+        {/* Row 2: Current Price and Target Average */}
+        <View style={styles.inputRow}>
+          <View style={styles.inputContainer}>
+            <CommonText title="Current Price" textStyle={[14, '500', '#666']} />
+            <TextInput
+              style={[
+                styles.input,
+                errors.currentPrice ? styles.inputError : null
+              ]}
+              placeholder="e.g., 45.00"
+              placeholderTextColor="#666"
+              keyboardType="numeric"
+              value={currentPrice}
+              onChangeText={handleCurrentPriceChange}
+            />
+            {errors.currentPrice ? (
+              <View style={styles.errorContainer}>
+                <CommonText
+                  title={`❌ ${errors.currentPrice}`}
+                  textStyle={[12, '500', '#d32f2f']}
+                />
+              </View>
+            ) : null}
+          </View>
+          
+          <View style={styles.inputContainer}>
+            <CommonText title="Target Average" textStyle={[14, '500', '#666']} />
+            <TextInput
+              style={[
+                styles.input,
+                errors.targetAveragePrice ? styles.inputError : null
+              ]}
+              placeholder="e.g., 43.00"
+              placeholderTextColor="#666"
+              keyboardType="numeric"
+              value={targetAveragePrice}
+              onChangeText={handleTargetAveragePriceChange}
+            />
+            {errors.targetAveragePrice ? (
+              <View style={styles.errorContainer}>
+                <CommonText
+                  title={`❌ ${errors.targetAveragePrice}`}
+                  textStyle={[12, '500', '#d32f2f']}
+                />
+              </View>
+            ) : null}
+          </View>
         </View>
       </View>
 
@@ -375,9 +417,23 @@ const SharePriceMatchCalculator = () => {
                 textStyle={[22, 'bold', '#333']}
               />
             </View>
-            {/* <TouchableOpacity style={styles.saveResultButton} onPress={handleSave}>
-              <CommonText title={editingCalculationId ? "💾 Update" : "💾 Save"} textStyle={[14, '600', '#4caf50']} />
-            </TouchableOpacity> */}
+            <TouchableOpacity 
+              style={[
+                styles.saveResultButton, 
+                isEditing && !hasChanges && { opacity: 0.5 }
+              ]} 
+              onPress={handleSave}
+              disabled={isEditing && !hasChanges}
+            >
+              <CommonText 
+                title={
+                  isEditing 
+                    ? (hasChanges ? "💾 Update" : "✅ Updated") 
+                    : "💾 Save"
+                } 
+                textStyle={[14, '600', '#4caf50']} 
+              />
+            </TouchableOpacity>
           </View>
 
      
@@ -491,27 +547,49 @@ const SharePriceMatchCalculator = () => {
         </View>
       )}
 
-      {/* Formula */}
-      <View style={styles.formulaSection}>
-        <CommonText 
-          title="Formula" 
-          textStyle={[18, 'bold', '#333']} 
-        />
-        <View style={styles.formulaCard}>
+      {/* Sample Result - Only show when no actual results */}
+      {!result && (
+        <View style={styles.formulaSection}>
           <CommonText 
-            title="Additional Shares = [Owned Shares × (Current Average - Target Average)] ÷ (Target Average - Current Price)" 
-            textStyle={[16, '600', '#666']} 
+            title="📊 Sample Result" 
+            textStyle={[18, 'bold', '#333']} 
           />
-          <CommonText 
-            title="This calculates shares needed to achieve your target average price" 
-            textStyle={[14, 'normal', '#888']} 
-          />
-          <CommonText 
-            title="New Average = (Total Investment) ÷ (Total Shares)" 
-            textStyle={[14, 'normal', '#888']} 
-          />
+          <View style={styles.formulaCard}>
+            <CommonText 
+              title="Example: If you own 100 shares at ₹50 average and want to achieve ₹43 average at ₹45 current price" 
+              textStyle={[16, '600', '#666']} 
+            />
+            <View style={styles.sampleResultContainer}>
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Current Situation:" textStyle={[14, '600', '#666']} />
+                <CommonText title="100 shares at ₹50 average" textStyle={[16, 'bold', '#2196F3']} />
+              </View>
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Target:" textStyle={[14, '600', '#666']} />
+                <CommonText title="₹43 average price" textStyle={[16, 'bold', '#9c27b0']} />
+              </View>
+              <View style={styles.sampleDivider} />
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Additional Shares Needed:" textStyle={[14, '600', '#666']} />
+                <CommonText title="150 shares" textStyle={[16, 'bold', '#4caf50']} />
+              </View>
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Investment Required:" textStyle={[14, '600', '#666']} />
+                <CommonText title="₹6,750" textStyle={[16, 'bold', '#ff9800']} />
+              </View>
+              <View style={styles.sampleDivider} />
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="New Average Price:" textStyle={[14, '600', '#666']} />
+                <CommonText title="₹43.00" textStyle={[16, 'bold', '#4caf50']} />
+              </View>
+            </View>
+            <CommonText 
+              title="Buy 150 shares at ₹45 to achieve your target average of ₹43" 
+              textStyle={[14, 'normal', '#888']} 
+            />
+          </View>
         </View>
-      </View>
+      )}
 
       {/* Save Modal */}
       <SaveModal calculationData={{ ...result, sharesOwned, averagePrice, currentPrice, targetAveragePrice }} reset={resetCalculator}/>
@@ -529,63 +607,81 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
+    paddingHorizontal: Math.min(20, screenWidth * 0.05),
   },
   stockNameContainer: {
     backgroundColor: '#e8f5e8',
-    paddingHorizontal: 15,
+    paddingHorizontal: Math.min(15, screenWidth * 0.04),
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#4caf50',
+    flex: 1,
+    marginRight: 10,
   },
   historyButton: {
     backgroundColor: '#e3f2fd',
-    paddingHorizontal: 20,
+    paddingHorizontal: Math.min(20, screenWidth * 0.05),
     paddingVertical: 10,
     borderRadius: 25,
     borderWidth: 1,
     borderColor: '#2196F3',
-    minWidth: 120,
+    minWidth: Math.min(120, screenWidth * 0.3),
     alignItems: 'center',
   },
   inputSection: {
     backgroundColor: 'white',
-    padding: 20,
+    padding: Math.min(20, screenWidth * 0.05),
     borderRadius: 12,
     marginBottom: 20,
-    shadowColor: '#2196F3',
-    shadowOffset: { width: 0, height: 1 },
+    marginHorizontal: Math.min(20, screenWidth * 0.05),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 1,
-    elevation: 2,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Math.min(20, screenHeight * 0.025),
+  },
+  inputRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Math.min(15, screenHeight * 0.02),
   },
   inputContainer: {
-    marginTop: 10,
+    flex: 1,
+    marginRight: Math.min(10, screenWidth * 0.025),
   },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
+    padding: Math.min(12, screenWidth * 0.03),
+    fontSize: Math.min(16, screenWidth * 0.04),
     backgroundColor: 'white',
+    marginTop: 5,
   },
   buttonSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
+    marginHorizontal: Math.min(20, screenWidth * 0.05),
   },
   calculateButton: {
     flex: 1,
     backgroundColor: '#2196F3',
-    padding: 15,
+    padding: Math.min(15, screenHeight * 0.02),
     borderRadius: 8,
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: Math.min(10, screenWidth * 0.025),
   },
   resetButton: {
     backgroundColor: '#f5f5f5',
-    padding: 15,
+    padding: Math.min(15, screenHeight * 0.02),
     borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
@@ -593,9 +689,10 @@ const styles = StyleSheet.create({
   },
   resultSection: {
     backgroundColor: 'white',
-    padding: 20,
+    padding: Math.min(20, screenWidth * 0.05),
     borderRadius: 12,
     marginBottom: 20,
+    marginHorizontal: Math.min(20, screenWidth * 0.05),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -705,9 +802,10 @@ const styles = StyleSheet.create({
   },
   formulaSection: {
     backgroundColor: 'white',
-    padding: 20,
+    padding: Math.min(20, screenWidth * 0.05),
     borderRadius: 12,
     marginBottom: 20,
+    marginHorizontal: Math.min(20, screenWidth * 0.05),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -721,6 +819,21 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderLeftWidth: 4,
     borderLeftColor: '#2196F3',
+  },
+  sampleResultContainer: {
+    marginVertical: 15,
+  },
+  samplePurchaseRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 5,
+  },
+  sampleDivider: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginVertical: 10,
   },
   currentSituationCard: {
     backgroundColor: '#f8f9fa',
@@ -755,19 +868,19 @@ const styles = StyleSheet.create({
   },
   solutionCard: {
     backgroundColor: '#e3f2fd',
-    padding: 20,
+    padding: Math.min(20, screenWidth * 0.05),
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: Math.min(20, screenHeight * 0.025),
     borderWidth: 1,
     borderColor: '#2196F3',
   },
   solutionGrid: {
     justifyContent: 'space-between',
-    marginTop: 15,
+    marginTop: Math.min(15, screenHeight * 0.02),
   },
   solutionItem: {
     width: '100%',
-    padding: 15,
+    padding: Math.min(15, screenWidth * 0.04),
     backgroundColor: 'white',
     borderRadius: 8,
     borderWidth: 1,
@@ -776,20 +889,20 @@ const styles = StyleSheet.create({
   },
   afterPurchaseCard: {
     backgroundColor: '#f0f9ff',
-    padding: 20,
+    padding: Math.min(20, screenWidth * 0.05),
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: Math.min(20, screenHeight * 0.025),
     borderWidth: 1,
     borderColor: '#2196F3',
   },
   afterPurchaseGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 15,
+    marginTop: Math.min(15, screenHeight * 0.02),
   },
   afterPurchaseItem: {
     width: '48%',
-    padding: 15,
+    padding: Math.min(15, screenWidth * 0.04),
     backgroundColor: 'white',
     borderRadius: 8,
     borderWidth: 1,
@@ -798,20 +911,20 @@ const styles = StyleSheet.create({
   },
   benefitsCard: {
     backgroundColor: '#fff3e0',
-    padding: 20,
+    padding: Math.min(20, screenWidth * 0.05),
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: Math.min(20, screenHeight * 0.025),
     borderWidth: 1,
     borderColor: '#ff9800',
   },
   benefitsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 15,
+    marginTop: Math.min(15, screenHeight * 0.02),
   },
   benefitItem: {
     width: '48%',
-    padding: 15,
+    padding: Math.min(15, screenWidth * 0.04),
     backgroundColor: 'white',
     borderRadius: 8,
     borderWidth: 1,
@@ -820,20 +933,20 @@ const styles = StyleSheet.create({
   },
   targetCard: {
     backgroundColor: '#f3e5f5',
-    padding: 20,
+    padding: Math.min(20, screenWidth * 0.05),
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: Math.min(20, screenHeight * 0.025),
     borderWidth: 1,
     borderColor: '#9c27b0',
   },
   targetItem: {
-    padding: 15,
+    padding: Math.min(15, screenWidth * 0.04),
     backgroundColor: 'white',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e9ecef',
     alignItems: 'center',
-    marginTop: 15,
+    marginTop: Math.min(15, screenHeight * 0.02),
   },
   inputError: {
     borderColor: '#d32f2f',
