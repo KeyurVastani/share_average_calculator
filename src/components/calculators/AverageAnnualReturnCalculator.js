@@ -21,6 +21,30 @@ const CAGRCalculator = () => {
   const [years, setYears] = useState('');
   const [result, setResult] = useState(null);
   const [currentStockName, setCurrentStockName] = useState('');
+  const [isEditing, setIsEditing] = useState(false); // Track if we're in editing mode
+  const [hasChanges, setHasChanges] = useState(false); // Track if changes were made
+
+  // Wrapper functions to track changes
+  const handleInitialValueChange = (value) => {
+    setInitialValue(value);
+    if (isEditing) {
+      setHasChanges(true);
+    }
+  };
+
+  const handleFinalValueChange = (value) => {
+    setFinalValue(value);
+    if (isEditing) {
+      setHasChanges(true);
+    }
+  };
+
+  const handleYearsChange = (value) => {
+    setYears(value);
+    if (isEditing) {
+      setHasChanges(true);
+    }
+  };
 
   // Handle loading saved calculations
   useEffect(() => {
@@ -30,6 +54,11 @@ const CAGRCalculator = () => {
       setInitialValue(loadedCalculation.initialValue || '');
       setFinalValue(loadedCalculation.finalValue || '');
       setYears(loadedCalculation.years || '');
+      
+      // Set editing mode
+      setIsEditing(true);
+      setHasChanges(false);
+      
       clearLoadedCalculation();
     }
   }, [loadedCalculation, clearLoadedCalculation]);
@@ -101,6 +130,11 @@ const CAGRCalculator = () => {
       yearlyBreakdown: yearlyBreakdown,
       stockName: currentStockName
     });
+    
+    // Mark that changes have been made if we're in editing mode
+    if (isEditing) {
+      setHasChanges(true);
+    }
   };
 
   const resetCalculator = () => {
@@ -109,18 +143,23 @@ const CAGRCalculator = () => {
     setYears('');
     setResult(null);
     setCurrentStockName('');
+    setIsEditing(false); // Clear editing mode
+    setHasChanges(false); // Clear changes flag
   };
 
   const handleSave = () => {
-    console.log('handleSave called:', { editingCalculationId, currentStockName, hasResult: !!result });
+    console.log('handleSave called:', { editingCalculationId, currentStockName, hasResult: !!result, isEditing, hasChanges });
     
-    if (editingCalculationId && result && currentStockName) {
+    if (isEditing && result && currentStockName) {
       // When editing and we have a stock name, automatically update without showing modal
       console.log('Auto-updating calculation with stock name:', currentStockName);
       saveCalculation({
         ...result,
         stockName: currentStockName // Use the stored stock name
       }, 'cagr');
+      
+      // Keep editing state but mark as no changes (button will be disabled)
+      setHasChanges(false);
     } else {
       // Show modal for new calculations or when no stock name exists
       console.log('Showing modal - editingCalculationId:', editingCalculationId, 'currentStockName:', currentStockName);
@@ -166,7 +205,7 @@ const CAGRCalculator = () => {
               placeholderTextColor="#666"
               keyboardType="numeric"
               value={initialValue}
-              onChangeText={setInitialValue}
+              onChangeText={handleInitialValueChange}
             />
           </View>
           
@@ -178,21 +217,21 @@ const CAGRCalculator = () => {
               placeholderTextColor="#666"
               keyboardType="numeric"
               value={finalValue}
-              onChangeText={setFinalValue}
+              onChangeText={handleFinalValueChange}
             />
           </View>
         </View>
 
         <View style={styles.inputContainer}>
           <CommonText title="Investment Period (Years)" textStyle={[14, '500', '#666']} />
-          <TextInput
-            style={styles.input}
-            placeholder="e.g. 5"
-            keyboardType="numeric"
-            placeholderTextColor="#666"
-            value={years}
-            onChangeText={setYears}
-          />
+                      <TextInput
+              style={styles.input}
+              placeholder="e.g. 5"
+              keyboardType="numeric"
+              placeholderTextColor="#666"
+              value={years}
+              onChangeText={handleYearsChange}
+            />
         </View>
       </View>
 
@@ -215,8 +254,22 @@ const CAGRCalculator = () => {
               title="📊 Results" 
               textStyle={[22, 'bold', '#333']} 
             />
-            <TouchableOpacity style={styles.saveResultButton} onPress={handleSave}>
-              <CommonText title={editingCalculationId ? "💾 Update" : "💾 Save"} textStyle={[14, '600', '#4caf50']} />
+            <TouchableOpacity 
+              style={[
+                styles.saveResultButton, 
+                isEditing && !hasChanges && { opacity: 0.5 }
+              ]} 
+              onPress={handleSave}
+              disabled={isEditing && !hasChanges}
+            >
+              <CommonText 
+                title={
+                  isEditing 
+                    ? (hasChanges ? "💾 Update" : "✅ Updated") 
+                    : "💾 Save"
+                } 
+                textStyle={[14, '600', '#4caf50']} 
+              />
             </TouchableOpacity>
           </View>
           

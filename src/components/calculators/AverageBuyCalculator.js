@@ -22,6 +22,8 @@ const AverageBuyCalculator = () => {
   ]);
   const [result, setResult] = useState(null);
   const [currentStockName, setCurrentStockName] = useState(''); // Store current stock name
+  const [isEditing, setIsEditing] = useState(false); // Track if we're in editing mode
+  const [hasChanges, setHasChanges] = useState(false); // Track if changes were made
 
   // Handle loading saved calculations
   useEffect(() => {
@@ -35,6 +37,10 @@ const AverageBuyCalculator = () => {
         setPurchases(loadedCalculation.purchases);
       }
       
+      // Set editing mode
+      setIsEditing(true);
+      setHasChanges(false);
+      
       clearLoadedCalculation(); // Clear the loaded calculation
     }
   }, [loadedCalculation, clearLoadedCalculation]);
@@ -42,11 +48,21 @@ const AverageBuyCalculator = () => {
   const addPurchase = () => {
     const newId = Date.now() + Math.random();
     setPurchases([...purchases, { quantity: '', price: '', id: newId }]);
+    
+    // Mark that changes have been made if we're in editing mode
+    if (isEditing) {
+      setHasChanges(true);
+    }
   };
 
   const removePurchase = (id) => {
     if (purchases.length > 2) {
       setPurchases(purchases.filter(purchase => purchase.id !== id));
+      
+      // Mark that changes have been made if we're in editing mode
+      if (isEditing) {
+        setHasChanges(true);
+      }
     }
   };
 
@@ -54,6 +70,11 @@ const AverageBuyCalculator = () => {
     setPurchases(purchases.map(purchase => 
       purchase.id === id ? { ...purchase, [field]: value } : purchase
     ));
+    
+    // Mark that changes have been made if we're in editing mode
+    if (isEditing) {
+      setHasChanges(true);
+    }
   };
 
   const calculateAveragePrice = () => {
@@ -90,6 +111,11 @@ const AverageBuyCalculator = () => {
       numberOfPurchases: validPurchases.length,
       stockName: currentStockName // Preserve the stock name
     });
+    
+    // Mark that changes have been made if we're in editing mode
+    if (isEditing) {
+      setHasChanges(true);
+    }
   };
 
   const resetCalculator = () => {
@@ -99,12 +125,14 @@ const AverageBuyCalculator = () => {
     ]);
     setResult(null);
     setCurrentStockName(''); // Clear the stock name
+    setIsEditing(false); // Clear editing mode
+    setHasChanges(false); // Clear changes flag
   };
 
   const handleSave = () => {
-    console.log('handleSave called:', { editingCalculationId, currentStockName, hasResult: !!result });
+    console.log('handleSave called:', { editingCalculationId, currentStockName, hasResult: !!result, isEditing, hasChanges });
     
-    if (editingCalculationId && result && currentStockName) {
+    if (isEditing && result && currentStockName) {
       // When editing and we have a stock name, automatically update without showing modal
       console.log('Auto-updating calculation with stock name:', currentStockName);
       saveCalculation({
@@ -112,6 +140,9 @@ const AverageBuyCalculator = () => {
         purchases,
         stockName: currentStockName // Use the stored stock name
       }, 'average-buy');
+      
+      // Keep editing state but mark as no changes (button will be disabled)
+      setHasChanges(false);
     } else {
       // Show modal for new calculations or when no stock name exists
       console.log('Showing modal - editingCalculationId:', editingCalculationId, 'currentStockName:', currentStockName);
@@ -216,8 +247,22 @@ const AverageBuyCalculator = () => {
               title="📊 Results" 
               textStyle={[22, 'bold', '#333']} 
             />
-            <TouchableOpacity style={styles.saveResultButton} onPress={handleSave}>
-              <CommonText title={editingCalculationId ? "💾 Update" : "💾 Save"} textStyle={[14, '600', '#4caf50']} />
+            <TouchableOpacity 
+              style={[
+                styles.saveResultButton, 
+                isEditing && !hasChanges && { opacity: 0.5 }
+              ]} 
+              onPress={handleSave}
+              disabled={isEditing && !hasChanges}
+            >
+              <CommonText 
+                title={
+                  isEditing 
+                    ? (hasChanges ? "💾 Update" : "✅ Updated") 
+                    : "💾 Save"
+                } 
+                textStyle={[14, '600', '#4caf50']} 
+              />
             </TouchableOpacity>
           </View>
           
