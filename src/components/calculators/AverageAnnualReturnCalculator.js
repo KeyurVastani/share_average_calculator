@@ -212,7 +212,7 @@ const CAGRCalculator = () => {
         <View style={styles.resultSection}>
           <View style={styles.resultHeader}>
             <CommonText 
-              title="📊 Calculation Results" 
+              title="📊 Results" 
               textStyle={[22, 'bold', '#333']} 
             />
             <TouchableOpacity style={styles.saveResultButton} onPress={handleSave}>
@@ -565,10 +565,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 1,
+    elevation: 2,
   },
   formulaCard: {
     backgroundColor: '#e3f2fd',

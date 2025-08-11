@@ -174,6 +174,7 @@ const AverageBuyCalculator = () => {
                 <TextInput
                   style={styles.input}
                   placeholder="e.g., 100"
+                  placeholderTextColor="#666"
                   keyboardType="numeric"
                   value={purchase.quantity}
                   onChangeText={(value) => updatePurchase(purchase.id, 'quantity', value)}
@@ -185,6 +186,7 @@ const AverageBuyCalculator = () => {
                 <TextInput
                   style={styles.input}
                   placeholder="e.g., 50.00"
+                  placeholderTextColor="#666"
                   keyboardType="numeric"
                   value={purchase.price}
                   onChangeText={(value) => updatePurchase(purchase.id, 'price', value)}
@@ -211,7 +213,7 @@ const AverageBuyCalculator = () => {
         <View style={styles.resultSection}>
           <View style={styles.resultHeader}>
             <CommonText 
-              title="📊 Calculation Results" 
+              title="📊 Results" 
               textStyle={[22, 'bold', '#333']} 
             />
             <TouchableOpacity style={styles.saveResultButton} onPress={handleSave}>
@@ -302,23 +304,49 @@ const AverageBuyCalculator = () => {
         </View>
       )}
 
-      {/* Formula */}
-      <View style={styles.formulaSection}>
-        <CommonText 
-          title="Formula" 
-          textStyle={[18, 'bold', '#333']} 
-        />
-        <View style={styles.formulaCard}>
+      {/* Sample Result - Only show when no actual results */}
+      {!result && (
+        <View style={styles.formulaSection}>
           <CommonText 
-            title="Average Price = Total Investment ÷ Total Quantity" 
-            textStyle={[16, '600', '#666']} 
+            title="📊 Sample Result" 
+            textStyle={[18, 'bold', '#333']} 
           />
-          <CommonText 
-            title="Total Investment = Σ(Quantity × Price per Share)" 
-            textStyle={[14, 'normal', '#888']} 
-          />
+          <View style={styles.formulaCard}>
+            <CommonText 
+              title="Example: If you bought 100 shares at ₹50 and 200 shares at ₹60" 
+              textStyle={[16, '600', '#666']} 
+            />
+            <View style={styles.sampleResultContainer}>
+              <View style={[styles.samplePurchaseRow,{flexDirection:'column',justifyContent:'center',alignItems:'flex-start'}]}>
+                <CommonText title="Purchase 1:" textStyle={[14, '600', '#666']} />
+                <CommonText title="100 shares × ₹50 = ₹5,000" textStyle={[16, 'bold', '#2196F3']} />
+              </View>
+              <View style={[styles.samplePurchaseRow,{flexDirection:'column',justifyContent:'center',alignItems:'flex-start'}]}>
+                <CommonText title="Purchase 2:" textStyle={[14, '600', '#666']} />
+                <CommonText title="200 shares × ₹60 = ₹12,000" textStyle={[16, 'bold', '#2196F3']} />
+              </View>
+              <View style={styles.sampleDivider} />
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Total Investment:" textStyle={[14, '600', '#666']} />
+                <CommonText title="₹17,000" textStyle={[16, 'bold', '#4caf50']} />
+              </View>
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Total Shares:" textStyle={[14, '600', '#666']} />
+                <CommonText title="300" textStyle={[16, 'bold', '#4caf50']} />
+              </View>
+              <View style={styles.sampleDivider} />
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Average Price:" textStyle={[14, '600', '#666']} />
+                <CommonText title="₹56.67" textStyle={[16, 'bold', '#ff9800']} />
+              </View>
+            </View>
+            <CommonText 
+              title="Your average cost per share is ₹56.67" 
+              textStyle={[14, 'normal', '#888']} 
+            />
+          </View>
         </View>
-      </View>
+      )}
 
       {/* Save Modal */}
       <SaveModal calculationData={{ ...result, purchases }}  reset={resetCalculator}/>
@@ -563,12 +591,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: 50,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 2,
+    elevation: 2,
+
   },
   formulaCard: {
     backgroundColor: '#e3f2fd',
@@ -577,6 +606,21 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderLeftWidth: 4,
     borderLeftColor: '#2196F3',
+  },
+  sampleResultContainer: {
+    marginVertical: 15,
+  },
+  samplePurchaseRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 5,
+  },
+  sampleDivider: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginVertical: 10,
   },
   colorfulSummaryBanner: {
     backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
