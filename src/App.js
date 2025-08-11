@@ -46,14 +46,22 @@ function App() {
       icon: '📈',
       info: {
         title: 'CAGR Calculator',
-        description: 'Calculate the Compound Annual Growth Rate (CAGR) to understand the mean annual growth rate of your investment over a specified period.',
+        description: 'Calculate the Compound Annual Growth Rate (CAGR) to understand the mean annual growth rate of your investment over a specified period. CAGR is a useful measure to compare the performance of different investments over time, as it smooths out the volatility and shows the consistent annual return rate.',
         features: [
           'Calculate compound annual growth rate',
-          'Compare investment performance',
-          'Analyze growth patterns',
-          'Evaluate long-term investments'
+          'Compare investment performance across different time periods',
+          'Analyze long-term growth patterns',
+          'Evaluate investment returns vs benchmarks',
+          'Plan future investment goals',
+          'Understand true annualized returns'
         ],
-        formula: 'CAGR = (Final Value / Initial Value)^(1/Years) - 1'
+        formula: 'CAGR = (Final Value / Initial Value)^(1/Years) - 1',
+        additionalInfo: {
+          whatIsCAGR: 'CAGR (Compound Annual Growth Rate) is the mean annual growth rate of an investment over a specified period longer than one year. It represents one of the most accurate ways to calculate and determine returns for anything that can rise or fall in value over time.',
+          whyUseCAGR: 'CAGR is useful because it provides a smoothed annual rate of return, eliminating the volatility and fluctuations that can occur in year-to-year returns. This makes it easier to compare different investments.',
+          interpretation: 'A higher CAGR indicates better performance. For example, a 15% CAGR means the investment grew by an average of 15% per year over the specified period.',
+          limitations: 'CAGR assumes a smooth growth rate and doesn\'t account for volatility or the timing of cash flows. It\'s best used for comparing investments over similar time periods.'
+        }
       }
     },
     // {
@@ -513,7 +521,6 @@ function App() {
           />
           <View style={styles.modalContent}>
             {selectedCalculator?.id && 
-              
                 <>
                   <View style={styles.modalHeader}>
                     <View style={styles.modalHeaderContent}>
@@ -533,27 +540,59 @@ function App() {
 
                   <ScrollView style={styles.modalScrollView} showsVerticalScrollIndicator={false}>
                     <View style={styles.modalBody}>
-                      <View style={styles.modalUseSection}>
-                        <Text style={styles.modalUseTitle}>What is this calculator used for?</Text>
-                        <Text style={styles.modalDescription}>{selectedCalculator?.info?.description}</Text>
-                      </View>
+                      {(() => {
+                        const calculatorInfo = calculatorTypes.find(calc => calc.id === selectedCalculator?.id)?.info;
+                        return (
+                          <>
+                            <View style={styles.modalUseSection}>
+                              <Text style={styles.modalUseTitle}>What is this calculator used for?</Text>
+                              <Text style={styles.modalDescription}>{calculatorInfo?.description}</Text>
+                            </View>
 
-                      <View style={styles.modalSection}>
-                        <Text style={styles.modalSectionTitle}>Key Features:</Text>
-                        {selectedCalculator?.info?.features.map((feature, index) => (
-                          <View key={index} style={styles.modalFeatureItem}>
-                            <Text style={styles.modalFeatureBullet}>•</Text>
-                            <Text style={styles.modalFeatureText}>{feature}</Text>
-                          </View>
-                        ))}
-                      </View>
+                            <View style={styles.modalSection}>
+                              <Text style={styles.modalSectionTitle}>Key Features:</Text>
+                              {calculatorInfo?.features?.map((feature, index) => (
+                                <View key={index} style={styles.modalFeatureItem}>
+                                  <Text style={styles.modalFeatureBullet}>•</Text>
+                                  <Text style={styles.modalFeatureText}>{feature}</Text>
+                                </View>
+                              ))}
+                            </View>
 
-                      <View style={styles.modalSection}>
-                        <Text style={styles.modalSectionTitle}>Formula:</Text>
-                        <View style={styles.modalFormulaContainer}>
-                          <Text style={styles.modalFormula}>{selectedCalculator?.info?.formula}</Text>
-                        </View>
-                      </View>
+                            <View style={styles.modalSection}>
+                              <Text style={styles.modalSectionTitle}>Formula:</Text>
+                              <View style={styles.modalFormulaContainer}>
+                                <Text style={styles.modalFormula}>{calculatorInfo?.formula}</Text>
+                              </View>
+                            </View>
+
+                            {/* Additional CAGR Information */}
+                            {selectedCalculator?.id === 'cagr' && calculatorInfo?.additionalInfo && (
+                              <>
+                                <View style={styles.modalSection}>
+                                  <Text style={styles.modalSectionTitle}>What is CAGR?</Text>
+                                  <Text style={styles.modalDescription}>{calculatorInfo?.additionalInfo?.whatIsCAGR}</Text>
+                                </View>
+
+                                <View style={styles.modalSection}>
+                                  <Text style={styles.modalSectionTitle}>Why Use CAGR?</Text>
+                                  <Text style={styles.modalDescription}>{calculatorInfo?.additionalInfo?.whyUseCAGR}</Text>
+                                </View>
+
+                                <View style={styles.modalSection}>
+                                  <Text style={styles.modalSectionTitle}>How to Interpret Results:</Text>
+                                  <Text style={styles.modalDescription}>{calculatorInfo?.additionalInfo?.interpretation}</Text>
+                                </View>
+
+                                <View style={styles.modalSection}>
+                                  <Text style={styles.modalSectionTitle}>Limitations:</Text>
+                                  <Text style={styles.modalDescription}>{calculatorInfo?.additionalInfo?.limitations}</Text>
+                                </View>
+                              </>
+                            )}
+                          </>
+                        );
+                      })()}
                     </View>
                   </ScrollView>
                 </>
@@ -857,7 +896,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   modalScrollView: {
-    flex: 1,
+    flexGrow: 1,
   },
   modalBody: {
     padding: 20,

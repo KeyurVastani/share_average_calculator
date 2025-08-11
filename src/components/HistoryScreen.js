@@ -122,6 +122,68 @@ const HistoryScreen = () => {
 
                 {/* Key Metrics */}
                 <View style={styles.metricsGrid}>
+                  {/* CAGR Calculator Metrics */}
+                  {calculation.averageAnnualReturn && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="CAGR" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`${calculation.averageAnnualReturn}%`} 
+                        textStyle={[16, 'bold', '#4caf50']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.totalReturn && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Total Return" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`${calculation.totalReturn}%`} 
+                        textStyle={[16, 'bold', '#2196F3']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.initialValue && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Initial Value" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculation.initialValue}`} 
+                        textStyle={[16, 'bold', '#333']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.finalValue && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Final Value" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculation.finalValue}`} 
+                        textStyle={[16, 'bold', '#333']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.years && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Period (Years)" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={calculation.years} 
+                        textStyle={[16, 'bold', '#333']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.absoluteGain && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Absolute Gain" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculation.absoluteGain}`} 
+                        textStyle={[16, 'bold', '#4caf50']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {/* Other Calculator Metrics */}
                   {calculation.averagePrice && (
                     <View style={styles.metricItem}>
                       <CommonText title="Avg Price" textStyle={[12, '500', '#666']} />
@@ -131,14 +193,6 @@ const HistoryScreen = () => {
                       />
                     </View>
                   )}
-                  
-                  {/* <View style={styles.metricItem}>
-                    <CommonText title="Current Price" textStyle={[12, '500', '#666']} />
-                    <CommonText 
-                      title={`₹${calculation.currentPrice}`} 
-                      textStyle={[16, 'bold', '#333']} 
-                    />
-                  </View> */}
                   
                   {calculation.totalInvestment && (
                     <View style={styles.metricItem}>
@@ -180,6 +234,29 @@ const HistoryScreen = () => {
                     </View>
                   )}
                 </View>
+
+                {/* CAGR Summary - Only for CAGR Calculator */}
+                {calculation.averageAnnualReturn && (
+                  <View style={[styles.profitLossSummary, { 
+                    backgroundColor: '#f0f9ff',
+                    borderColor: '#4caf50'
+                  }]}>
+                    <View style={styles.profitLossRow}>
+                      <CommonText 
+                        title="📊 CAGR RESULT" 
+                        textStyle={[14, 'bold', '#4caf50']} 
+                      />
+                      <CommonText 
+                        title={`${calculation.averageAnnualReturn}%`} 
+                        textStyle={[16, 'bold', '#4caf50']} 
+                      />
+                    </View>
+                    <CommonText 
+                      title={`${calculation.totalReturn}% total return over ${calculation.years} years`} 
+                      textStyle={[14, '600', '#4caf50']} 
+                    />
+                  </View>
+                )}
 
                 {/* Profit/Loss Summary - Only for Average Buy Calculator */}
                 {calculation.profitLoss !== undefined && (

@@ -159,10 +159,11 @@ const CAGRCalculator = () => {
 
         <View style={styles.inputRow}>
           <View style={styles.inputContainer}>
-            <CommonText title="Initial Investment" textStyle={[14, '500', '#666']} />
+            <CommonText title="Initial Total Value" textStyle={[14, '500', '#666']} />
             <TextInput
               style={styles.input}
               placeholder="e.g., 10000"
+              placeholderTextColor="#666"
               keyboardType="numeric"
               value={initialValue}
               onChangeText={setInitialValue}
@@ -170,10 +171,11 @@ const CAGRCalculator = () => {
           </View>
           
           <View style={styles.inputContainer}>
-            <CommonText title="Final Value" textStyle={[14, '500', '#666']} />
+            <CommonText title="Final Total Value" textStyle={[14, '500', '#666']} />
             <TextInput
               style={styles.input}
               placeholder="e.g., 15000"
+              placeholderTextColor="#666"
               keyboardType="numeric"
               value={finalValue}
               onChangeText={setFinalValue}
@@ -185,8 +187,9 @@ const CAGRCalculator = () => {
           <CommonText title="Investment Period (Years)" textStyle={[14, '500', '#666']} />
           <TextInput
             style={styles.input}
-            placeholder="e.g., 5"
+            placeholder="e.g. 5"
             keyboardType="numeric"
+            placeholderTextColor="#666"
             value={years}
             onChangeText={setYears}
           />
@@ -228,18 +231,18 @@ const CAGRCalculator = () => {
             />
             
             <View style={styles.colorfulSummaryGrid}>
-                           <View style={[styles.colorfulSummaryItem, { backgroundColor: '#e8f5e8', borderColor: '#4caf50' }]}>
-                 <View style={styles.summaryItemIcon}>
-                   <CommonText title="📊" textStyle={[20, 'normal', '#4caf50']} />
-                   <CommonText title="Your CAGR" textStyle={[12, '500', '#666']} />
-                 </View>
-                 <View style={styles.summaryItemContent}>
-                   <CommonText 
-                     title={`${result.averageAnnualReturn}%`} 
-                     textStyle={[16, 'bold', '#4caf50']} 
-                   />
-                 </View>
-               </View>
+              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#e8f5e8', borderColor: '#4caf50' }]}>
+                <View style={styles.summaryItemIcon}>
+                  <CommonText title="📊" textStyle={[20, 'normal', '#4caf50']} />
+                  <CommonText title="Your CAGR" textStyle={[12, '500', '#666']} />
+                </View>
+                <View style={styles.summaryItemContent}>
+                  <CommonText 
+                    title={`${result.averageAnnualReturn}%`} 
+                    textStyle={[16, 'bold', '#4caf50']} 
+                  />
+                </View>
+              </View>
               <View style={[styles.colorfulSummaryItem, { backgroundColor: '#e3f2fd', borderColor: '#2196F3' }]}>
                 <View style={styles.summaryItemIcon}>
                   <CommonText title="📈" textStyle={[20, 'normal', '#2196F3']} />
@@ -249,6 +252,18 @@ const CAGRCalculator = () => {
                   <CommonText 
                     title={`${result.totalReturn}%`} 
                     textStyle={[16, 'bold', '#2196F3']} 
+                  />
+                </View>
+              </View>
+              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#fff3e0', borderColor: '#ff9800' }]}>
+                <View style={styles.summaryItemIcon}>
+                  <CommonText title="💰" textStyle={[20, 'normal', '#ff9800']} />
+                  <CommonText title="Absolute Gain" textStyle={[12, '500', '#666']} />
+                </View>
+                <View style={styles.summaryItemContent}>
+                  <CommonText 
+                    title={`₹${result.absoluteGain}`} 
+                    textStyle={[16, 'bold', '#ff9800']} 
                   />
                 </View>
               </View>
@@ -309,23 +324,39 @@ const CAGRCalculator = () => {
         </View>
       )}
 
-      {/* Formula */}
-      <View style={styles.formulaSection}>
-        <CommonText 
-          title="Formula" 
-          textStyle={[18, 'bold', '#333']} 
-        />
-        <View style={styles.formulaCard}>
+      {/* Sample Result - Only show when no actual results */}
+      {!result && (
+        <View style={styles.formulaSection}>
           <CommonText 
-            title="CAGR = (Final Value / Initial Value)^(1/Years) - 1" 
-            textStyle={[16, '600', '#666']} 
+            title="📊 Sample Result" 
+            textStyle={[18, 'bold', '#333']} 
           />
-          <CommonText 
-            title="This calculates the compound annual growth rate" 
-            textStyle={[14, 'normal', '#888']} 
-          />
+          <View style={styles.formulaCard}>
+            <CommonText 
+              title="Example: If you invested ₹10,000 and it grew to ₹15,000 over 5 years" 
+              textStyle={[16, '600', '#666']} 
+            />
+            <View style={styles.sampleResultGrid}>
+              <View style={styles.sampleResultItem}>
+                <CommonText title="CAGR" textStyle={[12, '500', '#666']} />
+                <CommonText title="8.45%" textStyle={[16, 'bold', '#4caf50']} />
+              </View>
+              <View style={styles.sampleResultItem}>
+                <CommonText title="Total Return" textStyle={[12, '500', '#666']} />
+                <CommonText title="50.00%" textStyle={[16, 'bold', '#2196F3']} />
+              </View>
+              <View style={styles.sampleResultItem}>
+                <CommonText title="Absolute Gain" textStyle={[12, '500', '#666']} />
+                <CommonText title="₹5,000" textStyle={[16, 'bold', '#4caf50']} />
+              </View>
+            </View>
+            <CommonText 
+              title="This means your investment grew by an average of 8.45% per year" 
+              textStyle={[14, 'normal', '#888']} 
+            />
+          </View>
         </View>
-      </View>
+      )}
 
       {/* Save Modal */}
       <SaveModal calculationData={result} reset={resetCalculator} />
@@ -546,6 +577,16 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderLeftWidth: 4,
     borderLeftColor: '#2196F3',
+  },
+  sampleResultGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 15,
+  },
+  sampleResultItem: {
+    alignItems: 'center',
+    flex: 1,
+    paddingHorizontal: 5,
   },
 
   tableContainer: {
