@@ -3,6 +3,7 @@ import { View, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, Dimen
 import CommonText from '../CommonText';
 import useCalculatorStore from '../../store/calculatorStore';
 import SaveModal from '../SaveModal';
+import { PixelSpacing } from './MarginCalculator';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -438,114 +439,94 @@ const SharePriceMatchCalculator = () => {
 
      
 
-          {/* Target Card */}
-          <View style={styles.targetCard}>
-            <CommonText 
-              title="🎯 Your Target" 
-              textStyle={[16, 'bold', '#333']} 
-            />
+          {/* First Section - Key Action Items & Loss Metrics */}
+          <View style={styles.mainResultCard}>
+            <View style={styles.sectionHeader}>
+              <CommonText title="📊 Action Plan & Loss Analysis" textStyle={[16, 'bold', '#333']} />
+            </View>
             
-            <View style={styles.targetItem}>
-              <CommonText title="Target Average Price" textStyle={[14, '500', '#666']} />
+            <View style={styles.resultItem}>
+              <CommonText title="Shares to Buy" textStyle={[14, '500', '#666']} />
               <CommonText 
-                title={`₹${result.targetAveragePrice}`} 
-                textStyle={[20, 'bold', '#9c27b0']} 
+                title={result.additionalSharesNeeded.toString()} 
+                textStyle={[18, 'bold', '#2196F3']} 
+              />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Investment" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`₹${result.investmentNeeded}`} 
+                textStyle={[18, 'bold', '#4caf50']} 
+              />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Current Loss" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`${result.currentLoss}%`} 
+                textStyle={[18, 'bold', '#ff5722']} 
+              />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Remaining Loss After Average" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`${result.remainingLossAfterAverage}%`} 
+                textStyle={[18, 'bold', '#ff9800']} 
               />
             </View>
           </View>
 
-          {/* Solution Card */}
-          <View style={styles.solutionCard}>
-            <CommonText 
-              title="📈 Solution to Achieve Target" 
-              textStyle={[16, 'bold', '#333']} 
-            />
-            
-            <View style={styles.solutionGrid}>
-              <View style={[styles.solutionItem,{marginBottom: 10}]}>
-                <CommonText title="Additional Shares Needed" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={result.additionalSharesNeeded.toString() + " shares"} 
-                  textStyle={[20, 'bold', '#2196F3']} 
-                />
-              </View>
-              
-              <View style={styles.solutionItem}>
-                <CommonText title="Investment Required" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={`₹${result.investmentNeeded}`} 
-                  textStyle={[20, 'bold', '#4caf50']} 
-                />
-              </View>
+          {/* Second Section - Remaining Details */}
+          <View style={styles.mainResultCard}>
+            <View style={styles.sectionHeader}>
+              <CommonText title="📈 Position Details" textStyle={[16, 'bold', '#333']} />
             </View>
-          </View>
-
-          {/* After Purchase Card */}
-          <View style={styles.afterPurchaseCard}>
-            <CommonText 
-              title="📊 After Additional Purchase" 
-              textStyle={[16, 'bold', '#333']} 
-            />
             
-            <View style={styles.afterPurchaseGrid}>
-              <View style={styles.afterPurchaseItem}>
-                <CommonText title="Total Shares" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={result.totalSharesAfter.toString()} 
-                  textStyle={[20, 'bold', '#333']} 
-                />
-                <CommonText title="shares" textStyle={[12, 'normal', '#999']} />
-              </View>
-              
-              <View style={styles.afterPurchaseItem}>
-                <CommonText title="New Average Price" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={`₹${result.newAveragePrice}`} 
-                  textStyle={[20, 'bold', '#4caf50']} 
-                />
-              </View>
+            <View style={styles.resultItem}>
+              <CommonText title="Target Average" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`₹${result.targetAveragePrice}`} 
+                textStyle={[18, 'bold', '#9c27b0']} 
+              />
             </View>
-          </View>
-
-          {/* Benefits Card */}
-          <View style={styles.benefitsCard}>
-            <CommonText 
-              title="💰 Benefits" 
-              textStyle={[16, 'bold', '#333']} 
-            />
             
-            <View style={styles.benefitsGrid}>
-              <View style={styles.benefitItem}>
-                <CommonText title="Current Loss" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={`${result.currentLoss}%`} 
-                  textStyle={[20, 'bold', '#ff5722']} 
-                />
-              </View>
-              
-              <View style={styles.benefitItem}>
-                <CommonText title="Remaining Loss After Average" textStyle={[14, '500', '#666']} />
-                <CommonText 
-                  title={`${result.remainingLossAfterAverage}%`} 
-                  textStyle={[20, 'bold', '#ff9800']} 
-                />
-              </View>
+            <View style={styles.resultItem}>
+              <CommonText title="New Average" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`₹${result.newAveragePrice}`} 
+                textStyle={[18, 'bold', '#4caf50']} 
+              />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Total Shares After Average" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={result.totalSharesAfter.toString()} 
+                textStyle={[18, 'bold', '#333']} 
+              />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Total Investment" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`₹${(parseFloat(result.sharesOwned) * parseFloat(result.averagePrice) + parseFloat(result.investmentNeeded)).toFixed(2)}`} 
+                textStyle={[18, 'bold', '#ff9800']} 
+              />
             </View>
           </View>
 
           {/* Summary Banner */}
           <View style={styles.summaryBanner}>
             <CommonText 
-              title={`Buy ${result.additionalSharesNeeded} shares at ₹${result.currentPrice} to achieve average price of ₹${result.targetAveragePrice}`} 
-              textStyle={[16, '600', '#333']} 
-            />
-            <CommonText 
-              title={`Total investment needed: ₹${result.investmentNeeded}`} 
-              textStyle={[14, 'normal', '#666']} 
+              title={`Buy ${result.additionalSharesNeeded} shares at ₹${result.currentPrice} to achieve ₹${result.targetAveragePrice} average`} 
+              textStyle={[14, '600', '#333']} 
             />
           </View>
         </View>
       )}
+          <PixelSpacing size={30}/>
 
       {/* Sample Result - Only show when no actual results */}
       {!result && (
@@ -795,6 +776,28 @@ const styles = StyleSheet.create({
     borderColor: '#e9ecef',
     alignItems: 'center',
     marginTop: 15,
+  },
+  mainResultCard: {
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    marginBottom: 10,
+  },
+  sectionHeader: {
+    paddingBottom: 8,
+    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#dee2e6',
+  },
+  resultItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
   },
   summaryBanner: {
     backgroundColor: '#f8f9fa',
