@@ -183,8 +183,69 @@ const HistoryScreen = () => {
                     </View>
                   )}
                   
+                  {/* Average Price Reduction Calculator Metrics */}
+                  {calculation.targetAveragePrice && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Target Average" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculation.targetAveragePrice}`} 
+                        textStyle={[16, 'bold', '#9c27b0']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.additionalSharesNeeded && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Shares to Buy" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={calculation.additionalSharesNeeded} 
+                        textStyle={[16, 'bold', '#2196F3']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.investmentNeeded && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Investment" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculation.investmentNeeded}`} 
+                        textStyle={[16, 'bold', '#4caf50']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.newAveragePrice && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="New Average" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${calculation.newAveragePrice}`} 
+                        textStyle={[16, 'bold', '#4caf50']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.currentLoss && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Current Loss" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`${calculation.currentLoss}%`} 
+                        textStyle={[16, 'bold', '#ff5722']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.remainingLossAfterAverage && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Remaining Loss" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`${calculation.remainingLossAfterAverage}%`} 
+                        textStyle={[16, 'bold', '#ff9800']} 
+                      />
+                    </View>
+                  )}
+                  
                   {/* Other Calculator Metrics */}
-                  {calculation.averagePrice && (
+                  {calculation.averagePrice && !calculation.targetAveragePrice && (
                     <View style={styles.metricItem}>
                       <CommonText title="Avg Price" textStyle={[12, '500', '#666']} />
                       <CommonText 
@@ -194,7 +255,7 @@ const HistoryScreen = () => {
                     </View>
                   )}
                   
-                  {calculation.totalInvestment && (
+                  {calculation.totalInvestment && !calculation.investmentNeeded && (
                     <View style={styles.metricItem}>
                       <CommonText title="Total Investment" textStyle={[12, '500', '#666']} />
                       <CommonText 
@@ -224,7 +285,7 @@ const HistoryScreen = () => {
                     </View>
                   )}
                   
-                  {calculation.sharesNeeded && (
+                  {calculation.sharesNeeded && !calculation.additionalSharesNeeded && (
                     <View style={styles.metricItem}>
                       <CommonText title="Shares Needed" textStyle={[12, '500', '#666']} />
                       <CommonText 
@@ -281,8 +342,31 @@ const HistoryScreen = () => {
                   </View>
                 )}
 
+                {/* Average Price Reduction Summary */}
+                {calculation.targetAveragePrice && (
+                  <View style={[styles.profitLossSummary, { 
+                    backgroundColor: '#f0f9ff',
+                    borderColor: '#9c27b0'
+                  }]}>
+                    <View style={styles.profitLossRow}>
+                      <CommonText 
+                        title="📊 AVERAGE PRICE REDUCTION" 
+                        textStyle={[14, 'bold', '#9c27b0']} 
+                      />
+                      <CommonText 
+                        title={`₹${calculation.newAveragePrice}`} 
+                        textStyle={[16, 'bold', '#9c27b0']} 
+                      />
+                    </View>
+                    <CommonText 
+                      title={`Buy ${calculation.additionalSharesNeeded} shares to achieve ₹${calculation.targetAveragePrice} average`} 
+                      textStyle={[14, '600', '#9c27b0']} 
+                    />
+                  </View>
+                )}
+
                 {/* Share Price Match Summary */}
-                {calculation.sharesNeeded !== undefined && (
+                {calculation.sharesNeeded !== undefined && !calculation.targetAveragePrice && (
                   <View style={[styles.profitLossSummary, { 
                     backgroundColor: '#f0f9ff',
                     borderColor: '#2196F3'
