@@ -100,19 +100,19 @@ function App() {
     },
     {
       id: 'share-price-match',
-      name: 'Share Price Match Calculator',
-      description: 'Calculate shares for target amount',
-      icon: '🎯',
+      name: 'Average Price Reduction Calculator',
+      description: 'Calculate shares needed to reduce average price',
+      icon: '📉',
       info: {
-        title: 'Share Price Match Calculator',
-        description: 'Calculate how many shares you can buy with your target investment amount at the current share price.',
+        title: 'Average Price Reduction Calculator',
+        description: 'Calculate how many additional shares you need to buy at the current price to achieve your target average price.',
         features: [
-          'Calculate number of shares',
-          'Determine remaining amount',
-          'Plan investment allocation',
-          'Optimize share purchases'
+          'Calculate additional shares needed',
+          'Determine investment required',
+          'Plan average price reduction',
+          'Optimize cost averaging strategy'
         ],
-        formula: 'Number of Shares = Target Amount ÷ Current Share Price'
+        formula: 'Additional Shares = [Owned Shares × (Current Average - Target Average)] ÷ (Target Average - Current Price)'
       }
     },
     {

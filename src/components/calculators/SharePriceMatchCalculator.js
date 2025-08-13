@@ -289,7 +289,7 @@ const SharePriceMatchCalculator = () => {
         {/* Row 1: Shares Owned and Average Price */}
         <View style={styles.inputRow}>
           <View style={styles.inputContainer}>
-            <CommonText title="Shares Owned" textStyle={[14, '500', '#666']} />
+            <CommonText title="Total Shares Owned" textStyle={[14, '500', '#666']} />
             <TextInput
               style={[
                 styles.input,
@@ -312,7 +312,7 @@ const SharePriceMatchCalculator = () => {
           </View>
           
           <View style={styles.inputContainer}>
-            <CommonText title="Average Price" textStyle={[14, '500', '#666']} />
+            <CommonText title="Current Average Price" textStyle={[14, '500', '#666']} />
             <TextInput
               style={[
                 styles.input,
@@ -338,7 +338,7 @@ const SharePriceMatchCalculator = () => {
         {/* Row 2: Current Price and Target Average */}
         <View style={styles.inputRow}>
           <View style={styles.inputContainer}>
-            <CommonText title="Current Price" textStyle={[14, '500', '#666']} />
+            <CommonText title="Current Share Price" textStyle={[14, '500', '#666']} />
             <TextInput
               style={[
                 styles.input,
@@ -361,7 +361,7 @@ const SharePriceMatchCalculator = () => {
           </View>
           
           <View style={styles.inputContainer}>
-            <CommonText title="Target Average" textStyle={[14, '500', '#666']} />
+            <CommonText title="Target Average Price" textStyle={[14, '500', '#666']} />
             <TextInput
               style={[
                 styles.input,
@@ -413,7 +413,7 @@ const SharePriceMatchCalculator = () => {
             <View style={{width: '70%', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <CommonText title="📊" textStyle={[22, 'bold', '#333']} />
               <CommonText
-                title="Average Price Reduction Calculator"
+                title="Result"
                 textStyle={[22, 'bold', '#333']}
               />
             </View>
@@ -562,11 +562,15 @@ const SharePriceMatchCalculator = () => {
             <View style={styles.sampleResultContainer}>
               <View style={styles.samplePurchaseRow}>
                 <CommonText title="Current Situation:" textStyle={[14, '600', '#666']} />
-                <CommonText title="100 shares at ₹50 average" textStyle={[16, 'bold', '#2196F3']} />
+                <CommonText title={`100 shares`} textStyle={[16, 'bold', '#2196F3']} numberOfLines={2}/>
+              </View>
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Current Average Price:" textStyle={[14, '600', '#666']} />
+                <CommonText title={`₹50`} textStyle={[16, 'bold', '#2196F3']} numberOfLines={2}/>
               </View>
               <View style={styles.samplePurchaseRow}>
                 <CommonText title="Target:" textStyle={[14, '600', '#666']} />
-                <CommonText title="₹43 average price" textStyle={[16, 'bold', '#9c27b0']} />
+                <CommonText title="₹43 avg price / share" textStyle={[16, 'bold', '#9c27b0']} />
               </View>
               <View style={styles.sampleDivider} />
               <View style={styles.samplePurchaseRow}>
@@ -607,7 +611,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
-    paddingHorizontal: Math.min(20, screenWidth * 0.05),
+    paddingHorizontal: Math.min(20, screenWidth * 0.08),
   },
   stockNameContainer: {
     backgroundColor: '#e8f5e8',
@@ -631,10 +635,10 @@ const styles = StyleSheet.create({
   },
   inputSection: {
     backgroundColor: 'white',
-    padding: Math.min(20, screenWidth * 0.05),
+    padding: 15,
     borderRadius: 12,
     marginBottom: 20,
-    marginHorizontal: Math.min(20, screenWidth * 0.05),
+    marginHorizontal: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -669,7 +673,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
-    marginHorizontal: Math.min(20, screenWidth * 0.05),
+    marginHorizontal:5,
   },
   calculateButton: {
     flex: 1,
@@ -689,10 +693,10 @@ const styles = StyleSheet.create({
   },
   resultSection: {
     backgroundColor: 'white',
-    padding: Math.min(20, screenWidth * 0.05),
+    padding: 15,
     borderRadius: 12,
     marginBottom: 20,
-    marginHorizontal: Math.min(20, screenWidth * 0.05),
+    marginHorizontal:5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -802,10 +806,10 @@ const styles = StyleSheet.create({
   },
   formulaSection: {
     backgroundColor: 'white',
-    padding: Math.min(20, screenWidth * 0.05),
+    padding: 15,
     borderRadius: 12,
     marginBottom: 20,
-    marginHorizontal: Math.min(20, screenWidth * 0.05),
+    marginHorizontal:5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
