@@ -266,84 +266,57 @@ const AverageBuyCalculator = () => {
             </TouchableOpacity>
           </View>
           
-          {/* Colorful Summary Banner */}
-          <View style={styles.colorfulSummaryBanner}>
-            <View style={styles.summaryIconContainer}>
-              <CommonText title="📈" textStyle={[32, 'normal', '#fff']} />
+          {/* First Section - Key Results */}
+          <View style={styles.mainResultCard}>
+            <View style={styles.sectionHeader}>
+              <CommonText title="📊 Average Buy Price Results" textStyle={[16, 'bold', '#333']} />
             </View>
-            <View style={styles.summaryTextContainer}>
-              <CommonText 
-                title="Your Average Buy Price" 
-                textStyle={[18, 'bold', '#fff']} 
-              />
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Average Price" textStyle={[14, '500', '#666']} />
               <CommonText 
                 title={`₹${result.averagePrice}`} 
-                textStyle={[24, 'bold', '#fff']} 
+                textStyle={[18, 'bold', '#9c27b0']} 
+              />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Total Investment" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`₹${result.totalInvestment}`} 
+                textStyle={[18, 'bold', '#2196F3']} 
+              />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Total Shares" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={result.totalQuantity} 
+                textStyle={[18, 'bold', '#4caf50']} 
               />
             </View>
           </View>
 
-     
-
-          {/* Colorful Investment Summary Cards */}
-          <View style={styles.colorfulSummarySection}>
-            <CommonText 
-              title="💰 Investment Summary" 
-              textStyle={[18, 'bold', '#333']} 
-            />
+          {/* Second Section - Purchase Details */}
+          <View style={styles.mainResultCard}>
+            <View style={styles.sectionHeader}>
+              <CommonText title="📈 Purchase Details" textStyle={[16, 'bold', '#333']} />
+            </View>
             
-            <View style={styles.colorfulSummaryGrid}>
-              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#e3f2fd', borderColor: '#2196F3' }]}>
-                <View style={styles.summaryItemIcon}>
-                  <CommonText title="💰" textStyle={[20, 'normal', '#2196F3']} />
-                  <CommonText title=" Total Investment" textStyle={[12, '500', '#666']} />
-
-                </View>
-                  <CommonText 
-                    title={`₹${result.totalInvestment}`} 
-                    textStyle={[16, 'bold', '#2196F3']} 
-                  />
-              </View>
-              
-              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#e8f5e8', borderColor: '#4caf50' }]}>
-                <View style={styles.summaryItemIcon}>
-                  <CommonText title="📈" textStyle={[20, 'normal', '#4caf50']} />
-                  <CommonText title=" Total Shares" textStyle={[12, '500', '#666']} />
-                </View>
-                <View style={styles.summaryItemContent}>
-                  <CommonText 
-                    title={result.totalQuantity} 
-                    textStyle={[16, 'bold', '#4caf50']} 
-                  />
-                </View>
-              </View>
-              
-              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#fff3e0', borderColor: '#ff9800' }]}>
-                <View style={styles.summaryItemIcon}>
-                  <CommonText title="📈" textStyle={[20, 'normal', '#ff9800']} />
-                  <CommonText title=" No. of Purchases" textStyle={[12, '500', '#666']} />
-
-                </View>
-                <View style={styles.summaryItemContent}>
-                  <CommonText 
-                    title={result.numberOfPurchases.toString()} 
-                    textStyle={[16, 'bold', '#ff9800']} 
-                  />
-                </View>
-              </View>
-              
-              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#f3e5f5', borderColor: '#9c27b0' }]}>
-                <View style={styles.summaryItemIcon}>
-                  <CommonText title="⚖️" textStyle={[20, 'normal', '#9c27b0']} />
-                  <CommonText title=" Avg Price per Share" textStyle={[12, '500', '#666']} />
-                </View>
-                <View style={styles.summaryItemContent}>
-                  <CommonText 
-                    title={`₹${result.averagePrice}`} 
-                    textStyle={[16, 'bold', '#9c27b0']} 
-                  />
-                </View>
-              </View>
+            <View style={styles.resultItem}>
+              <CommonText title="Number of Purchases" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={result.numberOfPurchases.toString()} 
+                textStyle={[18, 'bold', '#ff9800']} 
+              />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Average Price per Share" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`₹${result.averagePrice}`} 
+                textStyle={[18, 'bold', '#9c27b0']} 
+              />
             </View>
           </View>
         </View>
@@ -752,6 +725,28 @@ const styles = StyleSheet.create({
     width: 1,
     height: 30,
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  mainResultCard: {
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    marginBottom: 10,
+  },
+  sectionHeader: {
+    paddingBottom: 8,
+    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#dee2e6',
+  },
+  resultItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
   },
 });
 
