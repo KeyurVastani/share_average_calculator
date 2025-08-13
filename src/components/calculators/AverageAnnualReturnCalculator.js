@@ -51,9 +51,17 @@ const CAGRCalculator = () => {
     if (loadedCalculation) {
       setResult(loadedCalculation);
       setCurrentStockName(loadedCalculation.stockName || '');
-      setInitialValue(loadedCalculation.initialValue || '');
-      setFinalValue(loadedCalculation.finalValue || '');
-      setYears(loadedCalculation.years || '');
+      
+      // Convert formatted values back to original input format
+      const formatInputValue = (value) => {
+        if (!value) return '';
+        const num = parseFloat(value);
+        return Number.isInteger(num) ? num.toString() : value;
+      };
+      
+      setInitialValue(formatInputValue(loadedCalculation.initialValue) || '');
+      setFinalValue(formatInputValue(loadedCalculation.finalValue) || '');
+      setYears(formatInputValue(loadedCalculation.years) || '');
       
       // Set editing mode
       setIsEditing(true);
@@ -276,59 +284,73 @@ const CAGRCalculator = () => {
           
       
 
-          {/* Colorful Investment Summary Cards */}
-          <View style={styles.colorfulSummarySection}>
-            <CommonText 
-              title="💰 Investment Summary" 
-              textStyle={[18, 'bold', '#333']} 
-            />
+          {/* First Section - Key Results */}
+          <View style={styles.mainResultCard}>
+            <View style={styles.sectionHeader}>
+              <CommonText title="📊 CAGR Results" textStyle={[16, 'bold', '#333']} />
+            </View>
             
-            <View style={styles.colorfulSummaryGrid}>
-              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#e8f5e8', borderColor: '#4caf50' }]}>
-                <View style={styles.summaryItemIcon}>
-                  <CommonText title="📊" textStyle={[20, 'normal', '#4caf50']} />
-                  <CommonText title="Your CAGR" textStyle={[12, '500', '#666']} />
-                </View>
-                <View style={styles.summaryItemContent}>
-                  <CommonText 
-                    title={`${result.averageAnnualReturn}%`} 
-                    textStyle={[16, 'bold', '#4caf50']} 
-                  />
-                </View>
-              </View>
-              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#e3f2fd', borderColor: '#2196F3' }]}>
-                <View style={styles.summaryItemIcon}>
-                  <CommonText title="📈" textStyle={[20, 'normal', '#2196F3']} />
-                  <CommonText title=" Total Return" textStyle={[12, '500', '#666']} />
-                </View>
-                <View style={styles.summaryItemContent}>
-                  <CommonText 
-                    title={`${result.totalReturn}%`} 
-                    textStyle={[16, 'bold', '#2196F3']} 
-                  />
-                </View>
-              </View>
-              <View style={[styles.colorfulSummaryItem, { backgroundColor: '#fff3e0', borderColor: '#ff9800' }]}>
-                <View style={styles.summaryItemIcon}>
-                  <CommonText title="💰" textStyle={[20, 'normal', '#ff9800']} />
-                  <CommonText title="Absolute Gain" textStyle={[12, '500', '#666']} />
-                </View>
-                <View style={styles.summaryItemContent}>
-                  <CommonText 
-                    title={`₹${result.absoluteGain}`} 
-                    textStyle={[16, 'bold', '#ff9800']} 
-                  />
-                </View>
-              </View>
+            <View style={styles.resultItem}>
+              <CommonText title="CAGR" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`${result.averageAnnualReturn}%`} 
+                textStyle={[18, 'bold', '#4caf50']} 
+              />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Total Return" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`${result.totalReturn}%`} 
+                textStyle={[18, 'bold', '#2196F3']} 
+              />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Absolute Gain" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`₹${result.absoluteGain}`} 
+                textStyle={[18, 'bold', '#ff9800']} 
+              />
+            </View>
+          </View>
+
+          {/* Second Section - Investment Details */}
+          <View style={styles.mainResultCard}>
+            <View style={styles.sectionHeader}>
+              <CommonText title="📈 Investment Details" textStyle={[16, 'bold', '#333']} />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Initial Investment" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`₹${result.initialValue}`} 
+                textStyle={[18, 'bold', '#333']} 
+              />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Final Value" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`₹${result.finalValue}`} 
+                textStyle={[18, 'bold', '#333']} 
+              />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <CommonText title="Investment Period" textStyle={[14, '500', '#666']} />
+              <CommonText 
+                title={`${result.years} years`} 
+                textStyle={[18, 'bold', '#333']} 
+              />
             </View>
           </View>
 
           {/* Yearly Breakdown Table */}
-          <View >
-            <CommonText 
-              title="📅 Yearly Breakdown" 
-              textStyle={[18, 'bold', '#333']} 
-            />
+          <View style={styles.mainResultCard}>
+            <View style={styles.sectionHeader}>
+              <CommonText title="📅 Yearly Breakdown" textStyle={[16, 'bold', '#333']} />
+            </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.tableContainer}>
                 <View style={styles.tableHeader}>
@@ -695,6 +717,28 @@ const styles = StyleSheet.create({
   },
   returnColumn: {
     width: 90, // Return % column
+  },
+  mainResultCard: {
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    marginBottom: 10,
+  },
+  sectionHeader: {
+    paddingBottom: 8,
+    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#dee2e6',
+  },
+  resultItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
   },
 });
 
