@@ -191,9 +191,9 @@ const SharePriceMatchCalculator = () => {
     // Verify the new average price
     const newAveragePrice = ((owned * avgPrice) + investmentNeeded) / totalSharesAfter;
     
-    // Calculate percentage reduction
-    const priceReduction = ((avgPrice - target) / avgPrice) * 100;
-    const costReduction = (avgPrice - target) * owned;
+    // Calculate loss percentages
+    const currentLoss = ((avgPrice - current) / avgPrice) * 100;
+    const remainingLossAfterAverage = ((target - current) / target) * 100;
 
     setResult({
       sharesOwned: owned,
@@ -204,8 +204,8 @@ const SharePriceMatchCalculator = () => {
       investmentNeeded: investmentNeeded.toFixed(2),
       totalSharesAfter: Math.ceil(totalSharesAfter),
       newAveragePrice: newAveragePrice.toFixed(2),
-      priceReduction: priceReduction.toFixed(2),
-      costReduction: costReduction.toFixed(2),
+      currentLoss: currentLoss.toFixed(2),
+      remainingLossAfterAverage: remainingLossAfterAverage.toFixed(2),
       stockName: currentStockName
     });
     
@@ -411,10 +411,10 @@ const SharePriceMatchCalculator = () => {
         <View style={styles.resultSection}>
           <View style={styles.resultHeader}>
             <View style={{width: '70%', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <CommonText title="📊" textStyle={[22, 'bold', '#333']} />
+              <CommonText title="📊" textStyle={[18, 'bold', '#333']} />
               <CommonText
                 title="Result"
-                textStyle={[22, 'bold', '#333']}
+                textStyle={[18, 'bold', '#333']}
               />
             </View>
             <TouchableOpacity 
@@ -442,14 +442,14 @@ const SharePriceMatchCalculator = () => {
           <View style={styles.targetCard}>
             <CommonText 
               title="🎯 Your Target" 
-              textStyle={[18, 'bold', '#333']} 
+              textStyle={[16, 'bold', '#333']} 
             />
             
             <View style={styles.targetItem}>
               <CommonText title="Target Average Price" textStyle={[14, '500', '#666']} />
               <CommonText 
                 title={`₹${result.targetAveragePrice}`} 
-                textStyle={[24, 'bold', '#9c27b0']} 
+                textStyle={[20, 'bold', '#9c27b0']} 
               />
             </View>
           </View>
@@ -458,7 +458,7 @@ const SharePriceMatchCalculator = () => {
           <View style={styles.solutionCard}>
             <CommonText 
               title="📈 Solution to Achieve Target" 
-              textStyle={[18, 'bold', '#333']} 
+              textStyle={[16, 'bold', '#333']} 
             />
             
             <View style={styles.solutionGrid}>
@@ -466,7 +466,7 @@ const SharePriceMatchCalculator = () => {
                 <CommonText title="Additional Shares Needed" textStyle={[14, '500', '#666']} />
                 <CommonText 
                   title={result.additionalSharesNeeded.toString() + " shares"} 
-                  textStyle={[24, 'bold', '#2196F3']} 
+                  textStyle={[20, 'bold', '#2196F3']} 
                 />
               </View>
               
@@ -484,7 +484,7 @@ const SharePriceMatchCalculator = () => {
           <View style={styles.afterPurchaseCard}>
             <CommonText 
               title="📊 After Additional Purchase" 
-              textStyle={[18, 'bold', '#333']} 
+              textStyle={[16, 'bold', '#333']} 
             />
             
             <View style={styles.afterPurchaseGrid}>
@@ -511,23 +511,23 @@ const SharePriceMatchCalculator = () => {
           <View style={styles.benefitsCard}>
             <CommonText 
               title="💰 Benefits" 
-              textStyle={[18, 'bold', '#333']} 
+              textStyle={[16, 'bold', '#333']} 
             />
             
             <View style={styles.benefitsGrid}>
               <View style={styles.benefitItem}>
-                <CommonText title="Price Reduction" textStyle={[14, '500', '#666']} />
+                <CommonText title="Current Loss" textStyle={[14, '500', '#666']} />
                 <CommonText 
-                  title={`${result.priceReduction}%`} 
+                  title={`${result.currentLoss}%`} 
                   textStyle={[20, 'bold', '#ff5722']} 
                 />
               </View>
               
               <View style={styles.benefitItem}>
-                <CommonText title="Cost Reduction on Existing Shares" textStyle={[14, '500', '#666']} />
+                <CommonText title="Remaining Loss After Average" textStyle={[14, '500', '#666']} />
                 <CommonText 
-                  title={`₹${result.costReduction}`} 
-                  textStyle={[16, 'bold', '#4caf50']} 
+                  title={`${result.remainingLossAfterAverage}%`} 
+                  textStyle={[20, 'bold', '#ff9800']} 
                 />
               </View>
             </View>
@@ -798,8 +798,8 @@ const styles = StyleSheet.create({
   },
   summaryBanner: {
     backgroundColor: '#f8f9fa',
-    padding: 20,
-    borderRadius: 12,
+    padding: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e9ecef',
     alignItems: 'center',
@@ -872,85 +872,85 @@ const styles = StyleSheet.create({
   },
   solutionCard: {
     backgroundColor: '#e3f2fd',
-    padding: Math.min(20, screenWidth * 0.05),
-    borderRadius: 12,
-    marginBottom: Math.min(20, screenHeight * 0.025),
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: '#2196F3',
   },
   solutionGrid: {
     justifyContent: 'space-between',
-    marginTop: Math.min(15, screenHeight * 0.02),
+    marginTop: 10,
   },
   solutionItem: {
     width: '100%',
-    padding: Math.min(15, screenWidth * 0.04),
+    padding: 10,
     backgroundColor: 'white',
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#e9ecef',
     alignItems: 'center',
   },
   afterPurchaseCard: {
     backgroundColor: '#f0f9ff',
-    padding: Math.min(20, screenWidth * 0.05),
-    borderRadius: 12,
-    marginBottom: Math.min(20, screenHeight * 0.025),
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: '#2196F3',
   },
   afterPurchaseGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: Math.min(15, screenHeight * 0.02),
+    marginTop: 10,
   },
   afterPurchaseItem: {
     width: '48%',
-    padding: Math.min(15, screenWidth * 0.04),
+    padding: 10,
     backgroundColor: 'white',
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#e9ecef',
     alignItems: 'center',
   },
   benefitsCard: {
     backgroundColor: '#fff3e0',
-    padding: Math.min(20, screenWidth * 0.05),
-    borderRadius: 12,
-    marginBottom: Math.min(20, screenHeight * 0.025),
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: '#ff9800',
   },
   benefitsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: Math.min(15, screenHeight * 0.02),
+    marginTop: 10,
   },
   benefitItem: {
     width: '48%',
-    padding: Math.min(15, screenWidth * 0.04),
+    padding: 10,
     backgroundColor: 'white',
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#e9ecef',
     alignItems: 'center',
   },
   targetCard: {
     backgroundColor: '#f3e5f5',
-    padding: Math.min(20, screenWidth * 0.05),
-    borderRadius: 12,
-    marginBottom: Math.min(20, screenHeight * 0.025),
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: '#9c27b0',
   },
   targetItem: {
-    padding: Math.min(15, screenWidth * 0.04),
+    padding: 10,
     backgroundColor: 'white',
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#e9ecef',
     alignItems: 'center',
-    marginTop: Math.min(15, screenHeight * 0.02),
+    marginTop: 10,
   },
   inputError: {
     borderColor: '#d32f2f',
