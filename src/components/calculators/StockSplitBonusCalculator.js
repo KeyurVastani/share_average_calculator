@@ -86,6 +86,12 @@ const StockSplitBonusCalculator = () => {
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Function to format numbers in Indian numbering system (e.g., 10,00,00,000)
+  const formatIndianNumber = (num) => {
+    if (num === null || num === undefined || isNaN(num)) return '0';
+    return parseFloat(num).toLocaleString('en-IN');
+  };
+
   // Handle loading saved calculations
   useEffect(() => {
     if (loadedCalculation) {
@@ -293,8 +299,12 @@ const StockSplitBonusCalculator = () => {
               style={styles.input}
               placeholder="e.g. 100"
               keyboardType="numeric"
-              value={currentShares}
-              onChangeText={setCurrentShares}
+              value={currentShares ? formatIndianNumber(currentShares) : ''}
+              onChangeText={(text) => {
+                // Remove commas and non-numeric characters for calculation
+                const numericValue = text.replace(/[^\d.]/g, '');
+                setCurrentShares(numericValue);
+              }}
             />
           </View>
           
@@ -304,8 +314,12 @@ const StockSplitBonusCalculator = () => {
               style={styles.input}
               placeholder="e.g. 150.00"
               keyboardType="numeric"
-              value={currentPrice}
-              onChangeText={setCurrentPrice}
+              value={currentPrice ? formatIndianNumber(currentPrice) : ''}
+              onChangeText={(text) => {
+                // Remove commas and non-numeric characters for calculation
+                const numericValue = text.replace(/[^\d.]/g, '');
+                setCurrentPrice(numericValue);
+              }}
             />
           </View>
         </View>
@@ -366,8 +380,12 @@ const StockSplitBonusCalculator = () => {
                 style={styles.input}
                 placeholder="e.g. 2"
                 keyboardType="numeric"
-                value={splitRatio}
-                onChangeText={setSplitRatio}
+                value={splitRatio ? formatIndianNumber(splitRatio) : ''}
+                onChangeText={(text) => {
+                  // Remove commas and non-numeric characters for calculation
+                  const numericValue = text.replace(/[^\d.]/g, '');
+                  setSplitRatio(numericValue);
+                }}
               />
               <CommonText 
                 title="Enter 2 if ratio 2:1" 
@@ -381,8 +399,12 @@ const StockSplitBonusCalculator = () => {
                 style={styles.input}
                 placeholder="e.g. 1"
                 keyboardType="numeric"
-                value={splitDenominator}
-                onChangeText={setSplitDenominator}
+                value={splitDenominator ? formatIndianNumber(splitDenominator) : ''}
+                onChangeText={(text) => {
+                  // Remove commas and non-numeric characters for calculation
+                  const numericValue = text.replace(/[^\d.]/g, '');
+                  setSplitDenominator(numericValue);
+                }}
               />
               <CommonText 
                 title="Enter 1 if ratio 2:1" 
@@ -398,8 +420,12 @@ const StockSplitBonusCalculator = () => {
                 style={styles.input}
                 placeholder="e.g. 2"
                 keyboardType="numeric"
-                value={bonusRatio}
-                onChangeText={setBonusRatio}
+                value={bonusRatio ? formatIndianNumber(bonusRatio) : ''}
+                onChangeText={(text) => {
+                  // Remove commas and non-numeric characters for calculation
+                  const numericValue = text.replace(/[^\d.]/g, '');
+                  setBonusRatio(numericValue);
+                }}
               />
               <CommonText 
                 title="Enter 2 if ratio 2:3 " 
@@ -413,8 +439,12 @@ const StockSplitBonusCalculator = () => {
                 style={styles.input}
                 placeholder="e.g. 3 "
                 keyboardType="numeric"
-                value={bonusDenominator}
-                onChangeText={setBonusDenominator}
+                value={bonusDenominator ? formatIndianNumber(bonusDenominator) : ''}
+                onChangeText={(text) => {
+                  // Remove commas and non-numeric characters for calculation
+                  const numericValue = text.replace(/[^\d.]/g, '');
+                  setBonusDenominator(numericValue);
+                }}
               />
               <CommonText 
                 title="Enter 3 if ratio 2:3" 

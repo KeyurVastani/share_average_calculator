@@ -38,9 +38,11 @@ const SharePriceMatchCalculator = () => {
     general: ''
   });
 
-  // Wrapper functions to track changes
+  // Wrapper functions to track changes with formatting
   const handleSharesOwnedChange = (text) => {
-    setSharesOwned(text);
+    // Remove commas and non-numeric characters for calculation
+    const numericValue = text.replace(/[^\d.]/g, '');
+    setSharesOwned(numericValue);
     clearFieldError('sharesOwned');
     if (isEditing) {
       setHasChanges(true);
@@ -48,7 +50,9 @@ const SharePriceMatchCalculator = () => {
   };
 
   const handleAveragePriceChange = (text) => {
-    setAveragePrice(text);
+    // Remove commas and non-numeric characters for calculation
+    const numericValue = text.replace(/[^\d.]/g, '');
+    setAveragePrice(numericValue);
     clearFieldError('averagePrice');
     if (isEditing) {
       setHasChanges(true);
@@ -56,7 +60,9 @@ const SharePriceMatchCalculator = () => {
   };
 
   const handleCurrentPriceChange = (text) => {
-    setCurrentPrice(text);
+    // Remove commas and non-numeric characters for calculation
+    const numericValue = text.replace(/[^\d.]/g, '');
+    setCurrentPrice(numericValue);
     clearFieldError('currentPrice');
     if (isEditing) {
       setHasChanges(true);
@@ -64,11 +70,19 @@ const SharePriceMatchCalculator = () => {
   };
 
   const handleTargetAveragePriceChange = (text) => {
-    setTargetAveragePrice(text);
+    // Remove commas and non-numeric characters for calculation
+    const numericValue = text.replace(/[^\d.]/g, '');
+    setTargetAveragePrice(numericValue);
     clearFieldError('targetAveragePrice');
     if (isEditing) {
       setHasChanges(true);
     }
+  };
+
+  // Function to format numbers in Indian numbering system (e.g., 10,00,00,000)
+  const formatIndianNumber = (num) => {
+    if (num === null || num === undefined || isNaN(num)) return '0';
+    return parseFloat(num).toLocaleString('en-IN');
   };
 
   // Handle loading saved calculations
@@ -299,7 +313,7 @@ const SharePriceMatchCalculator = () => {
               placeholder="e.g., 100"
               placeholderTextColor="#666"
               keyboardType="numeric"
-              value={sharesOwned}
+              value={sharesOwned ? formatIndianNumber(sharesOwned) : ''}
               onChangeText={handleSharesOwnedChange}
             />
             {errors.sharesOwned ? (
@@ -322,7 +336,7 @@ const SharePriceMatchCalculator = () => {
               placeholder="e.g., 50.00"
               placeholderTextColor="#666"
               keyboardType="numeric"
-              value={averagePrice}
+              value={averagePrice ? formatIndianNumber(averagePrice) : ''}
               onChangeText={handleAveragePriceChange}
             />
             {errors.averagePrice ? (
@@ -348,7 +362,7 @@ const SharePriceMatchCalculator = () => {
               placeholder="e.g., 45.00"
               placeholderTextColor="#666"
               keyboardType="numeric"
-              value={currentPrice}
+              value={currentPrice ? formatIndianNumber(currentPrice) : ''}
               onChangeText={handleCurrentPriceChange}
             />
             {errors.currentPrice ? (
@@ -371,7 +385,7 @@ const SharePriceMatchCalculator = () => {
               placeholder="e.g., 43.00"
               placeholderTextColor="#666"
               keyboardType="numeric"
-              value={targetAveragePrice}
+              value={targetAveragePrice ? formatIndianNumber(targetAveragePrice) : ''}
               onChangeText={handleTargetAveragePriceChange}
             />
             {errors.targetAveragePrice ? (

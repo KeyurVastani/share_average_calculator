@@ -42,6 +42,12 @@ const MarginCalculator = () => {
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Function to format numbers in Indian numbering system (e.g., 10,00,00,000)
+  const formatIndianNumber = (num) => {
+    if (num === null || num === undefined || isNaN(num)) return '0';
+    return parseFloat(num).toLocaleString('en-IN');
+  };
+
   const handleOptionToggle = option => {
     setSelectedOptions(prev => ({
       ...prev,
@@ -246,8 +252,12 @@ const MarginCalculator = () => {
                     style={styles.input}
                     placeholder="e.g. 5"
                     keyboardType="numeric"
-                    value={intradayLeverage}
-                    onChangeText={setIntradayLeverage}
+                    value={intradayLeverage ? formatIndianNumber(intradayLeverage) : ''}
+                    onChangeText={(text) => {
+                      // Remove commas and non-numeric characters for calculation
+                      const numericValue = text.replace(/[^\d.]/g, '');
+                      setIntradayLeverage(numericValue);
+                    }}
                   />
                 </View>
               </View>
@@ -271,8 +281,12 @@ const MarginCalculator = () => {
               style={styles.input}
               placeholder="e.g. 10000"
               keyboardType="numeric"
-              value={amount}
-              onChangeText={setAmount}
+              value={amount ? formatIndianNumber(amount) : ''}
+              onChangeText={(text) => {
+                // Remove commas and non-numeric characters for calculation
+                const numericValue = text.replace(/[^\d.]/g, '');
+                setAmount(numericValue);
+              }}
             />
           </View>
 
@@ -282,8 +296,12 @@ const MarginCalculator = () => {
               style={styles.input}
               placeholder="e.g. 100"
               keyboardType="numeric"
-              value={sharePrice}
-              onChangeText={setSharePrice}
+              value={sharePrice ? formatIndianNumber(sharePrice) : ''}
+              onChangeText={(text) => {
+                // Remove commas and non-numeric characters for calculation
+                const numericValue = text.replace(/[^\d.]/g, '');
+                setSharePrice(numericValue);
+              }}
             />
           </View>
         </View>

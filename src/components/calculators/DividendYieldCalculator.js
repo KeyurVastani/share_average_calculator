@@ -7,6 +7,12 @@ const DividendYieldCalculator = () => {
   const [dividendYield, setDividendYield] = useState('');
   const [result, setResult] = useState(null);
   
+  // Function to format numbers in Indian numbering system (e.g., 10,00,00,000)
+  const formatIndianNumber = (num) => {
+    if (num === null || num === undefined || isNaN(num)) return '0';
+    return parseFloat(num).toLocaleString('en-IN');
+  };
+  
   // Error states for validation
   const [errors, setErrors] = useState({
     sharePrice: '',
@@ -96,9 +102,11 @@ const DividendYieldCalculator = () => {
             ]}
             placeholder="Enter current share price (e.g., 100.00)"
             keyboardType="numeric"
-            value={sharePrice}
+            value={sharePrice ? formatIndianNumber(sharePrice) : ''}
             onChangeText={(text) => {
-              setSharePrice(text);
+              // Remove commas and non-numeric characters for calculation
+              const numericValue = text.replace(/[^\d.]/g, '');
+              setSharePrice(numericValue);
               clearFieldError('sharePrice');
             }}
           />
@@ -127,9 +135,11 @@ const DividendYieldCalculator = () => {
             ]}
             placeholder="Enter dividend yield percentage (e.g., 3.5)"
             keyboardType="numeric"
-            value={dividendYield}
+            value={dividendYield ? formatIndianNumber(dividendYield) : ''}
             onChangeText={(text) => {
-              setDividendYield(text);
+              // Remove commas and non-numeric characters for calculation
+              const numericValue = text.replace(/[^\d.]/g, '');
+              setDividendYield(numericValue);
               clearFieldError('dividendYield');
             }}
           />

@@ -67,14 +67,22 @@ const AverageBuyCalculator = () => {
   };
 
   const updatePurchase = (id, field, value) => {
+    // Remove commas and non-numeric characters for calculation
+    const numericValue = value.replace(/[^\d.]/g, '');
     setPurchases(purchases.map(purchase => 
-      purchase.id === id ? { ...purchase, [field]: value } : purchase
+      purchase.id === id ? { ...purchase, [field]: numericValue } : purchase
     ));
     
     // Mark that changes have been made if we're in editing mode
     if (isEditing) {
       setHasChanges(true);
     }
+  };
+
+  // Function to format numbers in Indian numbering system (e.g., 10,00,00,000)
+  const formatIndianNumber = (num) => {
+    if (num === null || num === undefined || isNaN(num)) return '0';
+    return parseFloat(num).toLocaleString('en-IN');
   };
 
   const calculateAveragePrice = () => {
@@ -207,7 +215,7 @@ const AverageBuyCalculator = () => {
                   placeholder="e.g., 100"
                   placeholderTextColor="#666"
                   keyboardType="numeric"
-                  value={purchase.quantity}
+                  value={purchase.quantity ? formatIndianNumber(purchase.quantity) : ''}
                   onChangeText={(value) => updatePurchase(purchase.id, 'quantity', value)}
                 />
               </View>
@@ -219,7 +227,7 @@ const AverageBuyCalculator = () => {
                   placeholder="e.g., 50.00"
                   placeholderTextColor="#666"
                   keyboardType="numeric"
-                  value={purchase.price}
+                  value={purchase.price ? formatIndianNumber(purchase.price) : ''}
                   onChangeText={(value) => updatePurchase(purchase.id, 'price', value)}
                 />
               </View>
@@ -275,24 +283,24 @@ const AverageBuyCalculator = () => {
             <View style={styles.resultItem}>
               <CommonText title="Average Price" textStyle={[14, '500', '#666']} />
               <CommonText 
-                title={`₹${result.averagePrice}`} 
-                textStyle={[18, 'bold', '#9c27b0']} 
+                title={`₹${formatIndianNumber(result.averagePrice)}`} 
+                textStyle={[16, 'bold', '#9c27b0']} 
               />
             </View>
             
             <View style={styles.resultItem}>
               <CommonText title="Total Investment" textStyle={[14, '500', '#666']} />
               <CommonText 
-                title={`₹${result.totalInvestment}`} 
-                textStyle={[18, 'bold', '#2196F3']} 
+                title={`₹${formatIndianNumber(result.totalInvestment)}`} 
+                textStyle={[16, 'bold', '#2196F3']} 
               />
             </View>
             
             <View style={styles.resultItem}>
               <CommonText title="Total Shares" textStyle={[14, '500', '#666']} />
               <CommonText 
-                title={result.totalQuantity} 
-                textStyle={[18, 'bold', '#4caf50']} 
+                title={formatIndianNumber(result.totalQuantity)} 
+                textStyle={[16, 'bold', '#4caf50']} 
               />
             </View>
           </View>
@@ -314,8 +322,8 @@ const AverageBuyCalculator = () => {
             <View style={styles.resultItem}>
               <CommonText title="Average Price per Share" textStyle={[14, '500', '#666']} />
               <CommonText 
-                title={`₹${result.averagePrice}`} 
-                textStyle={[18, 'bold', '#9c27b0']} 
+                title={`₹${formatIndianNumber(result.averagePrice)}`} 
+                textStyle={[16, 'bold', '#9c27b0']} 
               />
             </View>
           </View>

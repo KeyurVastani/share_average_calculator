@@ -3,6 +3,7 @@ import { View, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert } from
 import CommonText from '../CommonText';
 import useCalculatorStore from '../../store/calculatorStore';
 import SaveModal from '../SaveModal';
+import { PixelSpacing } from './MarginCalculator';
 
 const LossRecoveryCalculator = () => {
   const { 
@@ -97,8 +98,13 @@ const LossRecoveryCalculator = () => {
     setErrors(prev => ({
       ...prev,
       [fieldName]: '',
-      general: ''
     }));
+  };
+
+  // Function to format numbers in Indian numbering system (e.g., 10,00,00,000)
+  const formatIndianNumber = (num) => {
+    if (num === null || num === undefined || isNaN(num)) return '0';
+    return parseFloat(num).toLocaleString('en-IN');
   };
 
   // Validate recovery percentage against current loss percentage
@@ -329,12 +335,14 @@ const LossRecoveryCalculator = () => {
               ]}
               placeholder="100"
               keyboardType="numeric"
-              value={sharesOwned}
+              value={sharesOwned ? formatIndianNumber(sharesOwned) : ''}
               returnKeyType="next"
               blurOnSubmit={false}
               onSubmitEditing={focusAveragePrice}
               onChangeText={(text) => {
-                setSharesOwned(text);
+                // Remove commas and non-numeric characters for calculation
+                const numericValue = text.replace(/[^\d.]/g, '');
+                setSharesOwned(numericValue);
                 clearFieldError('sharesOwned');
               }}
             />
@@ -353,12 +361,14 @@ const LossRecoveryCalculator = () => {
               ]}
               placeholder="₹100"
               keyboardType="numeric"
-              value={averagePrice}
+              value={averagePrice ? formatIndianNumber(averagePrice) : ''}
               returnKeyType="next"
               blurOnSubmit={false}
               onSubmitEditing={focusCurrentLossPercentage}
               onChangeText={(text) => {
-                setAveragePrice(text);
+                // Remove commas and non-numeric characters for calculation
+                const numericValue = text.replace(/[^\d.]/g, '');
+                setAveragePrice(numericValue);
                 clearFieldError('averagePrice');
               }}
             />
@@ -380,12 +390,14 @@ const LossRecoveryCalculator = () => {
               ]}
               placeholder="20"
               keyboardType="numeric"
-              value={currentLossPercentage}
+              value={currentLossPercentage ? formatIndianNumber(currentLossPercentage) : ''}
               returnKeyType="next"
               blurOnSubmit={false}
               onSubmitEditing={focusRecoveryPercentage}
               onChangeText={(text) => {
-                setCurrentLossPercentage(text);
+                // Remove commas and non-numeric characters for calculation
+                const numericValue = text.replace(/[^\d.]/g, '');
+                setCurrentLossPercentage(numericValue);
                 clearFieldError('currentLossPercentage');
               }}
             />
@@ -404,11 +416,13 @@ const LossRecoveryCalculator = () => {
               ]}
               placeholder="17"
               keyboardType="numeric"
-              value={recoveryPercentage}
+              value={recoveryPercentage ? formatIndianNumber(recoveryPercentage) : ''}
               returnKeyType="done"
               onSubmitEditing={handleLastFieldSubmit}
               onChangeText={(text) => {
-                setRecoveryPercentage(text);
+                // Remove commas and non-numeric characters for calculation
+                const numericValue = text.replace(/[^\d.]/g, '');
+                setRecoveryPercentage(numericValue);
                 clearFieldError('recoveryPercentage');
               }}
             />
@@ -463,7 +477,7 @@ const LossRecoveryCalculator = () => {
       </View>
 
       {/* Results - Always visible */}
-      <View style={styles.resultSection}>
+     {result && <View style={styles.resultSection}>
         <View style={styles.resultHeader}>
           <View style={{width: '70%', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <CommonText title="📊" textStyle={[22, 'bold', '#333']} />
@@ -479,110 +493,166 @@ const LossRecoveryCalculator = () => {
           )}
         </View>
 
-        {/* Results Display with Field Labels */}
-        <View style={styles.resultsDisplay}>
-          <View style={styles.resultItem}>
-            <View style={styles.resultLabelContainer}>
-              <CommonText title="Current Market Price" textStyle={[14, '600', '#333']} />
-              <CommonText title="(Calculated from your loss %)" textStyle={[10, 'normal', '#666']} />
+        {/* First Section - Recovery Plan */}
+        {result && (
+          <View style={styles.mainResultCard}>
+            <View style={styles.sectionHeader}>
+              <CommonText title="📊 Recovery Plan" textStyle={[16, 'bold', '#333']} />
             </View>
-            <CommonText 
-              title={result ? `₹${result.currentPrice}` : '₹--'} 
-              textStyle={[20, 'bold', result ? '#2196F3' : '#ccc']} 
-            />
-          </View>
-          
-          <View style={styles.resultItem}>
-            <View style={styles.resultLabelContainer}>
-              <CommonText title="Target Average Price" textStyle={[14, '600', '#333']} />
-              <CommonText title="(To achieve target loss %)" textStyle={[10, 'normal', '#666']} />
+            
+            <View style={styles.resultItem}>
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Current Market Price" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
+                <CommonText 
+                  title={`₹${formatIndianNumber(result.currentPrice)}`} 
+                  textStyle={[16, 'bold', '#2196F3']} 
+                />
+              </View>
             </View>
-            <CommonText 
-              title={result ? `₹${result.newAveragePrice}` : '₹--'} 
-              textStyle={[20, 'bold', result ? '#4caf50' : '#ccc']} 
-            />
-          </View>
-          
-          <View style={styles.resultItem}>
-            <View style={styles.resultLabelContainer}>
-              <CommonText title="Final Loss After Recovery" textStyle={[14, '600', '#333']} />
-              <CommonText title="(Current loss % - Recovery %)" textStyle={[10, 'normal', '#666']} />
+            
+            <View style={styles.resultItem}>
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Target Average Price" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
+                <CommonText 
+                  title={`₹${formatIndianNumber(result.newAveragePrice)}`} 
+                  textStyle={[16, 'bold', '#4caf50']} 
+                />
+              </View>
             </View>
-            <CommonText 
-              title={result ? `${result.finalLossPercent}%` : '--%'} 
-              textStyle={[20, 'bold', result ? '#ff9800' : '#ccc']} 
-            />
-          </View>
-          
-          <View style={styles.resultItem}>
-            <View style={styles.resultLabelContainer}>
-              <CommonText title="Additional Shares to Buy" textStyle={[14, '600', '#333']} />
-              <CommonText title="(At current market price)" textStyle={[10, 'normal', '#666']} />
+            
+            <View style={styles.resultItem}>
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Additional Shares to Buy" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
+                <CommonText 
+                  title={result.additionalShares} 
+                  textStyle={[16, 'bold', '#9c27b0']} 
+                />
+              </View>
             </View>
-            <CommonText 
-              title={result ? result.additionalShares : '--'} 
-              textStyle={[20, 'bold', result ? '#9c27b0' : '#ccc']} 
-            />
-          </View>
-          
-          <View style={styles.resultItem}>
-            <View style={styles.resultLabelContainer}>
-              <CommonText title="Additional Investment Needed" textStyle={[14, '600', '#333']} />
-              <CommonText title="(Additional shares × Current price)" textStyle={[10, 'normal', '#666']} />
+            
+            <View style={styles.resultItem}>
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Additional Investment" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
+                <CommonText 
+                  title={`₹${formatIndianNumber(result.investmentAmount)}`} 
+                  textStyle={[16, 'bold', '#ff9800']} 
+                />
+              </View>
             </View>
-            <CommonText 
-              title={result ? `₹${result.investmentAmount}` : '₹--'} 
-              textStyle={[20, 'bold', result ? '#ff9800' : '#ccc']} 
-            />
           </View>
-          
-          <View style={styles.resultItem}>
-            <View style={styles.resultLabelContainer}>
-              <CommonText title="Total Investment After Recovery" textStyle={[14, '600', '#333']} />
-              <CommonText title="(Previous + Additional investment)" textStyle={[10, 'normal', '#666']} />
-            </View>
-            <CommonText 
-              title={result ? `₹${result.totalInvestment}` : '₹--'} 
-              textStyle={[20, 'bold', result ? '#d32f2f' : '#ccc']} 
-            />
-          </View>
-        </View>
+        )}
 
-        {/* Summary Card */}
-        <View style={styles.summaryCard}>
-          <CommonText title="📋 Summary" textStyle={[16, 'bold', '#333']} />
-          <View style={styles.summaryContent}>
-            {result ? (
-              <>
+        {/* Second Section - Loss Analysis */}
+        {result && (
+          <View style={styles.mainResultCard}>
+            <View style={styles.sectionHeader}>
+              <CommonText title="📈 Loss Analysis" textStyle={[16, 'bold', '#333']} />
+            </View>
+            
+            <View style={styles.resultItem}>
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Current Loss" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
                 <CommonText 
-                  title={`• Buy ${result.additionalShares} shares at ₹${result.currentPrice}`} 
-                  textStyle={[14, 'normal', '#333']} 
+                  title={`${result.currentLossPercentage}%`} 
+                  textStyle={[16, 'bold', '#ff5722']} 
                 />
+              </View>
+            </View>
+            
+            <View style={styles.resultItem}>
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Final Loss After Recovery" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
                 <CommonText 
-                  title={`• Additional investment: ₹${result.investmentAmount}`} 
-                  textStyle={[14, 'normal', '#333']} 
+                  title={`${result.finalLossPercent}%`} 
+                  textStyle={[16, 'bold', '#ff9800']} 
                 />
+              </View>
+            </View>
+            
+            <View style={styles.resultItem}>
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Total Investment After Recovery" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
                 <CommonText 
-                  title={`• Total investment after recovery: ₹${result.totalInvestment}`} 
-                  textStyle={[14, 'normal', '#333']} 
+                  title={`₹${formatIndianNumber(result.totalInvestment)}`} 
+                  textStyle={[16, 'bold', '#d32f2f']} 
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                 />
-                <CommonText 
-                  title={`• Reduce loss from ${result.currentLossPercentage}% to ${result.finalLossPercent}%`} 
-                  textStyle={[14, 'normal', '#333']} 
-                />
-              </>
-            ) : (
-              <CommonText 
-                title="• Enter your values and calculate to see the recovery plan" 
-                textStyle={[14, 'normal', '#666']} 
-              />
-            )}
+              </View>
+            </View>
+          </View>
+        )}
+      </View>}
+
+      {/* Sample Result - Only show when no actual results */}
+      {!result && (
+        <View style={styles.formulaSection}>
+          <CommonText 
+            title="📊 Sample Result" 
+            textStyle={[18, 'bold', '#333']} 
+          />
+          <View style={styles.formulaCard}>
+            <CommonText 
+              title="Example: If you own 100 shares at ₹50 average with 20% loss and want to recover 10%" 
+              textStyle={[16, '600', '#666']} 
+            />
+            <View style={styles.sampleResultContainer}>
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Current Situation:" textStyle={[14, '600', '#666']} />
+                <CommonText title="100 shares at ₹50 avg" textStyle={[16, 'bold', '#2196F3']} />
+              </View>
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Current Loss:" textStyle={[14, '600', '#666']} />
+                <CommonText title="20%" textStyle={[16, 'bold', '#ff5722']} />
+              </View>
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Recovery Target:" textStyle={[14, '600', '#666']} />
+                <CommonText title="10% (reduce to 10% loss)" textStyle={[16, 'bold', '#9c27b0']} />
+              </View>
+              <View style={styles.sampleDivider} />
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Current Market Price:" textStyle={[14, '600', '#666']} />
+                <CommonText title="₹40" textStyle={[16, 'bold', '#2196F3']} />
+              </View>
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Target Average Price:" textStyle={[14, '600', '#666']} />
+                <CommonText title="₹44.44" textStyle={[16, 'bold', '#4caf50']} />
+              </View>
+              <View style={styles.sampleDivider} />
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Additional Shares Needed:" textStyle={[14, '600', '#666']} />
+                <CommonText title="100 shares" textStyle={[16, 'bold', '#9c27b0']} />
+              </View>
+              <View style={styles.samplePurchaseRow}>
+                <CommonText title="Additional Investment:" textStyle={[14, '600', '#666']} />
+                <CommonText title="₹4,000" textStyle={[16, 'bold', '#ff9800']} />
+              </View>
+            </View>
+            <CommonText 
+              title="Buy 100 shares at ₹40 to reduce loss from 20% to 10%" 
+              textStyle={[14, 'normal', '#888']} 
+            />
           </View>
         </View>
-      </View>
+      )}
 
       {/* Save Modal */}
       <SaveModal calculationData={{ ...result, sharesOwned, averagePrice, currentLossPercentage, recoveryPercentage }} reset={resetCalculator}/>
+    <PixelSpacing size={50} />
     </ScrollView>
   );
 };
@@ -724,6 +794,10 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
   },
+  resultValueContainer: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
   summaryCard: {
     backgroundColor: '#e3f2fd',
     padding: 15,
@@ -746,6 +820,62 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 1,
     borderColor: '#d32f2f',
+  },
+  mainResultCard: {
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    marginBottom: 10,
+  },
+  sectionHeader: {
+    paddingBottom: 8,
+    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#dee2e6',
+  },
+  resultItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+    flexWrap: 'wrap',
+  },
+  formulaSection: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 2,
+  },
+  formulaCard: {
+    backgroundColor: '#e3f2fd',
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 15,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196F3',
+  },
+  sampleResultContainer: {
+    marginVertical: 15,
+  },
+  samplePurchaseRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  sampleDivider: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginVertical: 10,
   },
 });
 

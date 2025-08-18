@@ -24,26 +24,38 @@ const CAGRCalculator = () => {
   const [isEditing, setIsEditing] = useState(false); // Track if we're in editing mode
   const [hasChanges, setHasChanges] = useState(false); // Track if changes were made
 
-  // Wrapper functions to track changes
+  // Wrapper functions to track changes with formatting
   const handleInitialValueChange = (value) => {
-    setInitialValue(value);
+    // Remove commas and non-numeric characters for calculation
+    const numericValue = value.replace(/[^\d.]/g, '');
+    setInitialValue(numericValue);
     if (isEditing) {
       setHasChanges(true);
     }
   };
 
   const handleFinalValueChange = (value) => {
-    setFinalValue(value);
+    // Remove commas and non-numeric characters for calculation
+    const numericValue = value.replace(/[^\d.]/g, '');
+    setFinalValue(numericValue);
     if (isEditing) {
       setHasChanges(true);
     }
   };
 
   const handleYearsChange = (value) => {
-    setYears(value);
+    // Remove commas and non-numeric characters for calculation
+    const numericValue = value.replace(/[^\d.]/g, '');
+    setYears(numericValue);
     if (isEditing) {
       setHasChanges(true);
     }
+  };
+
+  // Function to format numbers in Indian numbering system (e.g., 10,00,00,000)
+  const formatIndianNumber = (num) => {
+    if (num === null || num === undefined || isNaN(num)) return '0';
+    return parseFloat(num).toLocaleString('en-IN');
   };
 
   // Handle loading saved calculations
@@ -209,10 +221,10 @@ const CAGRCalculator = () => {
             <CommonText title="Initial Total Value" textStyle={[14, '500', '#666']} />
             <TextInput
               style={styles.input}
-              placeholder="e.g., 10000"
+              placeholder="e.g., 10,000"
               placeholderTextColor="#666"
               keyboardType="numeric"
-              value={initialValue}
+              value={initialValue ? formatIndianNumber(initialValue) : ''}
               onChangeText={handleInitialValueChange}
             />
           </View>
@@ -221,10 +233,10 @@ const CAGRCalculator = () => {
             <CommonText title="Final Total Value" textStyle={[14, '500', '#666']} />
             <TextInput
               style={styles.input}
-              placeholder="e.g., 15000"
+              placeholder="e.g., 15,000"
               placeholderTextColor="#666"
               keyboardType="numeric"
-              value={finalValue}
+              value={finalValue ? formatIndianNumber(finalValue) : ''}
               onChangeText={handleFinalValueChange}
             />
           </View>
@@ -291,27 +303,39 @@ const CAGRCalculator = () => {
             </View>
             
             <View style={styles.resultItem}>
-              <CommonText title="CAGR" textStyle={[14, '500', '#666']} />
-              <CommonText 
-                title={`${result.averageAnnualReturn}%`} 
-                textStyle={[18, 'bold', '#4caf50']} 
-              />
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="CAGR" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
+                <CommonText 
+                  title={`${result.averageAnnualReturn}%`} 
+                  textStyle={[16, 'bold', '#4caf50']} 
+                />
+              </View>
             </View>
             
             <View style={styles.resultItem}>
-              <CommonText title="Total Return" textStyle={[14, '500', '#666']} />
-              <CommonText 
-                title={`${result.totalReturn}%`} 
-                textStyle={[18, 'bold', '#2196F3']} 
-              />
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Total Return" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
+                <CommonText 
+                  title={`${result.totalReturn}%`} 
+                  textStyle={[16, 'bold', '#2196F3']} 
+                />
+              </View>
             </View>
             
             <View style={styles.resultItem}>
-              <CommonText title="Absolute Gain" textStyle={[14, '500', '#666']} />
-              <CommonText 
-                title={`₹${result.absoluteGain}`} 
-                textStyle={[18, 'bold', '#ff9800']} 
-              />
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Absolute Gain" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
+                <CommonText 
+                  title={`₹${formatIndianNumber(result.absoluteGain)}`} 
+                  textStyle={[16, 'bold', '#ff9800']} 
+                />
+              </View>
             </View>
           </View>
 
@@ -322,27 +346,39 @@ const CAGRCalculator = () => {
             </View>
             
             <View style={styles.resultItem}>
-              <CommonText title="Initial Investment" textStyle={[14, '500', '#666']} />
-              <CommonText 
-                title={`₹${result.initialValue}`} 
-                textStyle={[18, 'bold', '#333']} 
-              />
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Initial Investment" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
+                <CommonText 
+                  title={`₹${formatIndianNumber(result.initialValue)}`} 
+                  textStyle={[16, 'bold', '#333']} 
+                />
+              </View>
             </View>
             
             <View style={styles.resultItem}>
-              <CommonText title="Final Value" textStyle={[14, '500', '#666']} />
-              <CommonText 
-                title={`₹${result.finalValue}`} 
-                textStyle={[18, 'bold', '#333']} 
-              />
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Final Value" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
+                <CommonText 
+                  title={`₹${formatIndianNumber(result.finalValue)}`} 
+                  textStyle={[16, 'bold', '#333']} 
+                />
+              </View>
             </View>
             
             <View style={styles.resultItem}>
-              <CommonText title="Investment Period" textStyle={[14, '500', '#666']} />
-              <CommonText 
-                title={`${result.years} years`} 
-                textStyle={[18, 'bold', '#333']} 
-              />
+              <View style={styles.resultLabelContainer}>
+                <CommonText title="Investment Period" textStyle={[14, '500', '#666']} />
+              </View>
+              <View style={styles.resultValueContainer}>
+                <CommonText 
+                  title={`${result.years} years`} 
+                  textStyle={[16, 'bold', '#333']} 
+                />
+              </View>
             </View>
           </View>
 
@@ -380,13 +416,13 @@ const CAGRCalculator = () => {
                       <CommonText title={`${yearData.year}`} textStyle={[14, '600', '#333']} />
                     </View>
                     <View style={[styles.tableCell, styles.investmentColumn]}>
-                      <CommonText title={`₹${yearData.investment}`} textStyle={[14, 'normal', '#666']} />
+                      <CommonText title={`₹${formatIndianNumber(yearData.investment)}`} textStyle={[14, 'normal', '#666']} />
                     </View>
                     <View style={[styles.tableCell, styles.valueColumn]}>
-                      <CommonText title={`₹${yearData.value}`} textStyle={[14, 'normal', '#666']} />
+                      <CommonText title={`₹${formatIndianNumber(yearData.value)}`} textStyle={[14, 'normal', '#666']} />
                     </View>
                     <View style={[styles.tableCell, styles.gainColumn]}>
-                      <CommonText title={`₹${yearData.gain}`} textStyle={[14, 'normal', '#4caf50']} />
+                      <CommonText title={`₹${formatIndianNumber(yearData.gain)}`} textStyle={[14, 'normal', '#4caf50']} />
                     </View>
                     <View style={[styles.tableCell, styles.returnColumn]}>
                       <CommonText title={`${yearData.return}%`} textStyle={[14, 'normal', '#2196F3']} />
@@ -739,6 +775,14 @@ const styles = StyleSheet.create({
     padding: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
+  },
+  resultLabelContainer: {
+    flex: 1,
+    marginRight: 10,
+  },
+  resultValueContainer: {
+    flex: 1,
+    alignItems: 'flex-end',
   },
 });
 

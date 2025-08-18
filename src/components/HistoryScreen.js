@@ -17,6 +17,12 @@ const HistoryScreen = () => {
   // Get calculations for the current calculator type
   const currentCalculations = getCalculationsForType(selectedCalculator?.id);
 
+  // Function to format numbers in Indian numbering system (e.g., 10,00,00,000)
+  const formatIndianNumber = (num) => {
+    if (num === null || num === undefined || isNaN(num)) return '0';
+    return parseFloat(num).toLocaleString('en-IN');
+  };
+
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleDateString('en-US', {
@@ -147,7 +153,7 @@ const HistoryScreen = () => {
                     <View style={styles.metricItem}>
                       <CommonText title="Initial Value" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={`₹${calculation.initialValue}`} 
+                        title={`₹${formatIndianNumber(calculation.initialValue)}`} 
                         textStyle={[16, 'bold', '#333']} 
                       />
                     </View>
@@ -157,7 +163,7 @@ const HistoryScreen = () => {
                     <View style={styles.metricItem}>
                       <CommonText title="Final Value" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={`₹${calculation.finalValue}`} 
+                        title={`₹${formatIndianNumber(calculation.finalValue)}`} 
                         textStyle={[16, 'bold', '#333']} 
                       />
                     </View>
@@ -167,7 +173,7 @@ const HistoryScreen = () => {
                     <View style={styles.metricItem}>
                       <CommonText title="Period (Years)" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={calculation.years} 
+                        title={formatIndianNumber(calculation.years)} 
                         textStyle={[16, 'bold', '#333']} 
                       />
                     </View>
@@ -177,7 +183,7 @@ const HistoryScreen = () => {
                     <View style={styles.metricItem}>
                       <CommonText title="Absolute Gain" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={`₹${calculation.absoluteGain}`} 
+                        title={`₹${formatIndianNumber(calculation.absoluteGain)}`} 
                         textStyle={[16, 'bold', '#4caf50']} 
                       />
                     </View>
@@ -188,7 +194,7 @@ const HistoryScreen = () => {
                     <View style={styles.metricItem}>
                       <CommonText title="Target Average" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={`₹${calculation.targetAveragePrice}`} 
+                        title={`₹${formatIndianNumber(calculation.targetAveragePrice)}`} 
                         textStyle={[16, 'bold', '#9c27b0']} 
                       />
                     </View>
@@ -198,7 +204,7 @@ const HistoryScreen = () => {
                     <View style={styles.metricItem}>
                       <CommonText title="Shares to Buy" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={calculation.additionalSharesNeeded} 
+                        title={formatIndianNumber(calculation.additionalSharesNeeded)} 
                         textStyle={[16, 'bold', '#2196F3']} 
                       />
                     </View>
@@ -208,7 +214,7 @@ const HistoryScreen = () => {
                     <View style={styles.metricItem}>
                       <CommonText title="Investment" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={`₹${calculation.investmentNeeded}`} 
+                        title={`₹${formatIndianNumber(calculation.investmentNeeded)}`} 
                         textStyle={[16, 'bold', '#4caf50']} 
                       />
                     </View>
@@ -218,7 +224,7 @@ const HistoryScreen = () => {
                     <View style={styles.metricItem}>
                       <CommonText title="New Average" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={`₹${calculation.newAveragePrice}`} 
+                        title={`₹${formatIndianNumber(calculation.newAveragePrice)}`} 
                         textStyle={[16, 'bold', '#4caf50']} 
                       />
                     </View>
@@ -244,12 +250,83 @@ const HistoryScreen = () => {
                     </View>
                   )}
                   
+                  {/* Loss Recovery Calculator Metrics */}
+                  {calculation.currentLossPercentage && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Current Loss" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`${calculation.currentLossPercentage}%`} 
+                        textStyle={[16, 'bold', '#ff5722']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.recoveryPercentage && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Recovery Target" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`${calculation.recoveryPercentage}%`} 
+                        textStyle={[16, 'bold', '#9c27b0']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.currentPrice && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Current Price" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${formatIndianNumber(calculation.currentPrice)}`} 
+                        textStyle={[16, 'bold', '#2196F3']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.finalLossPercent && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Final Loss" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`${calculation.finalLossPercent}%`} 
+                        textStyle={[16, 'bold', '#ff9800']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.additionalShares && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Shares to Buy" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={formatIndianNumber(calculation.additionalShares)} 
+                        textStyle={[16, 'bold', '#9c27b0']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.investmentAmount && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Additional Investment" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${formatIndianNumber(calculation.investmentAmount)}`} 
+                        textStyle={[16, 'bold', '#ff9800']} 
+                      />
+                    </View>
+                  )}
+                  
+                  {calculation.previousInvestment && (
+                    <View style={styles.metricItem}>
+                      <CommonText title="Previous Investment" textStyle={[12, '500', '#666']} />
+                      <CommonText 
+                        title={`₹${formatIndianNumber(calculation.previousInvestment)}`} 
+                        textStyle={[16, 'bold', '#333']} 
+                      />
+                    </View>
+                  )}
+                  
                   {/* Other Calculator Metrics */}
                   {calculation.averagePrice && !calculation.targetAveragePrice && (
                     <View style={styles.metricItem}>
                       <CommonText title="Avg Price" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={`₹${calculation.averagePrice}`} 
+                        title={`₹${formatIndianNumber(calculation.averagePrice)}`} 
                         textStyle={[16, 'bold', '#2196F3']} 
                       />
                     </View>
@@ -259,7 +336,7 @@ const HistoryScreen = () => {
                     <View style={styles.metricItem}>
                       <CommonText title="Total Investment" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={`₹${calculation.totalInvestment}`} 
+                        title={`₹${formatIndianNumber(calculation.totalInvestment)}`} 
                         textStyle={[16, 'bold', '#333']} 
                       />
                     </View>
@@ -269,7 +346,7 @@ const HistoryScreen = () => {
                     <View style={styles.metricItem}>
                       <CommonText title="Target Amount" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={`₹${calculation.targetAmount}`} 
+                        title={`₹${formatIndianNumber(calculation.targetAmount)}`} 
                         textStyle={[16, 'bold', '#333']} 
                       />
                     </View>
@@ -279,7 +356,7 @@ const HistoryScreen = () => {
                     <View style={styles.metricItem}>
                       <CommonText title="Total Shares" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={calculation.totalQuantity} 
+                        title={formatIndianNumber(calculation.totalQuantity)} 
                         textStyle={[16, 'bold', '#333']} 
                       />
                     </View>
@@ -289,7 +366,7 @@ const HistoryScreen = () => {
                     <View style={styles.metricItem}>
                       <CommonText title="Shares Needed" textStyle={[12, '500', '#666']} />
                       <CommonText 
-                        title={calculation.sharesNeeded} 
+                        title={formatIndianNumber(calculation.sharesNeeded)} 
                         textStyle={[16, 'bold', '#333']} 
                       />
                     </View>
@@ -313,7 +390,7 @@ const HistoryScreen = () => {
                       />
                     </View>
                     <CommonText 
-                      title={`${calculation.totalReturn}% total return over ${calculation.years} years`} 
+                      title={`${calculation.totalReturn}% total return over ${formatIndianNumber(calculation.years)} years`} 
                       textStyle={[14, '600', '#4caf50']} 
                     />
                   </View>
@@ -331,7 +408,7 @@ const HistoryScreen = () => {
                         textStyle={[14, 'bold', calculation.isProfitable ? '#4caf50' : '#f44336']} 
                       />
                       <CommonText 
-                        title={`₹${calculation.profitLoss}`} 
+                        title={`₹${formatIndianNumber(calculation.profitLoss)}`} 
                         textStyle={[16, 'bold', calculation.isProfitable ? '#4caf50' : '#f44336']} 
                       />
                     </View>
@@ -354,19 +431,42 @@ const HistoryScreen = () => {
                         textStyle={[14, 'bold', '#9c27b0']} 
                       />
                       <CommonText 
-                        title={`₹${calculation.newAveragePrice}`} 
+                        title={`₹${formatIndianNumber(calculation.newAveragePrice)}`} 
                         textStyle={[16, 'bold', '#9c27b0']} 
                       />
                     </View>
                     <CommonText 
-                      title={`Buy ${calculation.additionalSharesNeeded} shares to achieve ₹${calculation.targetAveragePrice} average`} 
+                      title={`Buy ${formatIndianNumber(calculation.additionalSharesNeeded)} shares to achieve ₹${formatIndianNumber(calculation.targetAveragePrice)} average`} 
                       textStyle={[14, '600', '#9c27b0']} 
                     />
                   </View>
                 )}
 
+                {/* Loss Recovery Summary */}
+                {calculation.currentLossPercentage && (
+                  <View style={[styles.profitLossSummary, { 
+                    backgroundColor: '#f0f9ff',
+                    borderColor: '#ff5722'
+                  }]}>
+                    <View style={styles.profitLossRow}>
+                      <CommonText 
+                        title="📉 LOSS RECOVERY" 
+                        textStyle={[14, 'bold', '#ff5722']} 
+                      />
+                      <CommonText 
+                        title={`${calculation.finalLossPercent}%`} 
+                        textStyle={[16, 'bold', '#ff5722']} 
+                      />
+                    </View>
+                    <CommonText 
+                      title={`Reduce loss from ${calculation.currentLossPercentage}% to ${calculation.finalLossPercent}%`} 
+                      textStyle={[14, '600', '#ff5722']} 
+                    />
+                  </View>
+                )}
+
                 {/* Share Price Match Summary */}
-                {calculation.sharesNeeded !== undefined && !calculation.targetAveragePrice && (
+                {calculation.sharesNeeded !== undefined && !calculation.targetAveragePrice && !calculation.currentLossPercentage && (
                   <View style={[styles.profitLossSummary, { 
                     backgroundColor: '#f0f9ff',
                     borderColor: '#2196F3'
@@ -377,12 +477,12 @@ const HistoryScreen = () => {
                         textStyle={[14, 'bold', '#2196F3']} 
                       />
                       <CommonText 
-                        title={`${calculation.sharesNeeded} shares`} 
+                        title={`${formatIndianNumber(calculation.sharesNeeded)} shares`} 
                         textStyle={[16, 'bold', '#2196F3']} 
                       />
                     </View>
                     <CommonText 
-                      title={`₹${calculation.actualInvestment} invested`} 
+                      title={`₹${formatIndianNumber(calculation.actualInvestment)} invested`} 
                       textStyle={[14, '600', '#2196F3']} 
                     />
                   </View>
@@ -392,13 +492,13 @@ const HistoryScreen = () => {
                 <View style={styles.purchaseDetails}>
                   {calculation.numberOfPurchases && (
                     <CommonText 
-                      title={`${calculation.numberOfPurchases} purchase${calculation.numberOfPurchases !== 1 ? 's' : ''} made`} 
+                      title={`${formatIndianNumber(calculation.numberOfPurchases)} purchase${calculation.numberOfPurchases !== 1 ? 's' : ''} made`} 
                       textStyle={[14, '500', '#666']} 
                     />
                   )}
                   {calculation.remainingAmount && (
                     <CommonText 
-                      title={`₹${calculation.remainingAmount} remaining`} 
+                      title={`₹${formatIndianNumber(calculation.remainingAmount)} remaining`} 
                       textStyle={[14, '500', '#666']} 
                     />
                   )}

@@ -46,6 +46,12 @@ const ProfitLossCalculator = () => {
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Function to format numbers in Indian numbering system (e.g., 10,00,00,000)
+  const formatIndianNumber = (num) => {
+    if (num === null || num === undefined || isNaN(num)) return '0';
+    return parseFloat(num).toLocaleString('en-IN');
+  };
+
   const validateInputs = () => {
     if (!buyPrice || !sellPrice || !quantity) {
       Alert.alert('Error', 'Please enter all values (Buy Price, Sell Price, and Quantity).');
@@ -139,8 +145,12 @@ const ProfitLossCalculator = () => {
               style={styles.input}
               placeholder="e.g. 100"
               keyboardType="numeric"
-              value={buyPrice}
-              onChangeText={setBuyPrice}
+              value={buyPrice ? formatIndianNumber(buyPrice) : ''}
+              onChangeText={(text) => {
+                // Remove commas and non-numeric characters for calculation
+                const numericValue = text.replace(/[^\d.]/g, '');
+                setBuyPrice(numericValue);
+              }}
             />
           </View>
 
@@ -150,8 +160,12 @@ const ProfitLossCalculator = () => {
               style={styles.input}
               placeholder="e.g. 120"
               keyboardType="numeric"
-              value={sellPrice}
-              onChangeText={setSellPrice}
+              value={sellPrice ? formatIndianNumber(sellPrice) : ''}
+              onChangeText={(text) => {
+                // Remove commas and non-numeric characters for calculation
+                const numericValue = text.replace(/[^\d.]/g, '');
+                setSellPrice(numericValue);
+              }}
             />
           </View>
         </View>
@@ -162,8 +176,12 @@ const ProfitLossCalculator = () => {
             style={styles.input}
             placeholder="e.g. 50"
             keyboardType="numeric"
-            value={quantity}
-            onChangeText={setQuantity}
+                          value={quantity ? formatIndianNumber(quantity) : ''}
+              onChangeText={(text) => {
+                // Remove commas and non-numeric characters for calculation
+                const numericValue = text.replace(/[^\d.]/g, '');
+                setQuantity(numericValue);
+              }}
           />
         </View>
       </View>
